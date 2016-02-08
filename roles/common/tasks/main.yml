@@ -1,0 +1,9 @@
+---
+- name: Setting Common Facts
+  set_fact:
+    openshift_storage_disk_volume: "{{ openshift_storage_disk_volume | default(default_openshift_storage_disk_volume) }}"
+    openshift_storage_volume_size: "{{ openshift_storage_volume_size | default(default_openshift_storage_volume_size) }}"
+    openshift_etcd_size: "{{ openshift_etcd_size | default(default_openshift_etcd_size) }}"
+    openshift_logging_volume_size: "{{ openshift_logging_volume_size | default(default_openshift_logging_volume_size) }}"
+
+

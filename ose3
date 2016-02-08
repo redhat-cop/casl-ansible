@@ -1,3 +1,12 @@
+[all:vars]
+
+# Enter the security key to provision new OpenStack instances
+openstack_key_name=""
+
+#node_count=2
+#openshift_storage_disk_volume=
+#openshift_etcd_size=
+
 # This is the ose3 inventory file...
 [ose3]
 
