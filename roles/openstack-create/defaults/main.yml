@@ -1,9 +1,7 @@
 ---
-env_id: "testenv"
 openstack_master_security_group: "ose3-master"
 openstack_node_security_group: "ose3-node"
-openstack_flavor_id: "d5fbd66f-2069-42d6-9bde-254bac4617b1"
+openstack_flavor_name: "m1.medium"
 openstack_image_name: "ose3_1-base"
 openstack_master_storage: 10
 openstack_node_storage: 10
-openshift_node_count: "{{ node_count | default(2) }}"

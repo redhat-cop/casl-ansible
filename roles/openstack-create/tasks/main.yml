@@ -1,15 +1,23 @@
----  
-- name: Register Environment Variable
-  set_fact:
-      env_id: "{{ env_id }}-{{ env_random_id.stdout }}"
-      
-- name: Validate OpenStack Variable
+---
+- name: Validate OpenStack Variables
   fail: msg="Required OpenStack Variables not defined!"
   when: 
        - openstack_image_name is not defined
        - openstack_security_groups is not defined
        - openstack_key_name is not defined
        
+- name: "Search for valid OpenStack Flavor"
+  shell: "nova flavor-list | awk \"/{{openstack_flavor_name }}/\"'{print $2}'"
+  register: openstack_flavor_query
+
+- name: Validate OpenStack Image
+  fail: msg="Unable to determine a unique OpenStack Image"
+  when: openstack_flavor_query.stdout.split()|length  != 1
+
+- name: Setting OpenStack Image ID Fact
+  set_fact:
+    openstack_flavor_id: "{{ openstack_flavor_query.stdout }}"
+
 - name: Provision OpenStack Master
   nova_compute:
     name: "{{ item }}"

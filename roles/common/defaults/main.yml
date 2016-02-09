@@ -1,5 +1,7 @@
 ---
+default_env_id: "testenv"
 default_openshift_storage_disk_volume: "/dev/vdb"
 default_openshift_storage_volume_size: 10
 default_openshift_etcd_size: 2
 default_openshift_logging_volume_size: 0
+default_openshift_node_count: 2
