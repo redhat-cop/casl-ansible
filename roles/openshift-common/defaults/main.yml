@@ -1,0 +1,11 @@
+---
+default_openshift_storage_disk_volume: "/dev/vdb"
+default_openshift_master_count: 1
+default_openshift_node_count: 2
+
+default_openshift_openstack_master_security_groups: "ose3-master"
+default_openshift_openstack_node_security_groups: "ose3-node"
+default_openshift_openstack_flavor_name: "m1.medium"
+default_openshift_openstack_image_name: "ose3_1-base"
+default_openshift_openstack_master_storage_size: 10
+default_openshift_openstack_node_storage_size: 10

@@ -2,80 +2,48 @@
 - name: Validate OpenStack Variables
   fail: msg="Required OpenStack Variables not defined!"
   when: 
-       - openstack_image_name is not defined
-       - openstack_security_groups is not defined
-       - openstack_key_name is not defined
-       
+       - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined or env_id is not defined
+
 - name: "Search for valid OpenStack Flavor"
-  shell: "nova flavor-list | awk \"/{{openstack_flavor_name }}/\"'{print $2}'"
-  register: openstack_flavor_query
+  shell: "nova flavor-list | awk \"/{{flavor_name }}/\"'{print $2}'"
+  register: flavor_query
 
 - name: Validate OpenStack Image
   fail: msg="Unable to determine a unique OpenStack Image"
-  when: openstack_flavor_query.stdout.split()|length  != 1
+  when: flavor_query.stdout.split()|length  != 1
 
 - name: Setting OpenStack Image ID Fact
   set_fact:
-    openstack_flavor_id: "{{ openstack_flavor_query.stdout }}"
+    flavor_id: "{{ flavor_query.stdout }}"
 
-- name: Provision OpenStack Master
+- name: "Provision OpenStack {{ type }}"
   nova_compute:
-    name: "{{ item }}"
+    name: "{{ type }}{{ item }}-{{ env_id }}"
     state: present
-    image_name: "{{ openstack_image_name }}"
-    flavor_id: "{{ openstack_flavor_id }}"
-    key_name: "{{ openstack_key_name }}"
-    security_groups: "{{ openstack_master_security_group }}"
+    image_name: "{{ image_name }}"
+    flavor_id: "{{ flavor_id }}"
+    key_name: "{{ key_name }}"
+    security_groups: "{{ security_groups }}"
     wait_for: 200
-  with_items:
-  -  "master-{{ env_id }}"
-  register: nova_compute_masters
-  
-- add_host:
-    hostname: "{{ item.info.name }}"
-    ansible_ssh_host: "{{ item.public_ip }}"
-    ansible_ssh_user: root
-    groups: nova_compute_masters
-  with_items: nova_compute_masters.results
-
-- name: Wait for Master to be available
-  wait_for: port=22 host={{ item.public_ip }}
-  with_items: nova_compute_masters.results
-
-
-- name: Provision OpenStack Nodes
-  nova_compute:
-    name: "node{{ item }}-{{ env_id }}"
-    state: present
-    image_name: "{{ openstack_image_name }}"
-    flavor_id: "{{ openstack_flavor_id }}"
-    key_name: "{{ openstack_key_name }}"
-    security_groups: "{{ openstack_node_security_group }}"
-    wait_for: 200
-  with_sequence: start=1 end={{ openshift_node_count }}
-  register: nova_compute_nodes
+  with_sequence: "start=1 end={{ node_count | default(1) }}"
+  register: "openstack_create"
 
 - add_host:
     hostname: "{{ item.info.name }}"
     ansible_ssh_host: "{{ item.public_ip }}"
     ansible_ssh_user: root
-    groups: nova_compute_nodes
-  with_items: nova_compute_nodes.results
+    groups: "{{ register_host_group }}"
+  with_items: openstack_create.results
 
-- name: Wait for Nodes to be available
+- name: "Wait for {{ type }} to be available"
   wait_for: port=22 host={{ item.public_ip }}
-  with_items: nova_compute_nodes.results
+  with_items: openstack_create.results
   
-# Create Master Volumes
-- include: create-volume.yml 
+# Create Volumes
+- include: create-volume.yml
+  when: volume_size is defined and disk_volume is defined
   vars:
-    instance_type: "Master"
-    openstack_machines: "{{ nova_compute_masters }}"
-    volume_size: "{{ openstack_master_storage }}"
-
-# Create Node Volumes
-- include: create-volume.yml 
-  vars:
-    instance_type: "Node"
-    openstack_machines: "{{ nova_compute_nodes }}"
-    volume_size: "{{ openstack_node_storage }}"
+    instance_type: "{{ type }}"
+    openstack_machines: "{{ openstack_create }}"
+    storage_volume_size: "{{ volume_size }}"
+    storage_disk_volume: "{{ disk_volume }}"

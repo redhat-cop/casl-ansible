@@ -1,4 +1,5 @@
 ---
+# Starting Point for OpenShift Installation and Configuration
 - name: Cleaning yum repositories
   command: "yum clean all"
   

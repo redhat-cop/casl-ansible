@@ -1,12 +1,12 @@
 ---
 - name: "Create {{ instance_type }} Attached Storage"
-  shell: "nova volume-create --display-name {{ item.id }} {{ volume_size }} |  awk '/ id / {print $4}'"
+  shell: "nova volume-create --display-name {{ item.id }} {{ storage_volume_size }} |  awk '/ id / {print $4}'"
   register: created_volumes
   failed_when: created_volumes.rc != 0
   with_items: openstack_machines.results
 
 
-- name: "Validate {{ instance_type }}  Attached Storage"
+- name: "Validate {{ instance_type }} Attached Storage"
   shell: "nova volume-show {{ item.stdout }} | grep -cE \"status.*available\""
   register: validate_volumes
   changed_when: false
@@ -17,7 +17,7 @@
   
 
 - name: "Attach {{ instance_type }} Storage"
-  command: "nova volume-attach {{ item.1.id }} {{ item.0.stdout }} {{ openshift_storage_disk_volume }}"
+  command: "nova volume-attach {{ item.1.id }} {{ item.0.stdout }} {{ storage_disk_volume }}"
   with_together:
     - "{{ created_volumes.results }}"
     - "{{ openstack_machines.results }}"
