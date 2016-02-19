@@ -1,0 +1,24 @@
+---
+- name: Install Registry
+  yum:
+    name: docker-registry
+    state: latest
+- name: Enable & Start Registry
+  service:
+    name: docker-registry
+    enabled: yes
+    state: started
+- name: Install firewalld
+  yum:
+    name: firewalld
+    state: latest
+- name: Enable Firewalld
+  service:
+    name: firewalld
+    enabled: yes
+    state: started
+- name: Open Firewall for Registry
+  firewalld:
+    port: 5000/tcp
+    permanent: true
+    state: enabled

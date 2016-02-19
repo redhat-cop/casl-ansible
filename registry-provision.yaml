@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  pre_tasks:
+  - include: roles/common/pre_tasks/pre_tasks.yml
+  roles:
+    - role: common
+    - role: openshift-common
+    # Provision Master
+    - role: openstack-create
+      type: "registry"
+      key_name: "{{ openstack_key_name }}"
+      image_name: "ose3_1-base"
+      flavor_name: "{{ openshift_openstack_flavor_name }}"
+      security_groups: "docker-registry,default"
+      register_host_group: "registry"
+      node_count: "1"
+- hosts: registry
+  roles:
+    - role: registry
