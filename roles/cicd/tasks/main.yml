@@ -1,0 +1,31 @@
+---
+
+- name: Register Attached Block Storage
+  stat:
+    path: "{{ cicd_storage_disk_volume }}"
+  register: block_device
+  
+- name: Validate Block Device
+  fail: msg="Attached device at {{ cicd_storage_disk_volume }} is not present"
+  failed_when: block_device.stat.exists == false
+  
+- name: Creates Temporary Directory
+  file:
+    path: "{{cicd_temp_dir}}"
+    state: directory
+  
+- include: prerequisites.yml
+
+- include: java.yml
+
+- include: groovy.yml
+
+- include: maven.yml
+
+- include: nexus.yml
+
+- include: httpd.yml
+
+- include: docker.yml
+
+- include: jenkins.yml

@@ -1,0 +1,40 @@
+---
+  
+- name: Installing HTTPD
+  yum: 
+    name: httpd
+    state: present
+  tags: httpd
+  
+- name: Copy HTTPD Files
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  notify:
+  - restart httpd
+  with_items:
+  - { src: httpd/index.html, dest: /var/www/html/index.html }
+  - { src: httpd/cicd.conf, dest: /etc/httpd/conf.d/cicd.conf }
+  tags: httpd
+  
+- name: Open Firewall for HTTP
+  firewalld: 
+    port: 80/tcp
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+  tags: httpd
+
+- name: HTTPD SELinux Configurations
+  seboolean: 
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+  tags: httpd
+  
+- name: Enable HTTPD Service
+  service: 
+    name: httpd
+    enabled: true
+  tags: httpd

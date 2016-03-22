@@ -1,0 +1,32 @@
+---
+  
+- name: Installing Prerequisite Software
+  yum: state=present name={{item}}
+  with_items:
+  - http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+  - wget
+  - firewalld
+  - unzip
+  - git
+  - vim
+  tags: prerequisites
+  
+- name: Installing JQ
+  yum:
+    name: jq
+    state: present
+  tags: prerequisites
+  
+- name: Disable iptables
+  service: 
+    name: iptables
+    enabled: no
+    state: stopped
+  tags: prerequisites
+  
+- name: Enable firewalld
+  service:
+    name: firewalld
+    enabled: yes
+    state: started
+  tags: prerequisites

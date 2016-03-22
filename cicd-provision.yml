@@ -1,0 +1,23 @@
+---
+- hosts: localhost
+  pre_tasks:
+  - include: roles/common/pre_tasks/pre_tasks.yml
+  roles:
+    - role: common
+    - role: cicd-common
+    # Provision CICD Environment
+    - role: openstack-create
+      type: "cicd"
+      image_name: "{{ cicd_openstack_image_name }}"
+      security_groups: "{{ cicd_openstack_security_groups }}"
+      key_name: "{{ openstack_key_name }}"
+      flavor_name: "{{ cicd_openstack_flavor_name }}"
+      register_host_group: "cicd"
+      node_count: "{{ cicd_instance_count }}"
+      disk_volume: "{{ cicd_storage_disk_volume }}"
+      volume_size: "{{ cicd_openstack_storage_size }}"
+
+- hosts: cicd
+  roles:
+  - cicd-common
+  - cicd

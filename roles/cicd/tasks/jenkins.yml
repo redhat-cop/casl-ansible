@@ -1,0 +1,143 @@
+---
+    
+- name: Install Jenkins Repository
+  get_url:
+    url: "{{ jenkins_repo_url }}"
+    dest: /etc/yum.repos.d/jenkins.repo
+  tags: jenkins
+
+- name: Add Jenkins GPG Key.
+  rpm_key:
+    state: present
+    key: "{{ jenkins_repo_key_url }}"
+  tags: jenkins
+
+- name: Install Jenkins.
+  yum:
+    pkg: jenkins
+    state: installed
+  tags: jenkins
+  
+- name: Copy Jenkins Configuration Files
+  copy:
+    src: jenkins/
+    dest: "{{ jenkins_home_dir }}"
+    group: "{{ jenkins_group }}"
+    owner: "{{ jenkins_user }}"
+  notify:
+  - restart jenkins
+  tags: jenkins
+  
+- name: Jenkins XML File
+  template:
+    src: jenkins-config.j2
+    dest: "{{ jenkins_home_dir }}/config.xml"
+    group: "{{ jenkins_group }}"
+    owner: "{{ jenkins_user }}"
+  notify:
+  - restart jenkins
+  tags: jenkins
+  
+  
+- name: Update Jenkins Service Configuration
+  lineinfile: 
+    dest: /etc/sysconfig/jenkins
+    regexp: "JENKINS_ARGS="
+    line: "JENKINS_ARGS=\"--prefix=/jenkins\""
+  notify:
+  - restart jenkins
+  tags: jenkins
+  
+  
+- name: Install Jenkins Plugin
+  include: jenkins_install_plugins.yml 
+  vars:
+    plugins:
+        - { name: "github", version: "1.14.2" }
+        - { name: "github-api", version: "1.71" }
+        - { name: "git", version: "2.4.1" }
+        - { name: "git-client", version: "1.19.1" }
+        - { name: "git-server", version: "1.5" }
+        - { name: "credentials", version: "1.24" }
+        - { name: "scm-api", version: "1.0" }
+        - { name: "credentials-binding", version: "1.6" }
+        - { name: "plain-credentials", version: "1.1" }
+        - { name: "ace-editor", version: "1.0.1" }
+        - { name: "jquery-detached", version: "1.1.1" }
+        - { name: "workflow-basic-steps", version: "1.12" }
+        - { name: "workflow-scm-step", version: "1.12" }
+        - { name: "workflow-cps-global-lib", version: "1.12" }
+        - { name: "workflow-support", version: "1.12" }
+        - { name: "workflow-job", version: "1.12" }
+        - { name: "workflow-durable-task-step", version: "1.12" }
+        - { name: "workflow-cps", version: "1.12" }
+        - { name: "workflow-api", version: "1.12" }
+        - { name: "workflow-step-api", version: "1.12" }
+        - { name: "workflow-aggregator", version: "1.12" }
+        - { name: "parameterized-trigger", version: "2.30" }
+        - { name: "matrix-project", version: "1.6" }
+        - { name: "promoted-builds", version: "2.24.1" }
+        - { name: "ssh-credentials", version: "1.11" }
+        - { name: "mapdb-api", version: "1.0.6.0" }
+        - { name: "build-pipeline-plugin", version: "1.4.9" }
+        - { name: "jquery", version: "1.11.2-0" }
+        - { name: "delivery-pipeline-plugin", version: "0.9.8" }
+        - { name: "token-macro", version: "1.12.1" }
+        - { name: "ws-cleanup", version: "0.28" }
+        - { name: "job-dsl", version: "1.41" }
+        - { name: "cloudbees-folder", version: "5.1" }
+        - { name: "groovy", version: "1.27" }
+        - { name: "groovy-postbuild", version: "2.2.2" }
+        - { name: "script-security", version: "1.15" }
+        - { name: "durable-task", version: "1.7" }
+        - { name: "docker-plugin", version: "0.16.0" }
+        - { name: "openshift-pipeline", version: "1.0.4" }
+        - { name: "credentials", version: "1.24", pinned: true }
+        - { name: "cvs", version: "2.12", pinned: true }
+        - { name: "javadoc", version: "1.3", pinned: true }
+        - { name: "junit", version: "1.10", pinned: true }
+        - { name: "mailer", version: "1.16", pinned: true }
+        - { name: "matrix-auth", version: "1.2", pinned: true }
+        - { name: "matrix-project", version: "1.6", pinned: true }
+        - { name: "maven-plugin", version: "2.12.1", pinned: true }
+        - { name: "antisamy-markup-formatter", version: "1.3", pinned: true }
+        - { name: "script-security", version: "1.15", pinned: true }
+        - { name: "ssh-credentials", version: "1.11", pinned: true }
+        - { name: "ssh-slaves", version: "1.10", pinned: true }
+        - { name: "translation", version: "1.12", pinned: true }
+        - { name: "subversion", version: "2.5.5", pinned: true }
+        - { name: "windows-slaves", version: "1.1", pinned: true }
+  notify:
+  - restart jenkins
+  tags: jenkins
+  
+- name: Create Docker Group
+  group:
+    name: docker
+    state: present
+  tags: jenkins
+    
+- name: Add Docker Group to Jenkins User
+  user:
+    name: "{{ jenkins_user }}"
+    groups: docker
+    append: yes
+  tags: jenkins
+  
+- name: Open Firewall for Jenkins
+  firewalld:
+    port: "{{ item }}"
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+  - "8080/tcp"
+  - "50000/tcp"
+  tags: jenkins
+  
+- name: Enable Jenkins Service
+  service: 
+    name: jenkins
+    enabled: true
+  tags: jenkins

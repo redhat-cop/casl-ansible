@@ -1,0 +1,31 @@
+---
+cicd_block_device: "/dev/vdb"
+java_keystore_password: "changeit"
+java_certs: ""
+cicd_temp_dir: "/tmp/cicd-setup"
+
+groovy_version: "2.4.4"
+groovy_url: "http://dl.bintray.com/groovy/maven/apache-groovy-binary-{{groovy_version}}.zip"
+groovy_local_archive: "{{cicd_temp_dir}}/apache-groovy-binary-{{groovy_version}}.zip"
+groovy_base_dir: "/usr/local"
+groovy_install_dir: "{{groovy_base_dir}}/groovy-{{groovy_version}}"
+
+nexus_version: "2.12.0-01"
+nexus_url: "https://sonatype-download.global.ssl.fastly.net/nexus/oss/nexus-{{nexus_version}}-bundle.tar.gz"
+nexus_local_archive: "{{cicd_temp_dir}}/nexus-{{                                                               nexus_version}}-bundle.tar.gz"
+nexus_base_dir: "/usr/local"
+nexus_install_dir: "{{nexus_base_dir}}/nexus-{{nexus_version}}"
+nexus_home_dir: "{{ nexus_base_dir }}/nexus"
+nexus_pid_dir: "/var/run/nexus"
+nexus_sonatype_work_dir: "{{nexus_base_dir}}/sonatype-work"
+nexus_user: "nexus"
+nexus_group: "nexus"
+
+jenkins_repo_url: "http://pkg.jenkins-ci.org/redhat-stable/jenkins.repo"
+jenkins_repo_key_url: "https://jenkins-ci.org/redhat/jenkins-ci.org.key"
+jenkins_home_dir: "/var/lib/jenkins"
+jenkins_authz_xml: '<authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/><securityRealm class="hudson.security.SecurityRealm$None"/>'
+jenkins_plugins_base_url: "https://updates.jenkins-ci.org/download/plugins"
+jenkins_plugins_home_dir: "{{ jenkins_home_dir }}/plugins"
+jenkins_user: "jenkins"
+jenkins_group: "jenkins"

@@ -1,0 +1,43 @@
+---
+  
+- name: Install Docker
+  yum: 
+    name: docker
+    state: present
+  tags: docker
+  
+- name: Docker Configuration File
+  lineinfile: 
+    dest: /etc/sysconfig/docker 
+    regexp: '^OPTIONS=.*$' 
+    line: "OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
+  tags: docker
+
+- name: Docker Storage Setup Configuration File
+  copy:
+    content: >
+      DEVS={{ cicd_storage_disk_volume }}\n
+      VG=docker_vg
+    dest: /etc/sysconfig/docker-storage-setup
+  register: docker_storage_setup
+  tags: docker
+  
+- name: Run Docker Storage Setup
+  command: docker-storage-setup
+  when: docker_storage_setup.changed == true
+  notify:
+  - restart docker
+  tags: docker
+
+- name: extend the vg
+  command: lvextend -l 90%VG /dev/docker_vg/docker-pool
+  when: docker_storage_setup.changed == true
+  notify:
+  - restart docker
+  tags: docker
+
+- name: Enable Docker Service
+  service: 
+    name: docker
+    enabled: true
+  tags: docker

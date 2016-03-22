@@ -1,0 +1,14 @@
+---
+  
+- name: Install Maven
+  yum: 
+    name: maven
+    enablerepo: rhel-7-server-optional-rpms 
+    state: present
+  tags: maven
+  
+- name: Copy Maven Settings File
+  copy: 
+    src: maven/settings.xml
+    dest: /usr/share/maven/conf/
+  tags: maven

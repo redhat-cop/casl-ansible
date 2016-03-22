@@ -1,0 +1,111 @@
+---
+  
+- name: Download Nexus Artifact
+  get_url:
+    url: "{{ nexus_url }}"
+    dest: "{{ nexus_local_archive }}"
+  tags: nexus
+ 
+- name: Create Nexus User
+  user:
+    name: "{{ nexus_user }}"
+    shell: "/bin/bash"
+    home: "{{ nexus_home_dir }}"
+    createhome: no
+    state: present
+  tags: nexus
+ 
+- name: Extract Nexus Artifact
+  unarchive: 
+    src: "{{ nexus_local_archive }}"
+    dest: "{{ nexus_base_dir }}"
+    copy: no
+    creates: "{{ nexus_install_dir }}"
+    group: "{{ nexus_group }}"
+    owner: "{{ nexus_user }}"
+  tags: nexus
+
+- name: Create Nexus Symbolic Link
+  file:
+    src: "{{ nexus_install_dir }}"
+    dest: "{{ nexus_home_dir }}"
+    state: link 
+    group: "{{ nexus_group }}"
+    owner: "{{ nexus_user }}"
+  tags: nexus
+
+- name: Add NEXUS_HOME Variable
+  lineinfile: 
+    dest: /etc/profile
+    regexp: "^export NEXUS_HOME=/usr/local/nexus-{{nexus_version}}"
+    line: "export NEXUS_HOME=/usr/local/nexus-{{nexus_version}}"
+  tags: nexus
+  
+- name: Create Nexus PID Directory
+  file: 
+    path: "{{nexus_pid_dir}}"
+    state: directory
+    group: "{{ nexus_group }}"
+    owner: "{{ nexus_user }}"
+  tags: nexus
+  
+- name: Create Nexus Work Configuration Directory
+  file: 
+    path: "{{nexus_sonatype_work_dir}}/nexus/conf"
+    state: directory
+    group: "{{ nexus_group }}"
+    owner: "{{ nexus_user }}"
+  tags: nexus
+  
+- name: Copy Work Nexus Configuration File
+  copy: 
+    src: nexus/nexus.xml
+    dest: "{{nexus_sonatype_work_dir}}/nexus/conf/"
+    group: "{{ nexus_group }}"
+    owner: "{{ nexus_user }}"
+  notify:
+  - restart nexus
+  tags: nexus
+  
+- name: Custom Nexus Configuration File Settings
+  lineinfile:
+    dest: "{{ nexus_home_dir }}/bin/nexus"
+    regexp: "{{ item.regex }}"
+    line: "{{ item.replace }}"
+    backup: yes
+    state: present
+  with_items:
+  - { regex: "^NEXUS_HOME=\"..\"", replace: "NEXUS_HOME=\"{{ nexus_home_dir }}\"" }
+  - { regex: "^#PIDDIR=\".\"", replace: "PIDDIR=\"{{ nexus_home_dir }}/bin/jsw/linux-x86-64\"" }
+  - { regex: "^#RUN_AS_USER=", replace: "RUN_AS_USER=\"{{ nexus_user }}\"" }
+  notify:
+  - restart nexus
+  tags: nexus
+  
+- name: Copy Nexus Service File
+  copy: 
+    src: nexus/nexus.service
+    dest: /etc/systemd/system/
+    mode: 0664
+  notify:
+  - reload systemd
+  - restart nexus
+  tags: nexus
+  
+- name: Open Firewall for Nexus
+  firewalld:
+    port: 8081/tcp
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+  tags: nexus
+  
+- name: Enable Nexus Service
+  service: 
+    name: nexus
+    enabled: true
+  tags: nexus
+  
+  
+# TODO: Need to handle custom configurations

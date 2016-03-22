@@ -1,0 +1,9 @@
+---
+- name: Setting CICD Common Facts
+  set_fact:
+    cicd_storage_disk_volume: "{{ cicd_storage_disk_volume | default(default_cicd_storage_disk_volume) }}"
+    cicd_openstack_security_groups: "{{ cicd_openstack_security_groups | default(default_cicd_openstack_security_groups) }}"
+    cicd_openstack_flavor_name: "{{ cicd_openstack_flavor_name | default(default_cicd_openstack_flavor_name) }}"
+    cicd_openstack_image_name: "{{ cicd_openstack_image_name | default(default_cicd_openstack_image_name) }}"
+    cicd_openstack_storage_size: "{{ cicd_openstack_storage_size | default(default_cicd_openstack_storage_size) }}"
+    cicd_instance_count: "{{ cicd_instance_count | default(default_cicd_instance_count) }}"

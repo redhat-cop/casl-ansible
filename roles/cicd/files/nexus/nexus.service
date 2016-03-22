@@ -1,0 +1,14 @@
+[Unit]
+Description=Sonatype Nexus
+
+[Service]
+Type=forking
+PIDFile=/usr/local/nexus/bin/jsw/linux-x86-64/nexus.pid
+ExecStart=/usr/local/nexus/bin/nexus start
+ExecReload=/usr/local/nexus/bin/nexus restart
+ExecStop=/usr/local/nexus/bin/nexus stop
+
+[Install]
+Alias=nexus
+WantedBy=default.target
+

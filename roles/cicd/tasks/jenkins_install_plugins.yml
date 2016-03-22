@@ -1,0 +1,42 @@
+---
+    
+- name: Validate Jenkins Plugins
+  fail: msg="Plugins Not Passed"
+  failed_when: plugins is not defined
+  tags: jenkins
+  
+- name: Cretate Jenkins Plugin Directory
+  file:
+    path: "{{ jenkins_plugins_home_dir }}"
+    group: "{{ jenkins_group }}"
+    owner: "{{ jenkins_user }}"
+    state: directory
+  tags: jenkins
+
+- name: "Download Plugins"
+  get_url:
+      url: "{{ jenkins_plugins_base_url }}/{{ item.name }}/{{ item.version }}/{{ item.name }}.hpi"
+      dest: "{{ jenkins_plugins_home_dir }}/{{item.name}}.{{ (item.pinned is defined and item.pinned == true) | ternary('jpi','hpi') }}"
+  register: jenkins_download_plugins
+  with_items: plugins
+  tags: jenkins
+  
+- name: "Change Plugin Permissions"
+  file:
+    group: "{{ jenkins_group }}"
+    owner: "{{ jenkins_user }}"
+    state: file
+    path: "{{ item.dest }}"
+  with_items: jenkins_download_plugins.results
+  tags: jenkins
+
+
+- name: "Set Pinned Plugin Markers"
+  file:
+    group: "{{ jenkins_group }}"
+    owner: "{{ jenkins_user }}"
+    state: touch
+    path: "{{ jenkins_plugins_home_dir }}/{{ item.item.name }}.jpi.pinned"
+  when: item.item.pinned is defined and item.item.pinned == true
+  with_items: jenkins_download_plugins.results
+  tags: jenkins

@@ -1,0 +1,36 @@
+---
+  
+- name: Download Groovy Artifact
+  get_url: 
+    url: "{{ groovy_url }}"
+    dest: "{{ groovy_local_archive }}"
+  tags: groovy
+ 
+- name: Extract Groovy Artifact
+  unarchive: 
+      src: "{{ groovy_local_archive }}"
+      dest: "{{ groovy_base_dir }}"
+      copy: no 
+      creates: "{{ groovy_install_dir }}"
+  tags: groovy
+
+- name: Create Groovy Symbolic Link
+  file: 
+      src: "{{ groovy_install_dir }}"
+      dest: "{{ groovy_base_dir }}/groovy"
+      state: link
+  tags: groovy
+
+- name: Add GROOVY_HOME Variable
+  lineinfile: 
+    dest: /etc/profile 
+    regexp: "^export GROOVY_HOME=/usr/local/groovy-{{groovy_version}}"
+    line: "export GROOVY_HOME=/usr/local/groovy-{{groovy_version}}"
+  tags: groovy
+  
+- name: Add GROOVY_HOME to PATH
+  lineinfile: 
+    dest: /etc/profile
+    regexp: "^export PATH=$PATH:$GROOVY_HOME/bin"
+    line: "export PATH=$PATH:$GROOVY_HOME/bin"
+  tags: groovy

@@ -1,0 +1,24 @@
+---
+
+- name: reload systemd
+  command: systemctl daemon-reload
+  
+- name: restart httpd
+  service: 
+    name: httpd
+    state: restarted
+
+- name: restart nexus
+  service: 
+    name: nexus
+    state: restarted
+    
+- name: restart jenkins
+  service: 
+    name: jenkins
+    state: restarted
+  
+- name: restart docker
+  service:
+    name: docker
+    state: restarted

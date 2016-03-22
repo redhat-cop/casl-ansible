@@ -1,0 +1,8 @@
+---
+default_cicd_storage_disk_volume: "/dev/vdb"
+
+default_cicd_openstack_security_groups: "CI-CD"
+default_cicd_openstack_flavor_name: "m1.medium"
+default_cicd_openstack_image_name: "ose3_1-base"
+default_cicd_openstack_storage_size: 10
+default_cicd_instance_count: 1

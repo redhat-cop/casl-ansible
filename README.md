@@ -8,6 +8,8 @@ Automation of OpenShift 3 using [Ansible](http://www.ansible.com/)
 
 The following are a list of Absible roles available
 
+* cicd - Installs and configures CICD tools such as Jenkins and Nexus
+* cicd-common - Sets common CICD related facts
 * common - Provides for the generation of an environment id per execution and sets common facts
 * openshift-common - Sets common OpenShift related facts
 * openshift-provision - Installs and configures OpenShift on a set of masters and nodes (Work in Progress)
@@ -17,11 +19,17 @@ The following are a list of Absible roles available
 
 The following are a list of Ansible playbooks
 
-* OpenShift Provision (provision-ose.yml)
+* OpenShift Provision (ose-provision.yml)
     * Provision machines on OpenStack for OpenShift
 	    * Attach persistent storage
 	    * Update machines with latest packages
         * Additional work in progress
+* Continuous Integration/Continuous Delivery (cicd-provision.yml)
+	* Provision instance on OpenStack
+		* Attach persistent storage
+	* Install prerequisite packages
+	* Install and configure Java, Groovy, Maven, Jenkins, Nexus, Docker
+
 
 ## Provisioning an OpenShift Environment
 
@@ -37,5 +45,13 @@ The current supported method of provisioning new OpenShift environments is to ut
  
 Execute the following command to run the playbook
 
-    ansible-playbook -i inventory/ose-provision openshift-provision.yml
+    ansible-playbook -i inventory/ose-provision ose-provision.yml
+    
+
+### Running the CICD Playbook
+ 
+Execute the following command to run the playbook
+
+    ansible-playbook -i inventory/cicd-provision cicd-provision.yml
+    
 

@@ -1,0 +1,12 @@
+[all:vars]
+
+# Enter the security key to provision new OpenStack instances
+openstack_key_name=""
+
+# The following variables can be used to override the defaults
+#cicd_storage_disk_volume=/dev/vdb
+#cicd_openstack_flavor_name="m1.medium"
+#cicd_openstack_security_groups="CI-CD"
+#cicd_openstack_image_name="ose3_1-base"
+#cicd_openstack_storage_size: 10
+#cicd_instance_count: 1
