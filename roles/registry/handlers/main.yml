@@ -1,0 +1,14 @@
+---
+
+- name: reload systemd
+  command: systemctl daemon-reload
+
+- name: restart docker registry
+  service:
+    name: docker-distribution
+    state: restarted
+
+- name: reload nginx
+  service:
+    name: nginx
+    state: reloaded

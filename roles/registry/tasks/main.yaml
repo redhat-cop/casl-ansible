@@ -1,15 +1,32 @@
 ---
+- name: Setting Registry Facts
+  set_fact:
+    template_registry_domain_name: "{{ registry_domain_name | default(default_registry_domain_name) }}"
+    registry_certificate_path: "/etc/nginx/ssl"
+
 - name: Install Registry
-  yum: name=docker-registry state=latest
+  yum: name=docker-distribution state=latest
 
 - name: Enable & Start Registry
-  service: name=docker-registry enabled=yes state=started
+  service: name=docker-distribution enabled=yes state=started
 
 - name: Install firewalld
   yum: name=firewalld state=latest
+
+#- name: Install firewall-cmd
+#  yum: name=firewall-cmd state=latest
 
 - name: Enable Firewalld
   service: name=firewalld enabled=yes state=started
 
 - name: Open Firewall for Registry
-  firewalld: port=5000/tcp permanent=yes state=enabled immediate=yes
+  firewalld: port=5000/tcp permanent=yes state=enabled immediate=yes zone=public
+  when: not registry_auth_layer | default(false) | bool
+
+- name: Lay Down Registry Config
+  template: src="{{role_path}}/templates/nginx.conf" dest="/etc/docker-distribution/registry/config.xml"
+  notify: restart docker registry
+
+- name: Add Auth Layer
+  include: "{{role_path}}/tasks/auth_layer_nginx.yaml"
+  when: registry_auth_layer | default(false) | bool

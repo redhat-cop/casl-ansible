@@ -1,0 +1,15 @@
+version: 0.1
+log:
+  fields:
+    service: registry
+storage:
+    cache:
+        layerinfo: inmemory
+    filesystem:
+        rootdirectory: /var/lib/registry
+http:
+  {% if registry_auth_layer == false -%}
+    addr: :5000
+  {% else -%}
+    addr: 127.0.0.1:5000
+  {% endif -%}
