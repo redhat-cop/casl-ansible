@@ -1,7 +1,7 @@
 [all:vars]
 
 # Enter the security key to provision new OpenStack instances
-openstack_key_name="esauer"
+openstack_key_name=""
 
 # The following variables can be used to override the defaults
 #openshift_master_count=1
