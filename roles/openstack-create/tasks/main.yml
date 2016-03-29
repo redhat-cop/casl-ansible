@@ -4,6 +4,55 @@
   when: 
        - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined or env_id is not defined
 
+# vvaldez - Using loops assuming there may be multiple security groups for each host type
+# also including both nova and neutron commands for compatibility or possible future decision making
+- name: "Check for Security Groups"
+  shell: "nova secgroup-list | grep {{ item }}"
+  #shell: "neutron security-group-list | grep {{ item }}"
+  with_items: "{{ security_groups }}"
+  ignore_errors: yes
+  changed_when: no
+  register: secgroup_exists
+
+#- debug: var=secgroup_exists
+
+- name: "Create Security Group"
+  shell: "nova secgroup-create {{ item.item }} {{ item.item }}"
+  #shell: "neutron security-group-create {{ item.item }}"
+  register: secgroup_create
+  when: "{{ item.rc != 0 }}"
+  with_items: "{{ secgroup_exists.results }}"
+
+#- debug: var=secgroup_create 
+
+# vvaldez - Need to add validation, if a security group existed, then the shell command wasn't run, so there is no rc to check which causes an error)
+#- name: Validate Security Group Creation
+#  fail: msg="Unable to create Security Group {{ item.item }}"
+#  when: "{{ item.rc != 0 }}"
+#  with_items: "{{ secgroup_create.results }}"
+
+- name: "Check for SSH rule in security groups"
+  shell: "nova secgroup-list-rules {{ item }} | grep 'tcp.*22'"
+  #shell: "neutron security-group-rule-list | grep \"{{ item }}.*22/tcp\""
+  with_items: "{{ security_groups }}"
+  ignore_errors: yes
+  changed_when: no
+  register: secgroup_rule
+
+- name: "Create SSH Rule in Security Group"
+  shell: "nova secgroup-add-rule {{ item.item }} tcp 22 22 0.0.0.0/0"
+  #shell: "neutron security-group-rule-create --protocol tcp --port-range-min 22 --port-range-max 22 --direction ingress {{ item.item }}"
+  register: secgroup_rule_create
+  when: "{{ item.rc != 0 }}"
+  with_items: "{{ secgroup_rule.results }}"
+
+# vvaldez - Need to add validation, if a security group rule existed, then the shell command wasn't run, so there is no rc to check which causes an error)
+#- name: Validate Security Group Rule for SSH
+#  fail: msg="Unable to create Security Group Rule for SSH"
+#  vvaldez - attempted checking the changed status, did not work
+#  when: secgroup_rule_create.changed|{{ item.rc != 0 }}
+#  with_items: "{{ secgroup_rule_create.results }}"
+
 - name: "Search for valid OpenStack Flavor"
   shell: "nova flavor-list | awk \"/{{flavor_name }}/\"'{print $2}'"
   register: flavor_query
