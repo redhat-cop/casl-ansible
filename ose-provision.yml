@@ -1,9 +1,14 @@
 ---
 # Provision OpenStack instances
 - hosts: localhost
+  vars_prompt:
+    - name: "rhsm_password"
+      prompt: "Subscription Manager password (enter blank if using rhsm_activationkey or to disable registration)"
+      confirm: yes
+      private: yes
   pre_tasks:
-  - include: roles/openstack-create/pre_tasks/pre_tasks.yml
   - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: roles/subscription-manager/pre_tasks/pre_tasks.yml
   roles:
     - role: common
     - role: openshift-common
@@ -35,4 +40,5 @@
     - openshift_masters
     - openshift_nodes
   roles:
+    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager' }
     - openshift-provision
