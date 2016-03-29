@@ -1,0 +1,4 @@
+---
+- name: Validate OpenStack SSH key is defined
+  fail: msg="Required 'openstack_key_name' is not defined!"
+  when: openstack_key_name is undefined or openstack_key_name is none or openstack_key_name|trim == ''
