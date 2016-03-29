@@ -1,5 +1,5 @@
 - name: Creates directory
-  file: path={{registry_certificate_path}} state=directory
+  file: path={{ certificate_path }} state=directory
 
 - name: create self-signed SSL cert
-  command: openssl req -new -nodes -x509 -subj "{{ registry_certificate_subject | default(default_registry_certificate_subject) }}" -days 3650 -keyout {{registry_certificate_path}}/server.key -out {{registry_certificate_path}}/server.crt -extensions v3_ca creates={{registry_certificate_path}}/server.crt
+  command: openssl req -new -nodes -x509 -subj "{{ certificate_subject }}" -days 3650 -keyout {{ certificate_path }}/server.key -out {{ certificate_path }}/server.crt -extensions v3_ca creates={{ certificate_path }}/server.crt

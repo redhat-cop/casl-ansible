@@ -1,11 +1,11 @@
 ---
-- name: Install Nexus Repository
+- name: Install NGinx Repository
   yum:
-    name: "{{ nexus_repo_url }}"
+    name: "{{ nginx_repo_url }}"
     state: present
 
 - name: Install NGinx
-  yum: name=nginx state=latest
+  action: "{{ ansible_pkg_mgr }} name=nginx state=latest"
 
 - name: Enable & Start Nginx
   service: name=nginx enabled=yes state=started
@@ -27,3 +27,10 @@
 
 - name: Open Firewall for Nginx
   firewalld: service=https permanent=yes state=enabled immediate=yes zone=public
+
+- name: NGinx SELinux Configurations
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+  tags: httpd
