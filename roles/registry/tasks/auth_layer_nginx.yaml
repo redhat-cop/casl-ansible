@@ -1,10 +1,8 @@
 ---
-- name: Install NGinx Repository
-  yum:
-    name: "{{ nginx_repo_url }}"
-    state: present
+- name: Install Nginx Repository
+  action: "{{ ansible_pkg_mgr }} name={{ nginx_repo_url }} state=present"
 
-- name: Install NGinx
+- name: Install Nginx
   action: "{{ ansible_pkg_mgr }} name=nginx state=latest"
 
 - name: Enable & Start Nginx
@@ -28,7 +26,7 @@
 - name: Open Firewall for Nginx
   firewalld: service=https permanent=yes state=enabled immediate=yes zone=public
 
-- name: NGinx SELinux Configurations
+- name: Nginx SELinux Configurations
   seboolean:
     name: httpd_can_network_connect
     state: yes

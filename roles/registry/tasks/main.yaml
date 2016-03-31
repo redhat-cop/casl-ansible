@@ -8,13 +8,13 @@
     auth_layer: "{{ registry_auth_layer | default(default_auth_layer) }}"
 
 - name: Install Registry
-  yum: name=docker-distribution state=latest
+  action: "{{ ansible_pkg_mgr }} name=docker-distribution state=latest"
 
 - name: Enable & Start Registry
   service: name=docker-distribution enabled=yes state=started
 
 - name: Install firewalld
-  yum: name=firewalld state=latest
+  action: "{{ ansible_pkg_mgr }} name=firewalld state=latest"
 
 #- name: Install firewall-cmd
 #  yum: name=firewall-cmd state=latest
