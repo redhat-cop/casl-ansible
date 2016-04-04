@@ -1,0 +1,34 @@
+---
+- name: Install Nginx Repository
+  action: "{{ ansible_pkg_mgr }} name={{ nginx_repo_url }} state=present"
+
+- name: Install Nginx
+  action: "{{ ansible_pkg_mgr }} name=nginx state=latest"
+
+- name: Enable & Start Nginx
+  service: name=nginx enabled=yes state=started
+
+- name: Create SSL Certs
+  include: "{{role_path}}/tasks/openssl.yaml"
+  notify: reload nginx
+
+- name: Create SSL Config
+  template: src="{{role_path}}/templates/nginx.j2" dest="/etc/nginx/nginx.conf"
+  notify: reload nginx
+
+- easy_install: name=pip
+
+- pip: name=passlib
+
+- name: Setup Authentication
+  htpasswd: path=/etc/nginx/conf.d/nginx.htpasswd name=demo password=demo owner=root group=nginx mode=0640
+
+- name: Open Firewall for Nginx
+  firewalld: service=https permanent=yes state=enabled immediate=yes zone=public
+
+- name: Nginx SELinux Configurations
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+  tags: httpd

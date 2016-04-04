@@ -1,0 +1,16 @@
+[all:vars]
+
+# Enter the security key to provision new OpenStack instances
+openstack_key_name=""
+
+# The following variables can be used to override the defaults
+#openshift_master_count=1
+#openshift_node_count=2
+#openshift_storage_disk_volume=/dev/vdb
+#openstack_flavor_name="m1.medium"
+#openstack_image_name="ose3_1-base"
+#openshift_openstack_master_storage_size: 10
+#openshift_openstack_node_storage_size: 10
+security_groups="docker-registry"
+
+registry_auth_layer=true

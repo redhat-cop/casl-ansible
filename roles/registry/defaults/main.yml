@@ -1,0 +1,6 @@
+---
+default_auth_layer: false
+default_certificate_path: "/etc/nginx/ssl"
+default_certificate_subject: "/C=US/ST=NC/L=Raleigh/O=Example, Inc/OU=Web/CN=example.com"
+default_domain_name: registry.example.com
+default_nginx_repo_url: "http://nginx.org/packages/rhel/7/noarch/RPMS/nginx-release-rhel-7-0.el7.ngx.noarch.rpm"
