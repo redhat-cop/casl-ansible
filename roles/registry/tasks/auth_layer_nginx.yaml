@@ -13,7 +13,7 @@
   notify: reload nginx
 
 - name: Create SSL Config
-  template: src="{{role_path}}/templates/nginx.conf" dest="/etc/nginx/nginx.conf"
+  template: src="{{role_path}}/templates/nginx.j2" dest="/etc/nginx/nginx.conf"
   notify: reload nginx
 
 - easy_install: name=pip

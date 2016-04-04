@@ -27,7 +27,7 @@
   when: not auth_layer | bool
 
 - name: Lay Down Registry Config
-  template: src="{{role_path}}/templates/nginx.conf" dest="/etc/docker-distribution/registry/config.xml"
+  template: src="{{role_path}}/templates/nginx.j2" dest="/etc/docker-distribution/registry/config.xml"
   notify: restart docker registry
 
 - name: Add Auth Layer
