@@ -1,0 +1,47 @@
+---
+- name: "Cleaning yum repositories"
+  command: "yum clean all"
+  
+- name: "Install required packages"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - wget
+    - git
+    - net-tools
+    - bind-utils
+    - firewalld
+    - iptables-services
+    - bridge-utils
+    - bash-completion
+    - atomic-openshift-utils
+    - vim-enhanced
+    - docker
+
+- name: "Update all packages (this can take a very log time)"
+  become: yes
+  yum: 
+    name: "*"
+    state: latest
+
+- name: "Disable iptables"
+  service: 
+    name: iptables
+    enabled: no
+    state: stopped
+  
+- name: "Enable firewalld"
+  service:
+    name: firewalld
+    enabled: yes
+    state: started
+
+- name: "Verify hostname"
+  shell: hostnamectl status | awk "/Static hostname/"'{ print $3 }'
+  register: hostname_fqdn
+
+- name: "Set hostname if required"
+  hostname: 
+    name: "{{ ansible_fqdn }}"
+  when: hostname_fqdn.stdout != ansible_fqdn
