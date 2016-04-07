@@ -1,0 +1,148 @@
+---
+# Use this to delete all OpenStack instances and their attached volumes matching a specified 'env_id'. 
+#
+# Call it as such:
+#
+#            ansible-playbook openstack-deprovision.yml -e "env_id=testenv1"
+
+- hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_ssh_user: root
+    max_instances: 6
+    min_env_id_length: 8
+    really_really_sure: false
+    uuid_regex: "[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}"
+    newline: "\n"
+    debug: false
+  tasks:
+
+  - name: Set 'env_id' to 'uuid_regex' if override requested
+    set_fact:
+      env_id: "{{ uuid_regex }}"
+    when:
+      - env_id is not defined or env_id is none or env_id|trim == ''
+      - really_really_sure
+
+  - name: Verify environment ID was set
+    fail: msg="No 'env_id' set, refusing to delete all instances and volumes, please provide a string to match via 'env_id'. Override with 'really_really_sure=true'"
+    when: 
+      - env_id is not defined or env_id is none or env_id|trim == ''
+      - not really_really_sure
+
+  - name: Verify environment ID is of sufficient length
+    fail: msg="'env_id' is too short at only '{{ env_id|length }}' characters, risk of deleting too many instances. Override with 'really_really_sure=true'"
+    when: 
+      - env_id|length < min_env_id_length|int
+      - not really_really_sure
+
+  - name: Verify connectivity to OpenStack
+    command: "nova list"
+    register: nova_result
+
+  - name: Verify nova command was successful
+    fail: msg="OpenStack 'nova list' command failed, check authenticaiton and connection."
+    when: nova_result.rc != 0
+
+  - name: Determine number of matching instances
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $2}' | sed ':a;N;$!ba;s/\n/ /g'
+    register: instances_to_delete
+
+  - name: Set instance count fact
+    set_fact:
+      instance_count: "{{ instances_to_delete.stdout.split(' ')|length }}"
+
+  - name: Fix count if list is empty
+    # Using split on an empty string like this results in a length of 1, so fixing it if so
+    set_fact:
+      instance_count: 0
+    when:
+      - instances_to_delete.stdout.split(' ').0|trim == ''
+
+  - name: Determine if there are matching instances
+    fail: msg="'{{ env_id }}' does not match any instances."
+    when:
+      - instance_count == 0
+      - not really_really_sure
+
+  - name: Verify environment ID does not match too many instances
+    fail: msg="'{{ env_id }}' matches too many instances at {{ instance_count|int }}, risk of deleting too many instnaces. Override with 'really_really_sure=true'"
+    when: 
+      - instance_count|int >= max_instances|int
+      - not really_really_sure
+
+  - name: Determine instance names to delete
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $4}' | sed ':a;N;$!ba;s/\n/, /g'
+    register: names_to_delete
+
+  - debug: var=instances_to_delete
+    when: debug
+
+  - debug: var=names_to_delete
+    when: debug
+
+  - name: Pause for confirmation
+    pause: prompt="{{ newline }}WARNING! About to delete the following {{ instance_count|int }} instances and attached volumes{{':'}}{{ newline }}'{{ names_to_delete.stdout }}'.{{ newline }}{{ newline }}Press ENTER to delete these or CTRL+c to cancel"
+
+  - name: Determine list of public IPs
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $13}' | sed ':a;N;$!ba;s/\n/ /g'
+    register: ips_to_delete
+
+  - name: Build a group containing instance IPs
+    add_host:
+      hostname: "{{ item }}"
+      ansible_ssh_host: "{{ item }}"
+      ansible_ssh_user: "{{ ansible_ssh_user }}"
+      groups: instance_ips
+    with_items: "ips_to_delete.stdout.split(' ')"
+
+  - name: Determine list of volumes
+    shell: for server in {{ instances_to_delete.stdout }}; do nova volume-list | awk "/${server}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/ /g'
+    register: volumes_to_delete
+
+  - debug: var=groups.instance_ips
+    when: debug
+
+  - debug: var=ips_to_delete
+    when: debug
+
+  - debug: var=volumes_to_delete
+    when: debug
+
+- hosts: instance_ips
+  gather_facts: false
+  vars:
+    debug: false
+  tasks:
+
+  - debug: var=hostvars[inventory_hostname]
+    when: debug
+
+  - pause: prompt="Ready to execute actions on matching instances"
+    when: debug
+
+  - name: Attempt to unregister from Subscription Manager
+    command: "subscription-manager unregister"
+    ignore_errors: yes
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+
+  - name: Delete instance
+    command: "nova delete {{ item }}"
+    ignore_errors: yes
+    with_items: "instances_to_delete.stdout.split(' ')"
+
+  - name: Wait for instance delete and volume detach
+    shell: nova volume-list | awk "/{{ item }}/"'{ print $4 }'
+    register: volume_check
+    until: volume_check.stdout != "in-use"
+    retries: 5
+    delay: 10
+    with_items: "volumes_to_delete.stdout.split(' ')"
+
+  - name: Delete volume
+    command: "nova volume-delete {{ item }}"
+    ignore_errors: yes
+    with_items: "volumes_to_delete.stdout.split(' ')"
