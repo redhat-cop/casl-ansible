@@ -45,3 +45,12 @@
   hostname: 
     name: "{{ ansible_fqdn }}"
   when: hostname_fqdn.stdout != ansible_fqdn
+
+- name: "Check SELinux status"
+  command: getenforce
+  register: getenforce
+
+- name: "Verify SELinux is enforcing"
+  fail:
+    msg: "SELinux is required for OpenShift and has been detected as '{{ getenforce.stdout }}'"
+  when: getenforce.stdout != "Enforcing"
