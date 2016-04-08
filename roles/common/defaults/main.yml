@@ -1,2 +1,2 @@
 ---
-default_env_id: "{{ lookup('env','OS_USERNAME') }}"
+default_env_id: "casl-{{ lookup('env','OS_USERNAME') }}"
