@@ -1,11 +1,6 @@
 ---
 # Provision OpenStack instances
 - hosts: localhost
-  vars_prompt:
-    - name: "rhsm_password"
-      prompt: "Subscription Manager password (enter blank if using rhsm_activationkey or to disable registration)"
-      confirm: yes
-      private: yes
   pre_tasks:
   - include: roles/common/pre_tasks/pre_tasks.yml
   - include: roles/subscription-manager/pre_tasks/pre_tasks.yml
