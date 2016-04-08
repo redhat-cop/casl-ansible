@@ -1,2 +1,2 @@
 ---
-default_env_id: "testenv"
+default_env_id: "{{ lookup('env','OS_USERNAME') }}"
