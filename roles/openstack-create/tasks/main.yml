@@ -18,7 +18,7 @@
 
 - name: "Provision OpenStack {{ type }}"
   nova_compute:
-    name: "{{ type }}{{ item }}-{{ env_id }}"
+    name: "{{ env_id }}-{{ type }}{{ item }}"
     state: present
     image_name: "{{ image_name }}"
     flavor_id: "{{ flavor_id }}"
