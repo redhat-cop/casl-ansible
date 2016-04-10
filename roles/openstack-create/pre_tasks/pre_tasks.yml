@@ -1,4 +1,9 @@
 ---
-- name: Validate OpenStack SSH key is defined
+- name: "Validate OpenStack SSH key is defined"
   fail: msg="Required 'openstack_key_name' is not defined!"
   when: openstack_key_name is undefined or openstack_key_name is none or openstack_key_name|trim == ''
+
+- name: "Verify connectivity to OpenStack"
+  command: "nova credentials"
+  register: nova_result
+  failed_when: nova_result.rc != 0
