@@ -69,7 +69,7 @@
     fail:
       msg: "'{{ env_id }}' matches {{ instance_count|int }} instances, risk of deleting too many instances. Override 'max_instances' or with 'really_really_sure=true'"
     when: 
-      - instance_count|int >= max_instances|int
+      - instance_count|int > max_instances|int
       - not really_really_sure
 
   - name: "Determine instance names to delete"
@@ -83,8 +83,6 @@
   - name: "Determine list of volumes"
     shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova volume-list | awk "/${instance}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/,/g'
     register: volumes_to_delete
-
-  - debug: var=volumes_to_delete
 
   - name: "Build a group containing instance IPs"
     add_host:
@@ -119,6 +117,7 @@ Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
 - hosts: instance_ips
   gather_facts: false
   vars:
+    ansible_sudo: true
     dry_run: false
   tasks:
 
