@@ -37,4 +37,4 @@
     - openshift_nodes
   roles:
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - openshift-provision
+    - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }

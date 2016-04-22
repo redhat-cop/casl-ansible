@@ -11,46 +11,26 @@
     - git
     - net-tools
     - bind-utils
-    - firewalld
-    - iptables-services
     - bridge-utils
     - bash-completion
     - atomic-openshift-utils
     - vim-enhanced
-    - docker
 
 - name: "Update all packages (this can take a very log time)"
-  become: yes
-  yum: 
+  yum:
     name: "*"
     state: latest
-
-- name: "Disable iptables"
-  service: 
-    name: iptables
-    enabled: no
-    state: stopped
-  
-- name: "Enable firewalld"
-  service:
-    name: firewalld
-    enabled: yes
-    state: started
 
 - name: "Verify hostname"
   shell: hostnamectl status | awk "/Static hostname/"'{ print $3 }'
   register: hostname_fqdn
 
 - name: "Set hostname if required"
-  hostname: 
+  hostname:
     name: "{{ ansible_fqdn }}"
   when: hostname_fqdn.stdout != ansible_fqdn
 
-- name: "Check SELinux status"
-  command: getenforce
-  register: getenforce
-
 - name: "Verify SELinux is enforcing"
   fail:
-    msg: "SELinux is required for OpenShift and has been detected as '{{ getenforce.stdout }}'"
-  when: getenforce.stdout != "Enforcing"
+    msg: "SELinux is required for OpenShift and has been detected as '{{ ansible_selinux.config_mode }}'"
+  when: ansible_selinux.config_mode != "enforcing"
