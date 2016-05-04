@@ -29,7 +29,7 @@
       register_host_group: "openshift_nodes"
       node_count: "{{ openshift_node_count }}"
       disk_volume: "{{ openshift_storage_disk_volume }}"
-      volume_size: "{{ openshift_openstack_master_storage_size }}"      
+      volume_size: "{{ openshift_openstack_master_storage_size }}"
 
 # Install and configure OpenShift
 - hosts:
@@ -37,5 +37,5 @@
     - openshift_nodes
   roles:
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - openshift-provision
     - { role: docker, tags: 'docker' }
+    - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }
