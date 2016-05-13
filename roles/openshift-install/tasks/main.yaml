@@ -1,0 +1,9 @@
+---
+
+  - name: "Creating Inventory"
+    template:
+      dest: "{{rhc_ose_inv_dest | default('/tmp') }}/inventory_{{ hostvars['localhost'].env_id}}"
+      src: "{{ role_path }}/templates/inventory_template.j2"
+      force: yes
+#    - include: /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+#     when: ose_install | default(true) | bool

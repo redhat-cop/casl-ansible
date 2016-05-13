@@ -2,13 +2,14 @@
 
 # Enter the security key to provision new OpenStack instances
 openstack_key_name=""
+#env_id=
 
 # The following variables can be used to override the defaults
 #openshift_master_count=1
 #openshift_node_count=2
 #openshift_storage_disk_volume=/dev/vdb
 #openstack_flavor_name="m1.medium"
-#openstack_image_name="ose3_1-base"
+openstack_image_name="_OS1_rhel-guest-image-7.2-20151102.0.x86_64.qcow2"
 #openshift_openstack_master_storage_size: 10
 #openshift_openstack_node_storage_size: 10
 
@@ -32,7 +33,33 @@ rhsm_pool=''
 # A better place for this is the group_vars/ to use proper yaml lists, but can be specified as such in inventory:
 rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-extras-rpms"]'
 
-# This is the ose3 inventory file...
-[ose3]
+#DNS Settings
+dns_domain="example.com"
+
+rhc_ose_inv_dest=.
+rhc_ose_cluster_method=native
+rhc_ose_cluster_public_hostname=public.hostname.com
+rhc_ose_cluster_hostname=hostname.com
+#rhc_ose_ssh_user=root
+#rhc_ose_identity_provider=htpasswd
+deployment_type=openshift-enterprise
+
+#Openshift Components
+rhc_ose_enable_efk=true                  #If E-F-K logging stack should be deployed
+rhc_ose_enable_hawkular=true             #If Hawkular metrics should be deployed
+
+ #Logging
+openshift_hosted_logging_hostname=kibana.example.com
+openshift_hosted_logging_elasticsearch_cluster_size=1
+openshift_hosted_logging_master_public_url=https://localhost:8443
+#openshift_hosted_logging_secret_vars=nothing=/dev/null
+#openshift_hosted_logging_fluentd_replicas=1
+#openshift_hosted_logging_cleanup=no #Set this to 'yes' in order to cleanup logging components instead of deploying
+
+ #Metrics
+openshift_hosted_metrics_storage_nfs_directory=/exports          #Root export directory.
+openshift_hosted_metrics_storage_volume_name=metrics             #Metrics volume within openshift_hosted_metrics_volume_dir
+openshift_hosted_metrics_storage_volume_size=10Gi                #Metrics volume size
+openshift_hosted_metrics_storage_nfs_options="*(rw,root_squash)" #NFS options for configured exports. |
 
 # ... more to come here soon ...

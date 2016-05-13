@@ -5,16 +5,16 @@
     docker_storage_volume_group: "{{ docker_storage_volume_group | default(default_docker_storage_volume_group) }}"
 
 - name: "Install Docker"
-  yum: 
+  yum:
     name: docker
     state: latest
   notify:
     - enable docker
 
 - name: "Confige Docker"
-  lineinfile: 
-    dest: /etc/sysconfig/docker 
-    regexp: '^OPTIONS=.*$' 
+  lineinfile:
+    dest: /etc/sysconfig/docker
+    regexp: '^OPTIONS=.*$'
     line: "^OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
 
 - name: "Check for existing Docker Storage device"
@@ -31,15 +31,15 @@
     src: docker-storage-setup.j2
     dest: /etc/sysconfig/docker-storage-setup
   when: docker_storage_setup is undefined
-  
-- name: "Run Docker Storage Setup"
-  command: docker-storage-setup
-  when: docker_storage_setup is undefined
-  notify:
-  - restart docker
 
-- name: "Extend the Volume Group for Docker Storage"
-  command: lvextend -l 90%VG /dev/{{ docker_storage_volume_group }}/docker-pool
-  when: docker_storage_setup is undefined
-  notify:
-  - restart docker
+# - name: "Run Docker Storage Setup"
+#   command: docker-storage-setup
+#   when: docker_storage_setup is undefined
+#   notify:
+#   - restart docker
+#
+# - name: "Extend the Volume Group for Docker Storage"
+#   command: lvextend -l 90%VG /dev/{{ docker_storage_volume_group }}/docker-pool
+#   when: docker_storage_setup is undefined
+#   notify:
+#   - restart docker

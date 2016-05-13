@@ -31,11 +31,85 @@
       disk_volume: "{{ openshift_storage_disk_volume }}"
       volume_size: "{{ openshift_openstack_master_storage_size }}"
 
-# Install and configure OpenShift
-- hosts:
-    - openshift_masters
-    - openshift_nodes
+    # Provision DNS
+
+- include: playbooks/dns-provision.yaml
+
+- hosts: all:!dns:!localhost
+  remote_user: "cloud-user"
+  become: true
+  become_user: root
+  vars:
+    ansible_ssh_user: cloud-user
+    ansible_user: cloud-user
   roles:
-    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
+    - role: hostnames
+
+- hosts: all:!localhost
+  remote_user: "cloud-user"
+  become: true
+  vars:
+    ansible_ssh_user: cloud-user
+    ansible_user: cloud-user
+  roles:
+    - { role: subscription-manager, repos: ["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-extras-rpms"] }
+
+- hosts: dns
+  remote_user: "cloud-user"
+  become: true
+  vars:
+    ansible_ssh_user: cloud-user
+    ansible_user: cloud-user
+  pre_tasks:
+  - name: "Generate dns-server views"
+    include: playbooks/dns_dual_view.yaml
+    delegate_to: localhost
+  - name: "Include the generated views"
+    include_vars: /tmp/named_views.yaml
+    delegate_to: localhost
+  - name: "Include generated dns records"
+    include_vars: /tmp/records.yaml
+    delegate_to: localhost
+  roles:
+    - role: dns-server
+    - role: dns
+
+# Install and configure OpenShift
+
+- hosts: openshift-masters:openshift-nodes
+  become: true
+  become_method: sudo
+  vars:
+    ansible_ssh_user: cloud-user
+    ansible_user: cloud-user
+  tasks:
+  - name: "Edit /etc/resolv.conf on masters/nodes"
+    lineinfile:
+      state: present
+      dest: /etc/resolv.conf
+      regexp: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_public_ip }} {% endfor %}"
+      line: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_public_ip }} {% endfor %}"
+      insertafter: search*
+  roles:
     - { role: docker, tags: 'docker' }
     - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }
+
+- hosts: localhost
+  roles:
+    - openshift-install
+  post_tasks:
+    - name: "Edit /etc/hosts in container"
+      lineinfile:
+        state: present
+        dest: /etc/hosts
+        regexp: "{%for host in groups['openshift_masters']%}{{ hostvars[host].dns_public_ip }} {{ hostvars[host].ansible_hostname }}{{dns_domain}}\n{% endfor %}"
+        line:   "{%for host in groups['openshift_masters']%}{{ hostvars[host].dns_public_ip }} {{ hostvars[host].ansible_hostname }}{{dns_domain}}\n{% endfor %}"
+    - name: "Edit /etc/hosts in container"
+      lineinfile:
+        state: present
+        dest: /etc/hosts
+        regexp: "{%for host in groups['openshift_nodes']%}{{ hostvars[host].dns_public_ip }} {{ hostvars[host].ansible_hostname }}{{dns_domain}}\n{% endfor %}"
+        line:   "{%for host in groups['openshift_nodes']%}{{ hostvars[host].dns_public_ip }} {{ hostvars[host].ansible_hostname }}{{dns_domain}}\n{% endfor %}"
+
+    - name: "Run openshift installer"
+      command: "ansible-playbook -e ansible_ssh_user=cloud-user -i {{ rhc_ose_inv_dest | default('/tmp') }}/inventory_{{ hostvars['localhost'].env_id }} /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"

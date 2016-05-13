@@ -1,0 +1,12 @@
+---
+named_config_views:
+  - name: "private"
+    acl_entry:
+{% for host in groups['openshift_nodes']%}
+    - "{{ hostvars[host]["dns_private_ip"] }}/32"
+{% endfor %}
+    zone:
+    - "dns_domain": "{{ dns_domain }}"
+  - name: "public"
+    zone:
+    - "dns_domain": "{{ dns_domain }}"

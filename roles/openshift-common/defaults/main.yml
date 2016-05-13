@@ -6,6 +6,6 @@ default_openshift_node_count: 2
 default_openshift_openstack_master_security_groups: "ose3-master"
 default_openshift_openstack_node_security_groups: "ose3-node"
 default_openshift_openstack_flavor_name: "m1.medium"
-default_openshift_openstack_image_name: "ose3_1-base"
+default_openshift_openstack_image_name: "_OS1_rhel-guest-image-7.2-20151102.0.x86_64.qcow2"
 default_openshift_openstack_master_storage_size: 10
 default_openshift_openstack_node_storage_size: 10
