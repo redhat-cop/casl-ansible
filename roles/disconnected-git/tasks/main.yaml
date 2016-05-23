@@ -5,6 +5,7 @@
     - git
     - httpd
     - firewalld
+    - libsemanage-python
     
 - name: Create Git User
   user: name="{{ git_user }}"
@@ -26,7 +27,7 @@
     - "{{ git_repo_home }}"
     - "{{ ose_git_repo_home }}"
 
-- name: Close OSE Examples
+- name: Clone OSE Examples
   git:
     repo: "{{ item }}"
     bare: yes
