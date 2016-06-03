@@ -36,6 +36,9 @@ rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-
 #DNS Settings
 dns_domain="example.com"
 
+# OpenShift Ansible Path - required when running openshift-ansible from cloned git repo rather than atomic-openshift-utils
+# openshift_ansible_path='/root/repository/openshift-ansible/'
+
 rhc_ose_inv_dest=.
 rhc_ose_cluster_method=native
 rhc_ose_cluster_public_hostname=public.hostname.com
