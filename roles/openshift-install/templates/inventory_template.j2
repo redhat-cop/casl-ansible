@@ -13,7 +13,16 @@ lb
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
-ansible_ssh_user={{ rhc_ose_ssh_user | default("root") }}
+{% if ansible_ssh_user is defined %}
+ansible_ssh_user={{ ansible_ssh_user }}
+{% elif ansible_user is defined %}
+ansible_ssh_user={{ ansible_user }}
+{% endif %}
+{% if ansible_sudo is defined %}
+ansible_sudo={{ ansible_sudo }}
+{% elif become is defined %}
+ansible_sudo={{ become }}
+{% endif %}
 deployment_type=openshift-enterprise
 
 # Uncomment the following to enable htpasswd authentication; defaults to
