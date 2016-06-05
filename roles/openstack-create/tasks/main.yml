@@ -4,16 +4,13 @@
   when: 
        - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined or env_id is not defined
 
-# including both nova and neutron commands for compatibility and possible future decision making
 - name: "Check for Security Groups"
   shell: "nova secgroup-list"
-  #shell: "neutron security-group-list"
   with_items: security_groups.split(',')
   register: secgroup_list
 
 - name: "Create Security Groups if required"
   shell: "nova secgroup-create {{ item.item }} {{ item.item }}"
-  #shell: "neutron security-group-create {{ item.item }}"
   when: not item.stdout | search('{{ item.item }}')
   with_items: secgroup_list.results
 
@@ -23,7 +20,6 @@
 
 - name: "Check for SSH rule in Security Groups"
   shell: "nova secgroup-list-rules {{ item }}"
-  #shell: "neutron security-group-rule-list"
   with_items: security_groups.split(',')
   register: secgroup_rule_list
 
@@ -31,12 +27,10 @@
   set_fact:
     ssh_rule_found: true
   when: item.stdout | search('tcp.*22.*22')
-  #For Neutron - when: item.stdout| search('22/tcp')
   with_items: secgroup_rule_list.results
 
 - name: "Create SSH Rule in first Security Group if required"
   shell: nova secgroup-add-rule {{ security_groups.split(',').0 }} tcp 22 22 0.0.0.0/0
-  #shell: neutron security-group-rule-create --protocol tcp --port-range-min 22 --port-range-max 22 --direction ingress {{ security_groups.split(',').0 }}
   when: not ssh_rule_found
 
 - name: "Search for valid OpenStack Flavor"
@@ -51,6 +45,20 @@
   set_fact:
     flavor_id: "{{ flavor_query.stdout }}"
 
+- name: "Initialize Neutron fact"
+  set_fact:
+    neutron_floatingip_needed: 'no'
+
+- name: "Query Neutron services"
+  command: neutron agent-list
+  register: neutron
+  ignore_errors: true
+
+- name: "Check for Neutron services - (a failure assumes Legacy Networking (Nova Network)"
+  set_fact:
+    neutron_floatingip_needed: 'yes'
+  when: neutron.rc == 0
+
 - name: "Provision OpenStack {{ type }}"
   nova_compute:
     name: "{{ env_id }}-{{ type }}{{ item }}"
@@ -59,6 +67,7 @@
     flavor_id: "{{ flavor_id }}"
     key_name: "{{ key_name }}"
     security_groups: "{{ security_groups }}"
+    auto_floating_ip: "{{ neutron_floatingip_needed }}"
     wait_for: 200
   with_sequence: "start=1 end={{ node_count | default(1) }}"
   register: "openstack_create"
@@ -69,13 +78,15 @@
     dns_public_ip: "{{ item.public_ip }}"
     dns_private_ip: "{{ item.private_ip}}"
     ansible_ssh_user: root
+    id: "{{ item.id }}"
+    private_ip: "{{ item.private_ip }}"
     groups: "{{ register_host_group }}"
   with_items: openstack_create.results
 
 - name: "Wait for {{ type }} to be available"
   wait_for: port=22 host={{ item.public_ip }}
   with_items: openstack_create.results
-  
+
 # Create Volumes
 - include: create-volume.yml
   when: volume_size is defined and disk_volume is defined
