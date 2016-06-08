@@ -4,10 +4,10 @@
 [OSEv3:children]
 masters
 nodes
-{% if groups['openshift_etcds'] is defined %}
+{% if groups['etcd'] is defined %}
 etcd
 {% endif %}
-{% if groups['openshift_lbs'] is defined %}
+{% if groups['lb'] is defined %}
 lb
 {% endif %}
 
@@ -45,34 +45,34 @@ openshift_master_cluster_public_hostname={{ rhc_ose_cluster_public_hostname }}
 
 # host group for masters
 [masters]
-{% for inv_master in groups['openshift_masters'] %}
+{% for inv_master in groups['masters'] %}
 {{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}}
 
 {% endfor %}
-{% if groups['openshift_etcds'] is defined %}
+{% if groups['etcd'] is defined %}
 
 # host group for etcd
 [etcd]
-{% for inv_etcd in groups['openshift_etcds'] %}
+{% for inv_etcd in groups['etcd'] %}
 {{ hostvars[inv_etcd]['ansible_hostname'] }}.{{dns_domain}}
 {% endfor %}
 {% endif %}
-{% if groups['openshift_lbs'] is defined %}
+{% if groups['lb'] is defined %}
 
 # Specify load balancer host
 [lb]
-{% for inv_lbs in groups['openshift_lbs'] %}
+{% for inv_lbs in groups['lb'] %}
 {{ hostvars[inv_lbs]['ansible_hostname'] }}.{{dns_domain}}
 {% endfor %}
 {% endif %}
 
 # host group for nodes, includes region info
 [nodes]
-{% for inv_master in groups['openshift_masters'] %}
+{% for inv_master in groups['masters'] %}
 {{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'type': 'master'}"
 {% endfor %}
 {% set counter = 0 %}
-{% for inv_node in groups['openshift_nodes'] %}
+{% for inv_node in groups['nodes'] %}
 {% if counter == 0%}
 {{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'type': 'infra'}"
 {% else %}

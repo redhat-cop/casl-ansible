@@ -15,7 +15,7 @@
       security_groups: "{{ openshift_openstack_master_security_groups }}"
       key_name: "{{ openstack_key_name }}"
       flavor_name: "{{ openshift_openstack_flavor_name }}"
-      register_host_group: "openshift_masters"
+      register_host_group: "masters"
       node_count: "{{ openshift_master_count }}"
       disk_volume: "{{ openshift_storage_disk_volume }}"
       volume_size: "{{ openshift_openstack_master_storage_size }}"
@@ -26,7 +26,7 @@
       security_groups: "{{ openshift_openstack_node_security_groups }}"
       key_name: "{{ openstack_key_name }}"
       flavor_name: "{{ openshift_openstack_flavor_name }}"
-      register_host_group: "openshift_nodes"
+      register_host_group: "nodes"
       node_count: "{{ openshift_node_count }}"
       disk_volume: "{{ openshift_storage_disk_volume }}"
       volume_size: "{{ openshift_openstack_master_storage_size }}"
@@ -76,7 +76,7 @@
 
 # Install and configure OpenShift
 
-- hosts: openshift-masters:openshift-nodes
+- hosts: masters:nodes
   become: true
   become_method: sudo
   vars:
@@ -99,5 +99,7 @@
   post_tasks:
     - name: "Edit /etc/resolv.conf in container"
       shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {%for host in groups['dns']%}{{ hostvars[host].dns_public_ip }}{% endfor %}\\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
-    - name: "Run openshift installer"
-      command: "ansible-playbook -e ansible_ssh_user=cloud-user -i {{ rhc_ose_inv_dest | default('/tmp') }}/inventory_{{ hostvars['localhost'].env_id }} {{openshift_ansible_path | default('/usr/share/ansible/openshift-ansible/') }}playbooks/byo/config.yml"
+#    - name: "Run openshift installer"
+#      command: "ansible-playbook -e ansible_ssh_user=cloud-user -i {{ rhc_ose_inv_dest | default('/tmp') }}/inventory_{{ hostvars['localhost'].env_id }} {{openshift_ansible_path | default('/usr/share/ansible/openshift-ansible/') }}playbooks/byo/config.yml"
+
+- include: /root/repository/openshift-ansible/playbooks/byo/config.yml
