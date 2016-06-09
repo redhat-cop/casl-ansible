@@ -5,6 +5,12 @@ named_config_views:
 {% for host in groups['nodes']%}
     - "{{ hostvars[host]["dns_private_ip"] }}/32"
 {% endfor %}
+{% for host in groups['masters']%}
+    - "{{ hostvars[host]["dns_private_ip"] }}/32"
+{% endfor %}
+{% for host in groups['dns']%}
+    - "{{ hostvars[host]["dns_private_ip"] }}/32"
+{% endfor %}
     zone:
     - "dns_domain": "{{ dns_domain }}"
   - name: "public"

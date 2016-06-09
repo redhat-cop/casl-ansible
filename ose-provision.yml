@@ -35,31 +35,23 @@
 
 - include: playbooks/dns-provision.yaml
 
-- hosts: all:!dns:!localhost
+- hosts: dns:masters:nodes
   remote_user: "cloud-user"
-  become: true
-  become_user: root
   vars:
     ansible_ssh_user: cloud-user
-    ansible_user: cloud-user
+  tasks:
+  - name: "Enable direct root access"
+    shell: "cat ~/.ssh/authorized_keys | sudo tee /root/.ssh/authorized_keys >/dev/null"
+
+- hosts: all:!dns:!localhost
   roles:
     - role: hostnames
 
 - hosts: all:!localhost
-  remote_user: "cloud-user"
-  become: true
-  vars:
-    ansible_ssh_user: cloud-user
-    ansible_user: cloud-user
   roles:
     - { role: subscription-manager, repos: ["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-extras-rpms"] }
 
 - hosts: dns
-  remote_user: "cloud-user"
-  become: true
-  vars:
-    ansible_ssh_user: cloud-user
-    ansible_user: cloud-user
   pre_tasks:
   - name: "Generate dns-server views"
     include: playbooks/dns_dual_view.yaml
@@ -77,18 +69,13 @@
 # Install and configure OpenShift
 
 - hosts: masters:nodes
-  become: true
-  become_method: sudo
-  vars:
-    ansible_ssh_user: cloud-user
-    ansible_user: cloud-user
   tasks:
   - name: "Edit /etc/resolv.conf on masters/nodes"
     lineinfile:
       state: present
       dest: /etc/resolv.conf
-      regexp: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_public_ip }} {% endfor %}"
-      line: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_public_ip }} {% endfor %}"
+      regexp: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
+      line: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
       insertafter: search*
   roles:
     - { role: docker, tags: 'docker' }
@@ -99,7 +86,5 @@
   post_tasks:
     - name: "Edit /etc/resolv.conf in container"
       shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {%for host in groups['dns']%}{{ hostvars[host].dns_public_ip }}{% endfor %}\\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
-#    - name: "Run openshift installer"
-#      command: "ansible-playbook -e ansible_ssh_user=cloud-user -i {{ rhc_ose_inv_dest | default('/tmp') }}/inventory_{{ hostvars['localhost'].env_id }} {{openshift_ansible_path | default('/usr/share/ansible/openshift-ansible/') }}playbooks/byo/config.yml"
 
 - include: /root/repository/openshift-ansible/playbooks/byo/config.yml

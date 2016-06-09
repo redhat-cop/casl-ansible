@@ -1,7 +1,5 @@
 ---
   - name: "Setting up views"
-    become: false
-    remote_user: cloud-user
     template:
       dest: /tmp/named_views.yaml
       src: ./playbooks/templates/named_views.template
