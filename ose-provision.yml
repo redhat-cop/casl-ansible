@@ -87,4 +87,4 @@
     - name: "Edit /etc/resolv.conf in container"
       shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {%for host in groups['dns']%}{{ hostvars[host].dns_public_ip }}{% endfor %}\\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
 
-- include: /root/repository/openshift-ansible/playbooks/byo/config.yml
+#- include: /root/repository/openshift-ansible/playbooks/byo/config.yml
