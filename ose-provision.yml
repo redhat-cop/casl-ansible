@@ -66,6 +66,13 @@
     - role: dns-server
     - role: dns
 
+# Use newly configured DNS server for this container ...
+- hosts: localhost
+  tasks:
+  - name: "Edit /etc/resolv.conf in container"
+    shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {%for host in groups['dns']%}{{ hostvars[host].dns_public_ip }}{% endfor %}\\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
+
+
 # Install and configure OpenShift
 
 - hosts: masters:nodes
@@ -77,14 +84,17 @@
       regexp: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
       line: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
       insertafter: search*
+  - name: "Include DHCP workaround for OSE 3.2"
+    lineinfile:
+      state: present
+      dest: /etc/sysconfig/network
+      regexp: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
+      line: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
   roles:
     - { role: docker, tags: 'docker' }
     - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }
+
 - hosts: localhost
   roles:
     - openshift-install
-  post_tasks:
-    - name: "Edit /etc/resolv.conf in container"
-      shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {%for host in groups['dns']%}{{ hostvars[host].dns_public_ip }}{% endfor %}\\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
 
-#- include: /root/repository/openshift-ansible/playbooks/byo/config.yml
