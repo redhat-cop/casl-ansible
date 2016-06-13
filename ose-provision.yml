@@ -88,8 +88,8 @@
     lineinfile:
       state: present
       dest: /etc/sysconfig/network
-      regexp: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
-      line: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
+      regexp: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
+      line: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
   roles:
     - { role: docker, tags: 'docker' }
     - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }
