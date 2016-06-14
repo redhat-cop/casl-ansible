@@ -33,8 +33,9 @@ rhsm_pool=''
 # A better place for this is the group_vars/ to use proper yaml lists, but can be specified as such in inventory:
 rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-extras-rpms"]'
 
-#DNS Settings
+# DNS Settings
 dns_domain="example.com"
+public_dns_forwarder="8.8.8.8"
 
 # OpenShift Ansible Path - required when running openshift-ansible from cloned git repo rather than atomic-openshift-utils
 # openshift_ansible_path='/root/repository/openshift-ansible/'

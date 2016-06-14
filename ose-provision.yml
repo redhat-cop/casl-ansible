@@ -84,12 +84,12 @@
       regexp: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
       line: "nameserver {%for host in groups['dns']%} {{ hostvars[host].dns_private_ip }} {% endfor %}"
       insertafter: search*
-  - name: "Include DHCP workaround for OSE 3.2"
+  - name: "Include DHCP/DNS workaround for OSE 3.2"
     lineinfile:
       state: present
       dest: /etc/sysconfig/network
-      regexp: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
-      line: "DHCP4_DOMAIN_NAME_SERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
+      regexp: "IP4_NAMESERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
+      line: "IP4_NAMESERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
   roles:
     - { role: docker, tags: 'docker' }
     - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }

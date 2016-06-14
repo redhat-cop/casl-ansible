@@ -16,3 +16,5 @@ named_config_views:
   - name: "public"
     zone:
     - "dns_domain": "{{ dns_domain }}"
+    forwarder:
+    - "{{ public_dns_forwarder }}"
