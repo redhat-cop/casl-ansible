@@ -42,8 +42,8 @@ public_dns_forwarder="8.8.8.8"
 
 rhc_ose_inv_dest=.
 rhc_ose_cluster_method=native
-rhc_ose_cluster_public_hostname=public.hostname.com
-rhc_ose_cluster_hostname=hostname.com
+rhc_ose_cluster_public_hostname=public.example.com
+rhc_ose_cluster_hostname=public.example.com
 #rhc_ose_ssh_user=root
 #rhc_ose_identity_provider=htpasswd
 deployment_type=openshift-enterprise

@@ -1,0 +1,8 @@
+---
+  - name: "Creating DNS records"
+    template:
+      dest: "/tmp/records.yaml"
+      src: "./playbooks/templates/records.template.yaml"
+      force: yes
+    delegate_to: localhost
+

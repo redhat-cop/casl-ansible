@@ -59,6 +59,9 @@
   - name: "Include the generated views"
     include_vars: /tmp/named_views.yaml
     delegate_to: localhost
+  - name: "Generate dns records"
+    include: playbooks/dns_records.yaml
+    delegate_to: localhost
   - name: "Include generated dns records"
     include_vars: /tmp/records.yaml
     delegate_to: localhost
