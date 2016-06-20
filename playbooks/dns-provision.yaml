@@ -7,7 +7,7 @@
     - role: openstack-create
       type: "dns"
       key_name: "{{ openstack_key_name }}"
-      image_name: "_OS1_rhel-guest-image-7.2-20151102.0.x86_64.qcow2"
+      image_name: "{{ openshift_openstack_image_name }}"
       flavor_name: "m1.small"
       security_groups: "dns,default"
       register_host_group: "dns"
