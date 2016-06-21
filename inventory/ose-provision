@@ -1,3 +1,7 @@
+# This is the "default" inventory file for a "Single Master and Multiple Nodes" Inventory File
+# Check out the install docs for more details - under "single-master"
+#
+
 [all:vars]
 
 # Enter the security key to provision new OpenStack instances
@@ -41,9 +45,6 @@ public_dns_forwarder="8.8.8.8"
 # openshift_ansible_path='/root/repository/openshift-ansible/'
 
 rhc_ose_inv_dest=.
-rhc_ose_cluster_method=native
-rhc_ose_cluster_public_hostname=public.hostname.com
-rhc_ose_cluster_hostname=hostname.com
 #rhc_ose_ssh_user=root
 #rhc_ose_identity_provider=htpasswd
 deployment_type=openshift-enterprise
@@ -66,4 +67,3 @@ openshift_hosted_metrics_storage_volume_name=metrics             #Metrics volume
 openshift_hosted_metrics_storage_volume_size=10Gi                #Metrics volume size
 openshift_hosted_metrics_storage_nfs_options="*(rw,root_squash)" #NFS options for configured exports. |
 
-# ... more to come here soon ...
