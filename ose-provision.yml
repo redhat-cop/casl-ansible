@@ -49,7 +49,7 @@
 
 - hosts: all:!localhost
   roles:
-    - role: subscription-manager
+    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
 
 - hosts: dns
   pre_tasks:
