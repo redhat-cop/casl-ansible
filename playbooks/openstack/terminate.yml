@@ -1,0 +1,183 @@
+---
+# Use this to delete all OpenStack instances and their attached volumes matching a specified 'env_id'. 
+#
+# Call it as such:
+#
+#            ansible-playbook terminate.yml -e "env_id=testenv1"
+
+- hosts: localhost
+  gather_facts: false
+  vars:
+    ansible_ssh_user: root
+    max_instances: 6
+    min_env_id_length: 8
+    really_really_sure: false
+    dry_run: false
+    uuid_regex: "[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}"
+    newline: "\n"
+  tasks:
+
+  - name: "Set 'env_id' to 'uuid_regex' if override requested"
+    set_fact:
+      env_id: "{{ uuid_regex }}"
+    when:
+      - env_id is not defined or env_id is none or env_id|trim == ''
+      - really_really_sure
+
+  - name: "Verify environment ID was set"
+    fail:
+      msg: "No 'env_id' set, refusing to delete all instances and volumes, please provide a string to match via 'env_id'. Override with 'really_really_sure=true'"
+    when: 
+      - env_id is not defined or env_id is none or env_id|trim == ''
+      - not really_really_sure
+
+  - name: "Verify environment ID is of sufficient length"
+    fail:
+      msg: "'env_id' is too short at only '{{ env_id|length }}' characters, risk of deleting too many instances. Override 'min_env_id_length' or with 'really_really_sure=true'"
+    when: 
+      - env_id|length < min_env_id_length|int
+      - not really_really_sure
+
+  - name: "Verify connectivity to OpenStack"
+    command: "nova credentials"
+    register: nova_result
+    failed_when: nova_result.rc != 0
+
+  - name: "Determine number of matching instances"
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $2}' | sed ':a;N;$!ba;s/\n/, /g'
+    register: instances_to_delete
+
+  - name: "Set instance count fact"
+    set_fact:
+      instance_count: "{{ instances_to_delete.stdout.split(', ')|length }}"
+
+  - name: "Fix count if list is empty"
+    # Python counts an empty list as length 1, so fixing it if so
+    set_fact:
+      instance_count: 0
+    when:
+      - instances_to_delete.stdout.split(', ').0|trim == ''
+
+  - name: "Determine if there are matching instances"
+    fail:
+      msg: "'{{ env_id }}' does not match any instances."
+    when:
+      - instance_count == 0
+      - not really_really_sure
+
+  - name: "Verify environment ID does not match too many instances"
+    fail:
+      msg: "'{{ env_id }}' matches {{ instance_count|int }} instances, risk of deleting too many instances. Override 'max_instances' or with 'really_really_sure=true'"
+    when: 
+      - instance_count|int > max_instances|int
+      - not really_really_sure
+
+  - name: "Determine instance names to delete"
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $4}' | sed ':a;N;$!ba;s/\n/, /g'
+    register: names_to_delete
+
+  - name: "Determine list of public IPs"
+    shell: nova list | grep -E "{{ env_id }}" | awk '{print $13}' | sed ':a;N;$!ba;s/\n/, /g'
+    register: ips_to_delete
+
+  - name: "Determine list of volumes"
+    shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova volume-list | awk "/${instance}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
+    register: volumes_to_delete
+
+  - name: "Determine images used in instances"
+    shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova show ${instance} | awk "/image/"'{print $4}'; done | sed ':a;N;$!ba;s/\n/, /g'
+    register: images_to_delete
+
+  - name: "Initialize image fact to first image found"
+    set_fact:
+      image: "{{ images_to_delete.stdout.split(', ').0 }}"
+
+  - name: "Determine if any instance uses a different image"
+    set_fact:
+      images_differ: true
+    when: "'{{ item }}' != image"
+    with_items: images_to_delete.stdout.split(', ')
+
+  - name: "Warn if images are not unique"
+    pause:
+      prompt: "{{ newline }}
+WARNING! Images used for matching instances are not unique. It is possible that different users are required for SSH based on the image used. This can lead to some termination tasks such as subscription-manager not being executed successfully. It is recommended that each environment is deleted in batches of matching images.{{ newline }}
+Proceed with caution.{{ newline }}{{ newline }}
+[Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
+Press ENTER to continue or CTRL+c to cancel"
+    when: images_differ is defined
+
+  - name: "Build a group containing instance IPs"
+    add_host:
+      hostname: "{{ item }}"
+      ansible_ssh_host: "{{ item }}"
+      ansible_ssh_user: "{{ ansible_ssh_user }}"
+      groups: instance_ips
+    with_items: "ips_to_delete.stdout.split(', ')"
+
+  - name: "Pause for confirmation on normal run."
+    pause:
+      prompt: "{{ newline }}
+WARNING! About to delete the following {{ instance_count|int }} instances and attached volumes{{':'}}{{ newline }}{{ newline }}
+[Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
+Press ENTER to delete these or CTRL+c to cancel"
+    when: not dry_run
+
+  - name: "Pause for confirmation on dry run."
+    pause:
+      prompt: "{{ newline }}
+NOTE{{':'}} A normal run would delete the following {{ instance_count|int }} instances and attached volumes{{':'}}{{ newline }}{{ newline }}
+[Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
+Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
+    when: dry_run
+
+- hosts: instance_ips
+  gather_facts: false
+  vars:
+    ansible_sudo: true
+    dry_run: false
+  tasks:
+
+  - debug:
+      var: hostvars[inventory_hostname]
+    when: dry_run
+
+  - name: "Attempt to unregister from Subscription Manager"
+    command: "subscription-manager unregister"
+    ignore_errors: yes
+    when: not dry_run
+
+- hosts: localhost
+  gather_facts: false
+  vars:
+    dry_run: false
+  tasks:
+
+  - name: "Delete instance"
+    command: "nova delete {{ item }}"
+    ignore_errors: yes
+    with_items: "instances_to_delete.stdout.split(', ')"
+    when: not dry_run
+
+  - name: "Wait for instance delete and volume detach"
+    shell: nova volume-list | awk "/{{ item }}/"'{ print $4 }'
+    register: volume_check
+    until: volume_check.stdout != "in-use"
+    retries: 5
+    delay: 10
+    with_items: "volumes_to_delete.stdout.split(', ')"
+    when: not dry_run
+
+  - name: "Delete volume"
+    command: "nova volume-delete {{ item }}"
+    ignore_errors: yes
+    with_items: "volumes_to_delete.stdout.split(', ')"
+    when: not dry_run

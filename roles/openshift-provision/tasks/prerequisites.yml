@@ -16,7 +16,7 @@
     - atomic-openshift-utils
     - vim-enhanced
 
-- name: "Update all packages (this can take a very log time)"
+- name: "Update all packages (this can take a very long time)"
   yum:
     name: "*"
     state: latest
