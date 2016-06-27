@@ -10,7 +10,7 @@ provision() {
   ansible-playbook ${ANSIBLE_OPTS} ${SCRIPT_BASE_DIR}/ose-provision.yml || error_out "Provisioning Failed." 1
 
   # Grab newly create inventory file
-  openshift_inventory=$(find . -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
+  openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
   [ -f "${openshift_inventory}" ] || error_out "No inventory file has been written at location: '${openshift_inventory}'" 1
 
   # Run the OpenShift Installer
