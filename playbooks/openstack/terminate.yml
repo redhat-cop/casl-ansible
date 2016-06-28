@@ -76,9 +76,29 @@
     shell: nova list | grep -E "{{ env_id }}" | awk '{print $4}' | sed ':a;N;$!ba;s/\n/, /g'
     register: names_to_delete
 
+  - name: "Query Neutron services"
+    command: neutron agent-list
+    register: neutron
+    ignore_errors: true
+
+  - name: "Check for Neutron services - (a failure assumes Legacy Networking (Nova Network)"
+    set_fact:
+      neutron_in_use: true
+    when: neutron.rc == 0
+
   - name: "Determine list of public IPs"
     shell: nova list | grep -E "{{ env_id }}" | awk '{print $13}' | sed ':a;N;$!ba;s/\n/, /g'
     register: ips_to_delete
+
+  - name: "Determine list of Neutron Floating IP IDs to delete"
+    shell: for floatingip in $(echo {{ ips_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read ip; do echo ${ip}; done); do neutron floatingip-list | awk "/${floatingip}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
+    register: floatingips_to_delete
+    when: neutron_in_use is defined
+
+  - debug:
+      var:
+        floatingips_to_delete
+    when: dry_run
 
   - name: "Determine list of volumes"
     shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova volume-list | awk "/${instance}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
@@ -97,6 +117,12 @@
       images_differ: true
     when: "'{{ item }}' != image"
     with_items: images_to_delete.stdout.split(', ')
+
+  - name: "Set Neutron Port ID fact"
+    set_fact:
+      floatingips_to_delete:
+        stdout: "Neutron not in use"
+    when: neutron_in_use is undefined
 
   - name: "Warn if images are not unique"
     pause:
@@ -122,6 +148,7 @@ WARNING! About to delete the following {{ instance_count|int }} instances and at
 [Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Floating IP IDs]{{':'}} '{{ floatingips_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
 Press ENTER to delete these or CTRL+c to cancel"
@@ -134,6 +161,7 @@ NOTE{{':'}} A normal run would delete the following {{ instance_count|int }} ins
 [Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
+[Floating IP IDs]{{':'}} '{{ floatingips_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
 Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
@@ -181,3 +209,14 @@ Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
     ignore_errors: yes
     with_items: "volumes_to_delete.stdout.split(', ')"
     when: not dry_run
+
+  - name: "Release Neutron Floating IP"
+    command: "neutron floatingip-delete {{ item }}"
+    ignore_errors: yes
+    with_items: "floatingips_to_delete.stdout.split(', ')"
+    when:
+      - not dry_run
+      - neutron_in_use is defined
+      - item is defined
+      - item is not none
+      - item|trim != ''
