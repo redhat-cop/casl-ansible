@@ -1,0 +1,12 @@
+openshift_registry_project: "default"
+docker_registry_dc_name: "docker-registry"
+registry_certificate: ""
+registry_key: ""
+registry_ca: "/etc/origin/master/ca.crt"
+registry_serviceaccount: "registry"
+registry-secret-name: "registry-secret"
+openshift: 
+   common:
+     client_binary: "oc"
+     admin_binary: "oadm"
+openshift.common.admin_binary: "oadm" 

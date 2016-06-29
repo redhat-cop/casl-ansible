@@ -1,0 +1,164 @@
+---
+
+  - name: "Check that Openshift Docker Registry exists"
+    command: "{{ openshift.common.client_binary }} get deploymentConfig {{ registry_dc }} -n {{ openshift_registry_project }}"
+    register: registry_exists
+    delegate_to: "{{ groups['masters'][0] }}"
+    run_once: true
+
+  - name: "fail"
+    fail: msg="No docker registry found in project default"
+    when: registry_exists.rc != 0
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "fail"
+    fail: msg="Both registry_certificate and registry_key must be set, or neither"
+    when: (registry_certificate == "" and registry_key != "") or (registry_certificate != "" and registry_key == "")
+    delegate_to: "{{ groups['masters'][0] }}"
+    run_once: true
+
+  - name: "Collect registry service info"
+    command: "{{ openshift.common.client_binary}} get service {{ docker_registry_dc_name}} -n {{ openshift_registry_project }} -o yaml"
+    register: registry_svc_info
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - set_fact:
+      registry_svc_ip: "{{ (registry_svc_info.stdout | from_yaml).spec.clusterIP }}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - set_fact:
+      registry_svc_ports: ["{{item.port}}"]
+    with_items: "{{ (registry_svc_info.stdout | from_yaml).spec.ports}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Creating certificate..."
+    command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
+        --signer-key=/etc/origin/master/ca.key \
+        --signer-serial=/etc/origin/master/ca.serial.txt \
+        --hostnames='docker-registry.default.svc.cluster.local,{{registry_svc_ip}}' \
+        --cert=/etc/secrets/registry.crt \
+        --key=/etc/secrets/registry.key"
+    when: registry_certificate == "" and registry_key == ""
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+    register: cert_created
+
+  - set_fact:
+      registry_certificate: '/etc/secrets/registry.crt'
+    when: registry_certificate == "" and registry_key == ""
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - set_fact:
+      registry_key: '/etc/secrets/registry.key'
+    when: registry_certificate == "/etc/secrets/registry.crt" and registry_key == ""
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - set_fact:
+      registry_ca: '/etc/origin/master/ca.crt'
+    when: registry_ca == ""
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Cleaning up any previous attempts"
+    command: "{{openshift.common.client_binary}} delete secrets {{registry_secret_name}} -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+    register: cleanup
+    failed_when: cleanup.rc != 0 and cleanup.rc != 1
+
+  - name: "Creating registry secret"
+    command: "{{openshift.common.client_binary}} secrets new {{registry_secret_name}} {{registry_certificate}} {{registry_key}} -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Adding secrets to registry's service account"
+    command: "{{openshift.common.client_binary}} secrets add serviceaccounts/{{registry_serviceaccount}} secrets/{{registry_secret_name}} -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Adding secrets to default account"
+    command: "{{openshift.common.client_binary}} secrets add serviceaccounts/default secrets/{{registry_secret_name}} -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Ceanup any previous runs"
+    shell: "{{openshift.common.client_binary}} get deploymentConfig/{{registry_dc}} -o yaml | grep {{registry_secret_name}}"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+    register: dc_cleanup
+    failed_when: dc_cleanup.rc != 0  and dc_cleanup.rc != 1
+
+  - name: "Add secret volumes to registry deploymentConfiguration"
+    command: "{{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}} --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets --overwrite"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+    when: dc_cleanup.rc == 0
+    
+  - name: "Add secret volumes to registry deploymentConfiguration"
+    command: "{{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}} --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+    when: dc_cleanup.rc == 1
+
+  - name: "Enable TLS"
+    command: "{{openshift.common.client_binary}} env deploymentConfig/{{registry_dc}} REGISTRY_HTTP_TLS_CERTIFICATE={{registry_certificate}} REGISTRY_HTTP_TLS_KEY={{registry_key}} --overwrite"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Updating liveness probe to HTTPS scheme"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{liveness_patch}}'"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Updating readinessProbe to HTTPS scheme"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{readiness_patch}}'"
+    run_once: true
+    delegate_to: "{{ groups['masters'][0] }}"
+
+  - name: "Create registry certificates directory for serviceIP"
+    file: "state=directory path=/etc/docker/certs.d/{{registry_svc_ip}}:{{item}} mode=755"
+    with_items: "{{registry_svc_ports}}"
+
+  - name: "Create registry certificates directory for kubernetes service"
+    file: "state=directory path=/etc/docker/certs.d/{{registry_dc}}.default.svc.cluster.local:{{item}} mode=755"
+    with_items: "{{registry_svc_ports}}"
+
+  - name: "Copy registry cert to kubernetes service directory"
+    command: "scp {{registry_ca}} {{item[0]}}:/etc/docker/certs.d/{{registry_dc}}.default.svc.cluster.local:{{item[1]}}"
+    with_nested:
+      - "{{groups['nodes'][0]}}"
+      - "{{registry_svc_ports}}"
+    delegate_to: "{{groups['masters'][0]}}"
+
+  - name: "Copy registry cert to serviceIP directory"
+    command: "scp {{registry_ca}} {{item[0]}}:/etc/docker/certs.d/{{registry_svc_ip}}:{{item[1]}}"
+    with_nested:
+      -  "{{groups['nodes'][0]}}"
+      -  "{{registry_svc_ports}}"
+    delegate_to: "{{groups['masters'][0]}}"
+  
+  - name: "Remove --insecure flag from /etc/sysconfig/docker"
+    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='--insecure-registry=172.30.0.0/16'"
+
+  - name: "Remove INSECURE_REGISTRY flag from /etc/sysconfig/docker"
+    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='INSECURE_REGISTRYy=\'*172.30.0.0/16\'' "
+
+  - name: "reload daemon"
+    command: "systemctl daemon-reload"
+
+  - pause: seconds=10
+
+  - name: "restart docker"
+    service: "name=docker state=restarted"
+
+#  - debug: msg="registry_svc_ports is equal to:{{registry_svc_ports}}"
+#  - debug: msg="registry_svc_ip is equal to:{{registry_svc_ip}}"
+
+
+#  - name: Prepare docker service info
