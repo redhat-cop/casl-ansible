@@ -7,7 +7,9 @@ source ${SCRIPT_BASE_DIR}/library/helpers
 
 provision() {
   # Run provision playbook to create the base environment
-  ansible-playbook ${ANSIBLE_OPTS} ${SCRIPT_BASE_DIR}/ose-provision.yml || error_out "Provisioning Failed." 1
+  command="ansible-playbook ${ANSIBLE_OPTS} ${SCRIPT_BASE_DIR}/ose-provision.yml"
+#  echo "${command}" && exit;
+  $command || error_out "Provisioning run failed: ${command}" 1
 
   # Grab newly create inventory file
   openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
@@ -50,6 +52,8 @@ do
   esac
 done
 
+INVENTORY_DEST=${SCRIPT_BASE_DIR}
+ANSIBLE_OPTS="${ANSIBLE_OPTS} -e rhc_ose_inv_dest=${INVENTORY_DEST}"
 INSTALLER_PATH=${INSTALLER_PATH:-'/usr/share/ansible/openshift-ansible'}
 
 provision
