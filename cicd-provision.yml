@@ -18,6 +18,18 @@
       volume_size: "{{ cicd_openstack_storage_size }}"
 
 - hosts: cicd
+  remote_user: "cloud-user"
+  vars:
+    ansible_ssh_user: cloud-user
+  tasks:
+  - name: "Enable direct root access"
+    shell: "cat ~/.ssh/authorized_keys | sudo tee /root/.ssh/authorized_keys >/dev/null"
+
+- hosts: cicd
+  roles:
+    - role: subscription-manager
+
+- hosts: cicd
   roles:
   - cicd-common
   - cicd
