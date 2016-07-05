@@ -3,10 +3,35 @@
 # Enter the security key to provision new OpenStack instances
 openstack_key_name=""
 
+# Update the 'env_id' with a desirable name (optional)
+#env_id=""
+
 # The following variables can be used to override the defaults
 #cicd_storage_disk_volume=/dev/vdb
 #cicd_openstack_flavor_name="m1.medium"
 #cicd_openstack_security_groups="CI-CD"
-#cicd_openstack_image_name="ose3_1-base"
-#cicd_openstack_storage_size: 10
-#cicd_instance_count: 1
+#cicd_openstack_image_name="rhel-guest-image-7.2"
+#cicd_openstack_storage_size=10
+#cicd_instance_count=1
+
+
+# Subscription Manager Satellite hostname. If using a Satellite server, set the FQDN here. For RHSM Hosted this value must be blank, none or false.
+rhsm_satellite=''
+
+# Subscription Manager username and password. Required for RHSM Hosted. Can be optionally used for Satellite, but it may be better to use 'rhsm_activationkey' for this
+rhsm_username=''
+rhsm_password=''
+
+# Optional Subscription Manager Satellite Organization - required for Satellite, ignored if using RHSM Hosted
+rhsm_org=''
+
+# Optional Subscription Manager Satellite Activation Key, use this instead of 'rhsm_username' and 'rhsm_password' if using Satellite to provide repositories and authentication in one key
+rhsm_activationkey=''
+
+# Optional Subscription Manager pool, determine this by running 'subscription-manager list --available' on a registered system. Valid for RHSM Hosted or Satellite
+rhsm_pool=''
+
+# Optional Repositories to enable. If left blank it is expected that the 'rhsm_activationkey' will specify repos instead.  If populated, a 'subscription-manager repos --disable=*' will be run and each of the specified repos explicitly enabled. Valid for RHSM Hosted or Satellite
+# A better place for this is the group_vars/ to use proper yaml lists, but can be specified as such in inventory:
+rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.1-rpms", "rhel-7-server-extras-rpms"]'
+

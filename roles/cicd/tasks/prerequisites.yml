@@ -3,7 +3,7 @@
 - name: Installing Prerequisite Software
   yum: state=present name={{item}}
   with_items:
-  - http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+  - http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   - wget
   - firewalld
   - unzip
