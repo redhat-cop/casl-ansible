@@ -12,10 +12,10 @@ openstack_key_name=""
 #openshift_master_count=1
 #openshift_node_count=2
 #openshift_storage_disk_volume=/dev/vdb
-#openstack_flavor_name="m1.medium"
-openstack_image_name="_OS1_rhel-guest-image-7.2-20151102.0.x86_64.qcow2"
-#openshift_openstack_master_storage_size: 10
-#openshift_openstack_node_storage_size: 10
+#openshift_openstack_flavor_name="m1.medium"
+openshift_openstack_image_name="rhel-guest-image-7.2"
+#openshift_openstack_master_storage_size=10
+#openshift_openstack_node_storage_size=10
 
 # Subscription Manager Satellite hostname. If using a Satellite server, set the FQDN here. For RHSM Hosted this value must be blank, none or false.
 rhsm_satellite=''
