@@ -1,0 +1,5 @@
+[disconnected-git]
+# Enter Address of Server
+
+[disconnected-git:vars]
+git_user_authorized_keys='["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDH24TWdxAT8A5X+gbZHa3JgwGpGzx4VYRrvFaAcAKm0QrOYRdtO0+ioQFDkhUrzEOSIafNBeNxPhGl1AgH/cut4Nfr+i78q1cvglSuMx/Ac68/5LdLiyKd5zl2/DwshoKwotRhqm0ltURxEhWi0Ow6D+7OYbBQf7z2jbK8zFXcnQ== developer@redhat.com"]'
