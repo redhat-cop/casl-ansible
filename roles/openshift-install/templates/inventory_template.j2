@@ -17,6 +17,8 @@ lb
 ansible_ssh_user={{ ansible_ssh_user }}
 {% elif ansible_user is defined %}
 ansible_ssh_user={{ ansible_user }}
+{% else %}
+ansible_ssh_user=root
 {% endif %}
 {% if ansible_sudo is defined %}
 ansible_sudo={{ ansible_sudo }}
