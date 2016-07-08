@@ -10,6 +10,9 @@ etcd
 {% if groups['lb'] is defined %}
 lb
 {% endif %}
+{% if groups['nfs'] is defined %}
+nfs
+{% endif %}
 
 # Set variables common for all OSEv3 hosts
 [OSEv3:vars]
@@ -71,17 +74,25 @@ openshift_master_cluster_public_hostname={{ rhc_ose_cluster_public_hostname }}
 {% endfor %}
 {% endif %}
 
+{% if groups['nfs'] is defined %}
+# Specify load balancer host
+[nfs]
+{% for inv_nfs in groups['nfs'] %}
+{{ hostvars[inv_nfs]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_nfs]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_nfs]['ansible_hostname'] }}.{{dns_domain}}
+{% endfor %}
+{% endif %}
+
 # host group for nodes, includes region info
 [nodes]
 {% for inv_master in groups['masters'] %}
-{{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'type': 'master'}"
+{{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_master]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'region': 'master'}"
 {% endfor %}
 {% set counter = 0 %}
 {% for inv_node in groups['nodes'] %}
 {% if counter == 0%}
-{{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'type': 'infra'}"
+{{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'region': 'infra'}"
 {% else %}
-{{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'type': 'app'}"
+{{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_public_hostname={{ hostvars[inv_node]['ansible_hostname'] }}.{{dns_domain}} openshift_node_labels="{'region': 'app'}"
 {% endif %}
 {% set counter = counter + 1%}
 {% endfor -%}

@@ -6,36 +6,46 @@
   - include: roles/common/pre_tasks/pre_tasks.yml
   - include: roles/subscription-manager/pre_tasks/pre_tasks.yml
   roles:
-    - role: common
-    - role: openshift-common
-    # Provision Master
-    - role: openstack-create
-      type: "master"
-      image_name: "{{ openshift_openstack_image_name }}"
-      security_groups: "{{ openshift_openstack_master_security_groups }}"
-      key_name: "{{ openstack_key_name }}"
-      flavor_name: "{{ openshift_openstack_flavor_name }}"
-      register_host_group: "masters"
-      node_count: "{{ openshift_master_count }}"
-      disk_volume: "{{ openshift_storage_disk_volume }}"
-      volume_size: "{{ openshift_openstack_master_storage_size }}"
-    # Provision Nodes
-    - role: openstack-create
-      type: "node"
-      image_name: "{{ openshift_openstack_image_name }}"
-      security_groups: "{{ openshift_openstack_node_security_groups }}"
-      key_name: "{{ openstack_key_name }}"
-      flavor_name: "{{ openshift_openstack_flavor_name }}"
-      register_host_group: "nodes"
-      node_count: "{{ openshift_node_count }}"
-      disk_volume: "{{ openshift_storage_disk_volume }}"
-      volume_size: "{{ openshift_openstack_master_storage_size }}"
-
+  - role: common
+  - role: openshift-common
+  # Provision Master
+  - role: openstack-create
+    type: "master"
+    image_name: "{{ openshift_openstack_image_name }}"
+    security_groups: "{{ openshift_openstack_master_security_groups }}"
+    key_name: "{{ openstack_key_name }}"
+    flavor_name: "{{ openshift_openstack_flavor_name }}"
+    register_host_group: "masters,openshift"
+    node_count: "{{ openshift_master_count }}"
+    disk_volume: "{{ openshift_storage_disk_volume }}"
+    volume_size: "{{ openshift_openstack_master_storage_size }}"
+  # Provision Nodes
+  - role: openstack-create
+    type: "node"
+    image_name: "{{ openshift_openstack_image_name }}"
+    security_groups: "{{ openshift_openstack_node_security_groups }}"
+    key_name: "{{ openstack_key_name }}"
+    flavor_name: "{{ openshift_openstack_flavor_name }}"
+    register_host_group: "nodes,openshift"
+    node_count: "{{ openshift_node_count }}"
+    disk_volume: "{{ openshift_storage_disk_volume }}"
+    volume_size: "{{ openshift_openstack_master_storage_size }}"
+  # Provision NFS
+  - role: openstack-create
+    type: "nfs"
+    image_name: "{{ openshift_openstack_image_name }}"
+    security_groups: "default"
+    key_name: "{{ openstack_key_name }}"
+    flavor_name: "{{ openshift_openstack_flavor_name }}"
+    register_host_group: "nfs,openshift"
+    node_count: "1"
+    disk_volume: "{{ openshift_storage_disk_volume }}"
+    volume_size: "{{ openshift_openstack_master_storage_size }}"
     # Provision DNS
 
 - include: playbooks/dns-provision.yaml
 
-- hosts: dns:masters:nodes
+- hosts: openshift
   remote_user: "cloud-user"
   vars:
     ansible_ssh_user: cloud-user
@@ -78,7 +88,7 @@
 
 # Install and configure OpenShift
 
-- hosts: masters:nodes
+- hosts: openshift:!dns
   tasks:
   - name: "Edit /etc/resolv.conf on masters/nodes"
     lineinfile:
@@ -100,4 +110,3 @@
 - hosts: localhost
   roles:
     - openshift-install
-

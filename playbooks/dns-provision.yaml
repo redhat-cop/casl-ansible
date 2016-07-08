@@ -10,5 +10,5 @@
       image_name: "{{ openshift_openstack_image_name }}"
       flavor_name: "m1.small"
       security_groups: "dns,default"
-      register_host_group: "dns"
+      register_host_group: "dns,openshift"
       node_count: "1"
