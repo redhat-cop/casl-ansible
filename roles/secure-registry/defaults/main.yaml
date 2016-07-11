@@ -5,8 +5,9 @@ registry_key: ""
 registry_ca: "/etc/origin/master/ca.crt"
 registry_serviceaccount: "registry"
 registry-secret-name: "registry-secret"
-openshift: 
+openshift:
    common:
      client_binary: "oc"
      admin_binary: "oadm"
-openshift.common.admin_binary: "oadm" 
+openshift.common.admin_binary: "oadm"
+secure_registry_master_host: play_hosts[0]

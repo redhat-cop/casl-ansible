@@ -9,4 +9,4 @@
 #      registry_key: ""
       registry_serviceaccount: "registry"
       registry_secret_name: "registry-secret"
- 
+      secure_registry_master_host: master1.example.com
