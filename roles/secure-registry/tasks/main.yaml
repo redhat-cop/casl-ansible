@@ -2,8 +2,8 @@
 
   - name: "Check that Openshift Docker Registry exists"
     command: >
-      "{{ openshift.common.client_binary }} get deploymentConfig {{ registry_dc }}
-       -n {{ openshift_registry_project }}"
+      {{ openshift.common.client_binary }} get deploymentConfig {{ registry_dc }}
+       -n {{ openshift_registry_project }}
     register: registry_exists
     delegate_to: "{{ secure_registry_master_host }}"
     run_once: true
@@ -24,8 +24,8 @@
 
   - name: "Collect registry service info"
     command: >
-      "{{ openshift.common.client_binary}} get service {{ docker_registry_dc_name}}
-       -n {{ openshift_registry_project }} -o yaml"
+      {{ openshift.common.client_binary}} get service {{ docker_registry_dc_name}}
+       -n {{ openshift_registry_project }} -o yaml
     register: registry_svc_info
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
@@ -51,7 +51,8 @@
     when: registry_certificate == "" and registry_key == ""
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
-    creates: '/etc/secrets/registry.crt'
+    args:
+      creates: '/etc/secrets/registry.crt'
     register: cert_created
 
   - set_fact:
@@ -74,8 +75,8 @@
 
   - name: "Cleaning up any previous attempts"
     command: >
-      "{{openshift.common.client_binary}} delete secrets {{registry_secret_name}}
-       -n {{openshift_registry_project}}"
+      {{openshift.common.client_binary}} delete secrets {{registry_secret_name}}
+       -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
     register: cleanup
@@ -83,28 +84,28 @@
 
   - name: "Creating registry secret"
     command: >
-      "{{openshift.common.client_binary}} secrets new {{registry_secret_name}}
-       {{registry_certificate}} {{registry_key}} -n {{openshift_registry_project}}"
+      {{openshift.common.client_binary}} secrets new {{registry_secret_name}}
+       {{registry_certificate}} {{registry_key}} -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Adding secrets to registry's service account"
     command: >
-      "{{openshift.common.client_binary}} secrets add
+      {{openshift.common.client_binary}} secrets add
       serviceaccounts/{{registry_serviceaccount}} secrets/{{registry_secret_name}}
-       -n {{openshift_registry_project}}"
+       -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Adding secrets to default account"
     command: >
-      "{{openshift.common.client_binary}} secrets add serviceaccounts/default
-      secrets/{{registry_secret_name}} -n {{openshift_registry_project}}"
+      {{openshift.common.client_binary}} secrets add serviceaccounts/default
+      secrets/{{registry_secret_name}} -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Ceanup any previous runs"
-    shell: "{{openshift.common.client_binary}} get deploymentConfig/{{registry_dc}} -o yaml | grep {{registry_secret_name}}"
+    shell: "{{openshift.common.client_binary}} get deploymentConfig/{{registry_dc}} -n {{openshift_registry_project}} -o yaml | grep {{registry_secret_name}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
     register: dc_cleanup
@@ -112,36 +113,38 @@
 
   - name: "Add secret volumes to registry deploymentConfiguration"
     command: >
-      "{{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}}
-      --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets
-       --overwrite"
+      {{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}}
+      --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets 
+      --overwrite -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
     when: dc_cleanup.rc == 0
 
   - name: "Add secret volumes to registry deploymentConfiguration"
     command: >
-      "{{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}}
-       --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets"
+      {{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}}
+       --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets
+       -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
     when: dc_cleanup.rc == 1
 
   - name: "Enable TLS"
     command: >
-      "{{openshift.common.client_binary}} env deploymentConfig/{{registry_dc}}
+      {{openshift.common.client_binary}} env deploymentConfig/{{registry_dc}}
        REGISTRY_HTTP_TLS_CERTIFICATE={{registry_certificate}}
-        REGISTRY_HTTP_TLS_KEY={{registry_key}} --overwrite"
+        REGISTRY_HTTP_TLS_KEY={{registry_key}} --overwrite
+       -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Updating liveness probe to HTTPS scheme"
-    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{liveness_patch}}'"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{liveness_patch}}' -n {{openshift_registry_project}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Updating readinessProbe to HTTPS scheme"
-    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{readiness_patch}}'"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{readiness_patch}}' -n {{openshift_registry_project}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
@@ -166,22 +169,29 @@
       dest: "/etc/docker/certs.d/{{registry_dc}}.default.svc.cluster.local:{{item}}/ca.crt"
     with_items: "{{registry_svc_ports}}"
 
+  - name: "Copy registry CA cert to registry IP directory"
+    copy:
+      content: "{{ registry_ca_file.content | b64decode }}"
+      dest: "/etc/docker/certs.d/{{registry_svc_ip}}:{{item}}/ca.crt"
+    with_items: "{{registry_svc_ports}}"
+
+
   - name: "Remove --insecure flag from /etc/sysconfig/docker"
     lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='--insecure-registry=172.30.0.0/16'"
 
   - name: "Remove INSECURE_REGISTRY flag from /etc/sysconfig/docker"
     lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='INSECURE_REGISTRYy=\'*172.30.0.0/16\'' "
 
-  - name: "reload daemon"
+  - name: "Reload daemon"
     command: "systemctl daemon-reload"
 
-  - pause: seconds=10
-
-  - name: "restart docker"
+  - name: "Restart docker"
     service: "name=docker state=restarted"
 
-#  - debug: msg="registry_svc_ports is equal to:{{registry_svc_ports}}"
-#  - debug: msg="registry_svc_ip is equal to:{{registry_svc_ip}}"
+  - pause: seconds=5
 
+  - name: "Deploying Secured Registry"
+    command: "{{openshift.common.client_binary}} deploy --latest deploymentConfig/{{registry_dc}}  -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ secure_registry_master_host }}"
 
-#  - name: Prepare docker service info
