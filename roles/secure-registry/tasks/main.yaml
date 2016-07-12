@@ -8,15 +8,13 @@
     delegate_to: "{{ secure_registry_master_host }}"
     run_once: true
 
-  - name: "fail"
-    fail:
+  - fail:
       msg: "No docker registry found in project default"
     when: registry_exists.rc != 0
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
-  - name: "fail"
-    fail:
+  - fail:
       msg: "Both registry_certificate and registry_key must be set, or neither"
     when: (registry_certificate == "" and registry_key != "") or (registry_certificate != "" and registry_key == "")
     delegate_to: "{{ secure_registry_master_host }}"
@@ -40,6 +38,12 @@
     with_items: "{{ (registry_svc_info.stdout | from_yaml).spec.ports}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
+
+#  - name: "Check if registry is already secured"
+#    uri:
+#      url: "https://{{ registry_svc_ip }}:5000"
+#      method: "GET"
+      
 
   - name: "Creating certificate..."
     command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
@@ -180,7 +184,7 @@
     lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='--insecure-registry=172.30.0.0/16'"
 
   - name: "Remove INSECURE_REGISTRY flag from /etc/sysconfig/docker"
-    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='INSECURE_REGISTRYy=\'*172.30.0.0/16\'' "
+    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='INSECURE_REGISTRY=\'*172.30.0.0/16\'' "
 
   - name: "Reload daemon"
     command: "systemctl daemon-reload"
