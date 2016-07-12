@@ -28,6 +28,7 @@ usage() {
   echo "Options:"
   echo "  --inventory=<file>|-i=<file>                : Path to an ansible inventory file (defaults to /etc/ansible/hosts)"
   echo "  --installer-path=<directory>|-p=<directory> : Path to the openshift-ansible directory (/usr/share/ansible/openshift-ansible -- location atomic-openshift-utils install to)"
+  echo "  --extra-vars=<vars>|-e=<vars>               : Additional vars to pass to Ansible. String Format: 'my_var1=value1 my_var2=value2'"
   echo "  --help|-h                                   : Show help output"
 }
 
@@ -42,7 +43,7 @@ do
     --installer-path=*|-p=*)
       INSTALLER_PATH="${i#*=}"
       shift;;
-    --environment=*|-e=*)
+    --extra-vars=*|-e=*)
       ANSIBLE_ENVIRONMENT="-e \"${i#*=}\""
       shift;;
     --help|-h)
