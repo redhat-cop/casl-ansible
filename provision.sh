@@ -9,7 +9,7 @@ provision() {
   # Run provision playbook to create the base environment
   command="ansible-playbook ${ANSIBLE_OPTS} ${SCRIPT_BASE_DIR}/ose-provision.yml"
 #  echo "${command}" && exit;
-  $command || error_out "Provisioning run failed: ${command}" 1
+  eval "$command" || error_out "Provisioning run failed: ${command}" 1
 
   # Grab newly create inventory file
   openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
@@ -17,7 +17,7 @@ provision() {
 
   # Run the OpenShift Installer
   command="ansible-playbook -i ${openshift_inventory} ${INSTALLER_PATH}/playbooks/byo/config.yml "
-  $command || error_out "OpenShift Installer failed to run with: ${command}" 1
+  eval "$command" || error_out "OpenShift Installer failed to run with: ${command}" 1
 }
 
 usage() {
@@ -37,10 +37,13 @@ do
   case $i in
     --inventory=*|-i=*)
       INVENTORY_FILE="${i#*=}"
-      ANSIBLE_OPTS="-i ${INVENTORY_FILE}"
+      ANSIBLE_OPTS="${ANSIBLE_OPTS} -i ${INVENTORY_FILE}"
       shift;;
     --installer-path=*|-p=*)
       INSTALLER_PATH="${i#*=}"
+      shift;;
+    --environment=*|-e=*)
+      ANSIBLE_ENVIRONMENT="-e \"${i#*=}\""
       shift;;
     --help|-h)
       usage
@@ -53,7 +56,7 @@ do
 done
 
 INVENTORY_DEST=${SCRIPT_BASE_DIR}
-ANSIBLE_OPTS="${ANSIBLE_OPTS} -e rhc_ose_inv_dest=${INVENTORY_DEST}"
+ANSIBLE_OPTS="${ANSIBLE_OPTS} -e rhc_ose_inv_dest=${INVENTORY_DEST} ${ANSIBLE_ENVIRONMENT}"
 INSTALLER_PATH=${INSTALLER_PATH:-'/usr/share/ansible/openshift-ansible'}
 
 provision
