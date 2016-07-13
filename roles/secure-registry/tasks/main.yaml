@@ -39,11 +39,16 @@
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
 
-#  - name: "Check if registry is already secured"
-#    uri:
-#      url: "https://{{ registry_svc_ip }}:5000"
-#      method: "GET"
-      
+  - name: "Check if registry is already secured"
+    uri:
+      url: "https://{{ registry_svc_ip }}:5000"
+      method: "GET"
+      status_code: '200'
+      validate_certs: no
+    run_once: true
+    delegate_to: "{{ secure_registry_master_host }}"
+    register: secured
+    failed_when: secured.failed == false
 
   - name: "Creating certificate..."
     command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
@@ -181,10 +186,16 @@
 
 
   - name: "Remove --insecure flag from /etc/sysconfig/docker"
-    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='--insecure-registry=172.30.0.0/16'"
+    lineinfile: 
+      dest: /etc/sysconfig/docker 
+      state: absent
+      regexp: '--insecure-registry=.*172\.30\.0\.0/16'
 
   - name: "Remove INSECURE_REGISTRY flag from /etc/sysconfig/docker"
-    lineinfile: "dest=/etc/sysconfig/docker state=absent regexp='INSECURE_REGISTRY=\'*172.30.0.0/16\'' "
+    lineinfile: 
+      dest: /etc/sysconfig/docker 
+      state: absent 
+      regexp: 'INSECURE_REGISTRY=\"--insecure-registry 172\.30\.0\.0/16\"'
 
   - name: "Reload daemon"
     command: "systemctl daemon-reload"

@@ -22,7 +22,6 @@
       run_once: true
       delegate_to: "{{ secure_registry_master_host }}"
 
-    - debug: var=registry_svc_ip
     - set_fact:
         registry_svc_ports: ["{{item.port}}"]
       with_items: "{{ (registry_svc_info.stdout | from_yaml).spec.ports}}"
@@ -55,7 +54,7 @@
       lineinfile: 
         dest: /etc/sysconfig/docker 
         state: present 
-        regexp: "INSECURE_REGISTRY='--insecure-registry 172.30.0.0/16'"
+        regexp: 'INSECURE_REGISTRY=.*172\.30\.0\.0/16.*'
         line:   "INSECURE_REGISTRY=\'--insecure-registry 172.30.0.0/16\'"
 
     - name: "Restart docker"
