@@ -15,7 +15,7 @@
   lineinfile:
     dest: /etc/sysconfig/docker
     regexp: '^OPTIONS=.*$'
-    line: "^OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
+    line: "OPTIONS='--selinux-enabled --insecure-registry 172.30.0.0/16'"
 
 - name: "Check for existing Docker Storage device"
   command: pvs
