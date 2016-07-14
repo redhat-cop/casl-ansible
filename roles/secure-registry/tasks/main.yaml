@@ -50,6 +50,8 @@
     register: secured
     failed_when: secured.failed == false
 
+  - debug: var=openshift_version
+
   - name: "Creating certificate..."
     command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
         --signer-key=/etc/origin/master/ca.key \
@@ -156,6 +158,7 @@
     command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{readiness_patch}}' -n {{openshift_registry_project}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
+    when: "{{openshift.common.version_gte_3_2_or_1_2}}"
 
   - name: "Create registry certificates directory for serviceIP"
     file: "state=directory path=/etc/docker/certs.d/{{registry_svc_ip}}:{{item}} mode=755"
