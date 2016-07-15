@@ -48,9 +48,17 @@
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
     register: secured
-    failed_when: secured.failed == false
+    failed_when: false
 
-  - debug: var=openshift_version
+  - debug: var=secured
+    run_once: true
+    delegate_to: "{{ secure_registry_master_host }}"
+
+  - fail:
+      msg: "The registry is already secured"
+    when: secured.status == 200
+    run_once: true
+    delegate_to: "{{ secure_registry_master_host }}"
 
   - name: "Creating certificate..."
     command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
