@@ -1,0 +1,7 @@
+liveness_patch: '{"spec": {"template": {"spec": {"containers":[{"name":"registry","livenessProbe":  {"httpGet": {"scheme":"HTTPS"}}}]}}}}'
+
+readiness_patch: '{"spec": {"template": {"spec": {"containers":[{"name":"registry","readinessProbe":  {"httpGet": {"scheme":"HTTPS"}}}]}}}}'
+
+registry_trigger_disable: '{"spec":{"triggers":[]}}'
+
+registry_trigger_enable: '{"spec":{"triggers":[{"type": "ConfigChange"}]}}'
