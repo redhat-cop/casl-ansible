@@ -9,7 +9,7 @@ provision() {
   # Run provision playbook to create the base environment
   command="ansible-playbook ${ANSIBLE_OPTS} ${SCRIPT_BASE_DIR}/ose-provision.yml"
 #  echo "${command}" && exit;
-  $command || error_out "Provisioning run failed: ${command}" 1
+  eval "$command" || error_out "Provisioning run failed: ${command}" 1
 
   # Grab newly create inventory file
   openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
@@ -17,7 +17,7 @@ provision() {
 
   # Run the OpenShift Installer
   command="ansible-playbook -i ${openshift_inventory} ${INSTALLER_PATH}/playbooks/byo/config.yml "
-  $command || error_out "OpenShift Installer failed to run with: ${command}" 1
+  eval "$command" || error_out "OpenShift Installer failed to run with: ${command}" 1
 }
 
 usage() {
@@ -28,6 +28,7 @@ usage() {
   echo "Options:"
   echo "  --inventory=<file>|-i=<file>                : Path to an ansible inventory file (defaults to /etc/ansible/hosts)"
   echo "  --installer-path=<directory>|-p=<directory> : Path to the openshift-ansible directory (/usr/share/ansible/openshift-ansible -- location atomic-openshift-utils install to)"
+  echo "  --extra-vars=<vars>|-e=<vars>               : Additional vars to pass to Ansible. String Format: 'my_var1=value1 my_var2=value2'"
   echo "  --help|-h                                   : Show help output"
 }
 
@@ -37,10 +38,13 @@ do
   case $i in
     --inventory=*|-i=*)
       INVENTORY_FILE="${i#*=}"
-      ANSIBLE_OPTS="-i ${INVENTORY_FILE}"
+      ANSIBLE_OPTS="${ANSIBLE_OPTS} -i ${INVENTORY_FILE}"
       shift;;
     --installer-path=*|-p=*)
       INSTALLER_PATH="${i#*=}"
+      shift;;
+    --extra-vars=*|-e=*)
+      ANSIBLE_ENVIRONMENT="-e \"${i#*=}\""
       shift;;
     --help|-h)
       usage
@@ -53,7 +57,7 @@ do
 done
 
 INVENTORY_DEST=${SCRIPT_BASE_DIR}
-ANSIBLE_OPTS="${ANSIBLE_OPTS} -e rhc_ose_inv_dest=${INVENTORY_DEST}"
+ANSIBLE_OPTS="${ANSIBLE_OPTS} -e rhc_ose_inv_dest=${INVENTORY_DEST} ${ANSIBLE_ENVIRONMENT}"
 INSTALLER_PATH=${INSTALLER_PATH:-'/usr/share/ansible/openshift-ansible'}
 
 provision
