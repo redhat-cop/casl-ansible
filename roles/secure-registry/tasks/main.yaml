@@ -53,9 +53,9 @@
   - debug: var=openshift_version
 
   - name: "Creating certificate..."
-    command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert=/etc/origin/master/ca.crt \
-        --signer-key=/etc/origin/master/ca.key \
-        --signer-serial=/etc/origin/master/ca.serial.txt \
+    command: "{{ openshift.common.admin_binary}} ca create-server-cert --signer-cert={{ openshift_master_config_dir }}/ca.crt \
+        --signer-key={{ openshift_master_config_dir }}/ca.key \
+        --signer-serial={{ openshift_master_config_dir }}/ca.serial.txt \
         --hostnames='docker-registry.default.svc.cluster.local,{{registry_svc_ip}}' \
         --cert=/etc/secrets/registry.crt \
         --key=/etc/secrets/registry.key"
@@ -125,7 +125,7 @@
   - name: "Add secret volumes to registry deploymentConfiguration"
     command: >
       {{openshift.common.client_binary}} volume deploymentConfig/{{registry_dc}}
-      --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets 
+      --add --type=secret --secret-name={{registry_secret_name}} -m /etc/secrets
       --overwrite -n {{openshift_registry_project}}
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
@@ -189,15 +189,15 @@
 
 
   - name: "Remove --insecure flag from /etc/sysconfig/docker"
-    lineinfile: 
-      dest: /etc/sysconfig/docker 
+    lineinfile:
+      dest: /etc/sysconfig/docker
       state: absent
       regexp: '--insecure-registry=.*172\.30\.0\.0/16'
 
   - name: "Remove INSECURE_REGISTRY flag from /etc/sysconfig/docker"
-    lineinfile: 
-      dest: /etc/sysconfig/docker 
-      state: absent 
+    lineinfile:
+      dest: /etc/sysconfig/docker
+      state: absent
       regexp: 'INSECURE_REGISTRY=\"--insecure-registry 172\.30\.0\.0/16\"'
 
   - name: "Reload daemon"
@@ -212,4 +212,3 @@
     command: "{{openshift.common.client_binary}} deploy --latest deploymentConfig/{{registry_dc}}  -n {{openshift_registry_project}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
-
