@@ -50,10 +50,6 @@
     register: secured
     failed_when: false
 
-  - debug: var=secured
-    run_once: true
-    delegate_to: "{{ secure_registry_master_host }}"
-
   - fail:
       msg: "The registry is already secured"
     when: secured.status == 200
@@ -129,6 +125,13 @@
     delegate_to: "{{ secure_registry_master_host }}"
     register: dc_cleanup
     failed_when: dc_cleanup.rc != 0  and dc_cleanup.rc != 1
+
+
+  - name: "Disable DeploymentConfig change triggger"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{registry_trigger_disable}}' -n {{openshift_registry_project}}"
+    run_once: true
+    delegate_to: "{{ secure_registry_master_host }}"
+
 
   - name: "Add secret volumes to registry deploymentConfiguration"
     command: >
@@ -214,10 +217,13 @@
   - name: "Restart docker"
     service: "name=docker state=restarted"
 
-  - pause: seconds=5
-
-  - name: "Deploying Secured Registry"
-    command: "{{openshift.common.client_binary}} deploy --latest deploymentConfig/{{registry_dc}}  -n {{openshift_registry_project}}"
+  - name: "Re-enable DeploymentConfig change triggger"
+    command: "{{openshift.common.client_binary}} patch deploymentConfig/{{registry_dc}} --api-version=v1 -p '{{registry_trigger_enable}}' -n {{openshift_registry_project}}"
     run_once: true
     delegate_to: "{{ secure_registry_master_host }}"
+
+#  - name: "Deploying Secured Registry"
+#    command: "{{openshift.common.client_binary}} deploy --latest deploymentConfig/{{registry_dc}}  -n {{openshift_registry_project}}"
+#    run_once: true
+#    delegate_to: "{{ secure_registry_master_host }}"
 
