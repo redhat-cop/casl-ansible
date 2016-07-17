@@ -18,6 +18,10 @@ provision() {
   # Run the OpenShift Installer
   command="ansible-playbook -i ${openshift_inventory} ${INSTALLER_PATH}/playbooks/byo/config.yml "
   eval "$command" || error_out "OpenShift Installer failed to run with: ${command}" 1
+
+  # Post Install Configuration
+  command="ansible-playbook -i ${openshift_inventory} ${SCRIPT_BASE_DIR}/playbooks/openshift/post-install.yaml"
+  eval "$command" || error_out "Post Install failed to run with: ${command}" 1
 }
 
 usage() {

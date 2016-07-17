@@ -1,0 +1,6 @@
+---
+- name: "Push Administrator's SSH Keys"
+  authorized_key:
+    user: "{{ ansible_ssh_user }}"
+    key: "{{ key_url }}"
+  when: key_url is defined and key_url != ""
