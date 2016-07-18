@@ -12,7 +12,7 @@ provision() {
   eval "$command" || error_out "Provisioning run failed: ${command}" 1
 
   # Grab newly create inventory file
-  openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' | sort | tail -n 1)
+  openshift_inventory=$(find ${SCRIPT_BASE_DIR} -maxdepth 1 -name 'inventory_*' -type f -printf '%Ts\t%p\n' | sort -nr | cut -f2 | head -n1)
   [ -f "${openshift_inventory}" ] || error_out "No inventory file has been written at location: '${openshift_inventory}'" 1
 
   # Run the OpenShift Installer

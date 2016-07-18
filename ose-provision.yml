@@ -29,7 +29,7 @@
     register_host_group: "nodes,openshift"
     node_count: "{{ openshift_node_count }}"
     disk_volume: "{{ openshift_storage_disk_volume }}"
-    volume_size: "{{ openshift_openstack_master_storage_size }}"
+    volume_size: "{{ openshift_openstack_node_storage_size }}"
   # Provision NFS
   - role: openstack-create
     type: "nfs"
