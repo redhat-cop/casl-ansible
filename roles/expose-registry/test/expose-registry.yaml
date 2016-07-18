@@ -5,4 +5,3 @@
       openshift_registry_project: "default"
       registry_dc: "docker-registry"
       router_rc: "router"
-      registry_hostname: "registry.apps.example.com"
