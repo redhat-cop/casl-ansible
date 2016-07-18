@@ -1,0 +1,68 @@
+---
+- hosts: masters:nodes
+  vars:
+    openshift_registry_project: "default"
+    registry_dc: "docker-registry"
+#    registry_certificate: ""
+#    registry_key: ""
+    registry_serviceaccount: "registry"
+    registry_secret_name: "registry-secret"
+    secure_registry_master_host: "{{play_hosts[0] }}"
+  tasks:
+    - name: "Collect registry service info"
+      command: >
+        oc get service {{ registry_dc}}
+         -n {{ openshift_registry_project }} -o yaml
+      register: registry_svc_info
+      run_once: true
+      delegate_to: "{{ secure_registry_master_host }}"
+
+    - set_fact:
+        registry_svc_ip: "{{ (registry_svc_info.stdout | from_yaml).spec.clusterIP }}"
+      run_once: true
+      delegate_to: "{{ secure_registry_master_host }}"
+
+    - set_fact:
+        registry_svc_ports: ["{{item.port}}"]
+      with_items: "{{ (registry_svc_info.stdout | from_yaml).spec.ports}}"
+      run_once: true
+      delegate_to: "{{ secure_registry_master_host }}"
+
+    - name: "Cleanup certs"
+      file: 
+        path: "/etc/docker/certs.d/{{registry_dc}}.default.svc.cluster.local:{{item}}/ca.crt"
+        state: absent
+      with_items: "{{registry_svc_ports}}"
+
+    - name: "Cleanup certs"
+      file: 
+        state: absent
+        path: "/etc/docker/certs.d/{{registry_svc_ip}}:{{item}}/ca.crt"
+      with_items: "{{registry_svc_ports}}"
+
+    - name: "Cleanup generated certs"
+      file:
+        state: absent
+        path: /etc/secrets/registry.crt
+
+    - name: "Cleanup generated keys"
+      file:
+        state: absent
+        path: /etc/secrets/registry.key
+
+    - name: "Add INSECURE_REGISTRY flag from /etc/sysconfig/docker"
+      lineinfile: 
+        dest: /etc/sysconfig/docker 
+        state: present 
+        regexp: 'INSECURE_REGISTRY=.*172\.30\.0\.0/16.*'
+        line:   "INSECURE_REGISTRY=\'--insecure-registry 172.30.0.0/16\'"
+
+    - name: "Restart docker"
+      service:
+        name: docker
+        state: restarted
+
+    - name: "Remove secret"
+      command: oc delete --ignore-not-found secret {{ registry_secret_name }} -n {{openshift_registry_project}}
+      run_once: yes
+      delegate_to: "{{ secure_registry_master_host }}"
