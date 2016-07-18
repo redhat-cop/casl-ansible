@@ -1,0 +1,72 @@
+---
+- name: "Check that Openshift Docker Registry exists"
+  command: >
+    {{ openshift.common.client_binary }} get deploymentConfig {{ registry_dc }}
+     -n {{ openshift_registry_project }}
+  register: registry_exists
+
+- fail:
+    msg: "No docker registry found"
+  when: registry_exists.rc != 0
+
+- name: "Check that Openshift router exists"
+  command: >
+    {{ openshift.common.client_binary }} get deploymentConfig {{ router_dc }}
+     -n {{ openshift_router_project }}
+  register: router_exists
+
+- fail:
+    msg: "No router found"
+  when: router_exists.rc != 0
+
+- name: "Collect registry service info"
+  command: >
+    {{ openshift.common.client_binary}} get service {{ registry_dc }}
+     -n {{ openshift_registry_project }} -o yaml
+  register: registry_svc_info
+
+- set_fact:
+    registry_svc_ip: "{{ (registry_svc_info.stdout | from_yaml).spec.clusterIP }}"
+
+
+- name: "Check if registry is already secured"
+  uri:
+    url: "https://{{ registry_svc_ip }}:5000"
+    method: "GET"
+    status_code: '200'
+    validate_certs: no
+  register: secured
+  failed_when: false
+
+- fail:
+    msg: "The registry has not been secured."
+  when: secured.status != 200
+
+- name: "Check if registry is already exposed"
+  command: >
+    {{openshift.common.client_binary}} get routes {{registry_dc}} -n {{openshift_registry_project}}
+  register: already_exposed
+  failed_when: false
+
+- fail:
+    msg: "Docker registry is already exposed"
+  when: already_exposed.rc == 0
+
+- fail:
+    msg: "Variable 'registry_hostname' has not been defined."
+  when: registry_hostname == '' or registry_hostname is not defined
+
+- name: "Create route"
+  command: >
+   {{ openshift.common.client_binary }} create route passthrough
+   --service={{registry_dc}}
+   --hostname={{registry_hostname}}
+   -n {{ openshift_registry_project }}
+  when: "{{openshift.common.version_gte_3_2_or_1_2 | bool}}"
+
+- name: "Create route"
+  command: >
+   {{ openshift.common.client_binary }} expose service/{{registry_dc}}
+   --hostname={{registry_hostname}}
+   -n {{ openshift_registry_project }}
+  when: "{{not openshift.common.version_gte_3_2_or_1_2 | bool}}"
