@@ -1,1 +1,4 @@
 ---
+default_security_groups:
+  - name: default
+    rules: []

@@ -4,6 +4,8 @@
   when: 
   - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined 
 
+- include: security_groups.yml
+
 - name: "Search for valid OpenStack Flavor"
   shell: "nova flavor-list | awk \"/{{flavor_name }}/\"'{print $2}'"
   register: flavor_query
@@ -37,7 +39,7 @@
     image_name: "{{ image_name }}"
     flavor_id: "{{ flavor_id }}"
     key_name: "{{ key_name }}"
-    security_groups: "{{ security_groups }}"
+    security_groups: "{{ security_groups_list }}"
     auto_floating_ip: "{{ neutron_floatingip_needed }}"
     wait_for: 200
   with_sequence: "start=1 end={{ node_count | default(1) }}"

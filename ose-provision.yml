@@ -8,13 +8,11 @@
   roles:
   - role: common
   - role: openshift-common
-  - role: openstack-security-groups
-    security_groups: "{{ openshift_openstack_security_groups }}"
   # Provision Master
   - role: openstack-create
     type: "master"
     image_name: "{{ openshift_openstack_image_name }}"
-    security_groups: "{{ security_groups_master }}"
+    security_groups: "{{ openshift_openstack_master_security_groups }}"
     key_name: "{{ openstack_key_name }}"
     flavor_name: "{{ openshift_openstack_flavor_name }}"
     register_host_group: "masters,openshift"
@@ -25,7 +23,7 @@
   - role: openstack-create
     type: "node"
     image_name: "{{ openshift_openstack_image_name }}"
-    security_groups: "{{ security_groups_node }}"
+    security_groups: "{{ openshift_openstack_node_security_groups }}"
     key_name: "{{ openstack_key_name }}"
     flavor_name: "{{ openshift_openstack_flavor_name }}"
     register_host_group: "nodes,openshift"
@@ -36,7 +34,7 @@
   - role: openstack-create
     type: "nfs"
     image_name: "{{ openshift_openstack_image_name }}"
-    security_groups: "{{ security_groups_nfs }}"
+    security_groups: "{{ openshift_openstack_nfs_security_groups }}"
     key_name: "{{ openstack_key_name }}"
     flavor_name: "{{ openshift_openstack_flavor_name }}"
     register_host_group: "nfs,openshift"

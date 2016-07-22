@@ -9,6 +9,6 @@
       key_name: "{{ openstack_key_name }}"
       image_name: "{{ openshift_openstack_image_name }}"
       flavor_name: "m1.small"
-      security_groups: "{{ security_groups_dns  }}"
+      security_groups: "{{ openshift_openstack_dns_security_groups }}"
       register_host_group: "dns,openshift"
       node_count: "1"
