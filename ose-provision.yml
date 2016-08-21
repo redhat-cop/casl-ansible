@@ -54,23 +54,27 @@
     shell: "cat ~/.ssh/authorized_keys | sudo tee /root/.ssh/authorized_keys >/dev/null"
 
 - hosts: all:!dns:!localhost
+  pre_tasks:
+  - include: roles/common/pre_tasks/pre_tasks.yml
   roles:
-    - role: hostnames
+  - role: hostnames
 
 - hosts: all:!localhost
   roles:
     - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
 
-- hosts: dns
+- hosts: localhost
   pre_tasks:
+  - include: roles/common/pre_tasks/pre_tasks.yml
   - name: "Generate dns-server views"
     include: playbooks/dns_dual_view.yaml
-    delegate_to: localhost
-  - name: "Include the generated views"
-    include_vars: /tmp/named_views.yaml
-    delegate_to: localhost
   - name: "Generate dns records"
     include: playbooks/dns_records.yaml
+
+- hosts: dns
+  pre_tasks:
+  - name: "Include the generated views"
+    include_vars: /tmp/named_views.yaml
     delegate_to: localhost
   - name: "Include generated dns records"
     include_vars: /tmp/records.yaml

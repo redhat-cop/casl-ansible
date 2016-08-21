@@ -1,6 +1,6 @@
 ---
 - name: "Create {{ instance_type }} Attached Storage"
-  shell: "nova volume-create --display-name {{ item.id }} {{ storage_volume_size }} |  awk '/ id / {print $4}'"
+  shell: "nova volume-create --display-name {{ item.info.name + '-volume' }} {{ storage_volume_size }} |  awk '/ id / {print $4}'"
   register: created_volumes
   failed_when: created_volumes.rc != 0
   with_items: openstack_machines.results

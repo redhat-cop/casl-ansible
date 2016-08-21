@@ -4,6 +4,7 @@
     openshift_storage_disk_volume: "{{ openshift_storage_disk_volume | default(default_openshift_storage_disk_volume) }}"
     openshift_master_count: "{{ openshift_master_count | default(default_openshift_master_count) }}"
     openshift_node_count: "{{ openshift_node_count | default(default_openshift_node_count) }}"
+    openshift_app_domain: "{{ openshift_app_domain | default(default_openshift_app_domain) }}"
     openshift_openstack_master_security_groups: "{{ openshift_openstack_master_security_groups | default(default_openshift_openstack_master_security_groups) }}"
     openshift_openstack_node_security_groups: "{{ openshift_openstack_node_security_groups | default(default_openshift_openstack_node_security_groups) }}"
     openshift_openstack_flavor_name: "{{ openshift_openstack_flavor_name | default(default_openshift_openstack_flavor_name) }}"

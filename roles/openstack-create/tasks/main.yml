@@ -2,7 +2,7 @@
 - name: Validate OpenStack Variables
   fail: msg="Required OpenStack Variables not defined!"
   when: 
-       - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined or env_id is not defined
+  - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined 
 
 - name: "Check for Security Groups"
   shell: "nova secgroup-list"
@@ -61,7 +61,7 @@
 
 - name: "Provision OpenStack {{ type }}"
   nova_compute:
-    name: "{{ env_id }}-{{ type }}{{ item }}"
+    name: "{{ type }}{{ item }}.{{ full_dns_domain }}"
     state: present
     image_name: "{{ image_name }}"
     flavor_id: "{{ flavor_id }}"

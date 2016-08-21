@@ -1,4 +1,1 @@
 ---
-- name: Setting Common Facts
-  set_fact:
-    env_id: "{{ env_id | default(default_env_id) }}-{{ env_random_id.stdout }}"

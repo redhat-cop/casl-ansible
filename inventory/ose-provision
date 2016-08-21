@@ -6,6 +6,10 @@
 
 # Enter the security key to provision new OpenStack instances
 openstack_key_name=""
+
+# if env_id is left disabled, the tools will auto-generate a unique id to be used - ex: 'master1.casl-userid-12312334.example.com'
+# if env_id is enabled, but left blank, (e.g.: env_id=), no id will be inserted - ex: 'master1.example.com'
+# if env_id is set to a fixed value, it will be used as the id - ex: if set to 'env1', the oucome will be 'master1.env1.example.com'
 #env_id=
 
 # The following variables can be used to override the defaults

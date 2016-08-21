@@ -2,6 +2,7 @@
 default_openshift_storage_disk_volume: "/dev/vdb"
 default_openshift_master_count: 1
 default_openshift_node_count: 2
+default_openshift_app_domain: "apps"
 
 default_openshift_openstack_master_security_groups: "ose3-master"
 default_openshift_openstack_node_security_groups: "ose3-node"
