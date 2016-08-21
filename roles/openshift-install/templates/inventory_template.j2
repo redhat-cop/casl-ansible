@@ -29,7 +29,7 @@ ansible_sudo={{ ansible_sudo }}
 ansible_sudo={{ become }}
 {% endif %}
 deployment_type=openshift-enterprise
-# openshift_master_default_subdomain={{ openshift_app_domain }}.{{ full_dns_domain }}
+openshift_master_default_subdomain={{ openshift_app_domain }}.{{ full_dns_domain }}
 
 # Uncomment the following to enable htpasswd authentication; defaults to
 # DenyAllPasswordIdentityProvider.
