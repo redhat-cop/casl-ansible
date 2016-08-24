@@ -1,0 +1,5 @@
+openshift_registry_project: "default"
+openshift_router_project: "default"
+registry_dc: "docker-registry"
+router_dc: "router"
+expose_registry_master_host: "{{play_hosts[0]}}"
