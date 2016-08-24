@@ -1,0 +1,15 @@
+---
+- hosts: masters:nodes
+  roles:
+    - role: secure-registry
+      openshift_registry_project: "default"
+      registry_dc: "docker-registry"
+#      registry_certificate: ""
+#      registry_key: ""
+      registry_serviceaccount: "registry"
+      registry_secret_name: "registry-secret"
+
+- hosts: all
+  roles:
+    - role: sync-keys
+      key_url: "{{ openshift_authorized_key_url }}"
