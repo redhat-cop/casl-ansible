@@ -8,11 +8,13 @@
 - hosts: localhost
   gather_facts: false
   vars:
-    ansible_ssh_user: root
+    ansible_ssh_user: cloud-user
     max_instances: 6
     min_env_id_length: 8
     really_really_sure: false
     dry_run: false
+    force: false
+    prompt: true
     uuid_regex: "[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}"
     newline: "\n"
   tasks:
@@ -44,14 +46,19 @@
     failed_when: nova_result.rc != 0
 
   - name: "Determine number of matching instances"
-    shell: nova list | grep -E "{{ env_id }}" | awk '{print $2}' | sed ':a;N;$!ba;s/\n/, /g'
+    shell: nova list | grep -v "ERROR" | grep -E "{{ env_id }}" | awk '{print $2}' | sed ':a;N;$!ba;s/\n/, /g'
     register: instances_to_delete
+
+  - debug:
+      var:
+        instances_to_delete
+    when: dry_run
 
   - name: "Set instance count fact"
     set_fact:
       instance_count: "{{ instances_to_delete.stdout.split(', ')|length }}"
 
-  - name: "Fix count if list is empty"
+  - name: "Fix instance count if list is empty"
     # Python counts an empty list as length 1, so fixing it if so
     set_fact:
       instance_count: 0
@@ -73,8 +80,13 @@
       - not really_really_sure
 
   - name: "Determine instance names to delete"
-    shell: nova list | grep -E "{{ env_id }}" | awk '{print $4}' | sed ':a;N;$!ba;s/\n/, /g'
+    shell: nova list | grep -v "ERROR" | grep -E "{{ env_id }}" | awk '{print $4}' | sed ':a;N;$!ba;s/\n/, /g'
     register: names_to_delete
+
+  - debug:
+      var:
+        names_to_delete
+    when: dry_run
 
   - name: "Query Neutron services"
     command: neutron agent-list
@@ -86,9 +98,27 @@
       neutron_in_use: true
     when: neutron.rc == 0
 
+  # There is a possibility of an instance not having a floating IP thus the extra sed to delete an empty field
   - name: "Determine list of public IPs"
-    shell: nova list | grep -E "{{ env_id }}" | awk '{print $13}' | sed ':a;N;$!ba;s/\n/, /g'
+    shell: nova list | grep -v "ERROR" | grep -E "{{ env_id }}" | awk '{print $13}' | sed '/|/d' | sed ':a;N;$!ba;s/\n/, /g'
     register: ips_to_delete
+
+  - name: "Set IP count fact"
+    set_fact:
+      ip_count: "{{ ips_to_delete.stdout.split(', ')|length }}"
+
+  - name: "Fix IP count if list is empty"
+    # Python counts an empty list as length 1, so fixing it if so
+    set_fact:
+      ip_count: 0
+    when:
+      - ips_to_delete.stdout.split(', ').0|trim == ''
+
+
+  - debug:
+      var:
+        ips_to_delete
+    when: dry_run
 
   - name: "Determine list of Neutron Floating IP IDs to delete"
     shell: for floatingip in $(echo {{ ips_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read ip; do echo ${ip}; done); do neutron floatingip-list | awk "/${floatingip}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
@@ -100,13 +130,35 @@
         floatingips_to_delete
     when: dry_run
 
+  # It is possible for a volume to exist but not be attached possibly intentionally to save data, so adding an extra grep to ensure only in-use volumes are deleted. This is because the volume names are set the ID of the instance which is difficult to determine when it is attached or not by looking for an attached ID.
   - name: "Determine list of volumes"
-    shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova volume-list | awk "/${instance}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
+    shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova volume-list | grep "in-use" | awk "/${instance}/"'{print $2}'; done | sed ':a;N;$!ba;s/\n/, /g'
     register: volumes_to_delete
+
+  - debug:
+      var:
+        volumes_to_delete
+    when: dry_run
+
+  - name: "Set Volume count fact"
+    set_fact:
+      volume_count: "{{ volumes_to_delete.stdout.split(', ')|length }}"
+
+  - name: "Fix Volume count if list is empty"
+    # Python counts an empty list as length 1, so fixing it if so
+    set_fact:
+      volume_count: 0
+    when:
+      - volumes_to_delete.stdout.split(', ').0|trim == ''
 
   - name: "Determine images used in instances"
     shell: for instance in $(echo {{ instances_to_delete.stdout }}  | sed -n 1'p' | tr ',' ' ' | while read id; do echo ${id}; done); do nova show ${instance} | awk "/image/"'{print $4}'; done | sed ':a;N;$!ba;s/\n/, /g'
     register: images_to_delete
+
+  - debug:
+      var:
+        images_to_delete
+    when: dry_run
 
   - name: "Initialize image fact to first image found"
     set_fact:
@@ -131,7 +183,9 @@ WARNING! Images used for matching instances are not unique. It is possible that 
 Proceed with caution.{{ newline }}{{ newline }}
 [Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
 Press ENTER to continue or CTRL+c to cancel"
-    when: images_differ is defined
+    when:
+      - images_differ is defined
+      - prompt
 
   - name: "Build a group containing instance IPs"
     add_host:
@@ -140,11 +194,23 @@ Press ENTER to continue or CTRL+c to cancel"
       ansible_ssh_user: "{{ ansible_ssh_user }}"
       groups: instance_ips
     with_items: "ips_to_delete.stdout.split(', ')"
+    when:
+      - item is defined
+      - item is not none
+      - item|trim != ''
+
+  - name: "Set 'env_id' fact for display purposes if override requested"
+    set_fact:
+      env_id: "*"
+    when:
+      - really_really_sure
+      - env_id == uuid_regex
 
   - name: "Pause for confirmation on normal run."
     pause:
       prompt: "{{ newline }}
-WARNING! About to delete the following {{ instance_count|int }} instances and attached volumes{{':'}}{{ newline }}{{ newline }}
+WARNING! About to delete the following objects matching the environment ID '{{ env_id}}'{{':'}}{{ newline }}
+{{ instance_count|int }} instances, {{ ip_count|int }} IPs and {{ volume_count|int }} attached volumes{{':'}}{{ newline }}{{ newline }}
 [Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
@@ -152,12 +218,15 @@ WARNING! About to delete the following {{ instance_count|int }} instances and at
 [Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
 Press ENTER to delete these or CTRL+c to cancel"
-    when: not dry_run
+    when:
+      - not dry_run
+      - prompt
 
   - name: "Pause for confirmation on dry run."
     pause:
       prompt: "{{ newline }}
-NOTE{{':'}} A normal run would delete the following {{ instance_count|int }} instances and attached volumes{{':'}}{{ newline }}{{ newline }}
+NOTE{{':'}} A normal run would delete the following objects matching the environment ID '{{ env_id}}'{{':'}}{{ newline}}
+{{ instance_count|int }} instances, {{ ip_count|int }} IPs and {{ volume_count|int }} attached volumes{{':'}}{{ newline }}{{ newline }}
 [Instance IDs]{{':'}} '{{ instances_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance Names]{{':'}} '{{ names_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Instance IPs]{{':'}} '{{ ips_to_delete.stdout }}'{{ newline }}{{ newline }}
@@ -165,13 +234,16 @@ NOTE{{':'}} A normal run would delete the following {{ instance_count|int }} ins
 [Attached Volumes]{{':'}} '{{ volumes_to_delete.stdout }}'{{ newline }}{{ newline }}
 [Unique Images]{{':'}} '{{ images_to_delete.stdout.split(', ') | unique | join(', ') }}'{{ newline }}{{ newline }}
 Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
-    when: dry_run
+    when:
+      - dry_run
+      - prompt
 
 - hosts: instance_ips
   gather_facts: false
   vars:
     ansible_sudo: true
     dry_run: false
+    unregister: true
   tasks:
 
   - debug:
@@ -181,7 +253,9 @@ Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
   - name: "Attempt to unregister from Subscription Manager"
     command: "subscription-manager unregister"
     ignore_errors: yes
-    when: not dry_run
+    when:
+      - not dry_run
+      - unregister
 
 - hosts: localhost
   gather_facts: false
@@ -193,7 +267,11 @@ Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
     command: "nova delete {{ item }}"
     ignore_errors: yes
     with_items: "instances_to_delete.stdout.split(', ')"
-    when: not dry_run
+    when:
+      - not dry_run
+      - item is defined
+      - item is not none
+      - item|trim != ''
 
   - name: "Wait for instance delete and volume detach"
     shell: nova volume-list | awk "/{{ item }}/"'{ print $4 }'
@@ -202,13 +280,21 @@ Press ENTER to view tasks that will be skipped or CTRL+c to cancel"
     retries: 5
     delay: 10
     with_items: "volumes_to_delete.stdout.split(', ')"
-    when: not dry_run
+    when:
+      - not dry_run
+      - item is defined
+      - item is not none
+      - item|trim != ''
 
   - name: "Delete volume"
     command: "nova volume-delete {{ item }}"
     ignore_errors: yes
     with_items: "volumes_to_delete.stdout.split(', ')"
-    when: not dry_run
+    when:
+      - not dry_run
+      - item is defined
+      - item is not none
+      - item|trim != ''
 
   - name: "Release Neutron Floating IP"
     command: "neutron floatingip-delete {{ item }}"
