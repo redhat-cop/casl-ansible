@@ -4,8 +4,6 @@
   when: 
   - image_name is not defined or security_groups is not defined or key_name is not defined or image_name is not defined or flavor_name is not defined 
 
-- include: security_groups.yml
-
 - name: "Search for valid OpenStack Flavor"
   shell: "nova flavor-list | awk \"/{{flavor_name }}/\"'{print $2}'"
   register: flavor_query
@@ -31,6 +29,8 @@
   set_fact:
     neutron_floatingip_needed: 'yes'
   when: neutron.rc == 0
+
+- include: security_groups.yml
 
 - name: "Provision OpenStack {{ type }}"
   nova_compute:
