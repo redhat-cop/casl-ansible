@@ -60,7 +60,7 @@ rhc_ose_inv_dest=.
 # Example: htpasswd
 #rhc_ose_identity_provider=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 # Example: LDAP
-#rhc_ose_identity_provider=[{'name':'paas_ldap_provider','login':'true','challenge':'true','kind':'LDAPPasswordIdentityProvider','attributes':{'id':['dn'],'email':['mail'],'name':['displayName'],'preferredUsername':['uid']},'insecure':'true','bindDN':'uid=ldap,cn=users,cn=compat,dc=org,dc=example,dc=com','bindPassword':'password','url':'ldap://ldap.example.com:636/dc=org,dc=example,dc=com?uid?sub?(memberOf=cn=openshift,cn=groups,cn=accounts,dc=org,dc=example,dc=com)'}]
+#rhc_ose_identity_provider=[{'name':'paas_ldap_provider','login':'true','challenge':'true','kind':'LDAPPasswordIdentityProvider','attributes':{'id':['dn'],'email':['mail'],'name':['displayName'],'preferredUsername':['uid']},'insecure':'true','bindDN':'uid=ldap,cn=users,cn=compat,dc=org,dc=example,dc=com','bindPassword':'password','url':'ldap://ldap.example.com:389/dc=org,dc=example,dc=com?uid?sub?(memberOf=cn=openshift,cn=groups,cn=accounts,dc=org,dc=example,dc=com)'}]
 #rhc_ose_identity_provider=
 
 deployment_type=openshift-enterprise
