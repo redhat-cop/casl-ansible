@@ -32,6 +32,11 @@ default_openshift_openstack_master_security_groups:
       to_port: 8443
       protocol: tcp
       cidr: 0.0.0.0/0
+    - name: udp-8053
+      from_port: 8053
+      to_port: 8053
+      protocol: udp
+      cidr: 0.0.0.0/0
 default_openshift_openstack_node_security_groups:
   - name: default
     rules: []

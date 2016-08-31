@@ -18,7 +18,7 @@
 
 - name: "Initialize Neutron fact"
   set_fact:
-    neutron_floatingip_needed: 'no'
+    neutron_in_use: 'no'
 
 - name: "Query Neutron services"
   command: neutron agent-list
@@ -27,7 +27,7 @@
 
 - name: "Check for Neutron services - a failure assumes Legacy Networking (Nova Network)"
   set_fact:
-    neutron_floatingip_needed: 'yes'
+    neutron_in_use: 'yes'
   when: neutron.rc == 0
 
 - include: security_groups.yml
@@ -40,7 +40,7 @@
     flavor_id: "{{ flavor_id }}"
     key_name: "{{ key_name }}"
     security_groups: "{{ security_groups_list }}"
-    auto_floating_ip: "{{ neutron_floatingip_needed }}"
+    auto_floating_ip: "{{ neutron_in_use }}"
     wait_for: 200
   with_sequence: "start=1 end={{ node_count | default(1) }}"
   register: "openstack_create"
