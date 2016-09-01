@@ -3,10 +3,65 @@ default_openshift_storage_disk_volume: "/dev/vdb"
 default_openshift_master_count: 1
 default_openshift_node_count: 2
 default_openshift_app_domain: "apps"
-
-default_openshift_openstack_master_security_groups: "ose3-master"
-default_openshift_openstack_node_security_groups: "ose3-node"
 default_openshift_openstack_flavor_name: "m1.medium"
 default_openshift_openstack_image_name: "_OS1_rhel-guest-image-7.2-20151102.0.x86_64.qcow2"
 default_openshift_openstack_master_storage_size: 10
 default_openshift_openstack_node_storage_size: 10
+default_openshift_openstack_master_security_groups:
+  - name: default
+    rules: []
+  - name: ose3_master
+    rules:
+    - name: ssh
+      from_port: 22
+      to_port: 22
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: http
+      from_port: 80
+      to_port: 80
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: https
+      from_port: 443
+      to_port: 443
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: https-8443
+      from_port: 8443
+      to_port: 8443
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: udp-8053
+      from_port: 8053
+      to_port: 8053
+      protocol: udp
+      cidr: 0.0.0.0/0
+default_openshift_openstack_node_security_groups:
+  - name: default
+    rules: []
+  - name: ose3_nodes
+    rules:
+    - name: ssh
+      from_port: 22
+      to_port: 22
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: http
+      from_port: 80
+      to_port: 80
+      protocol: tcp
+      cidr: 0.0.0.0/0
+default_openshift_openstack_dns_security_groups:
+  - name: default
+    rules: []
+  - name: dns
+    rules:
+    - name: dns
+      from_port: 53
+      to_port: 53
+      protocol: udp
+      cidr: 0.0.0.0/0
+default_openshift_openstack_nfs_security_groups:
+  - name: default
+    rules: []

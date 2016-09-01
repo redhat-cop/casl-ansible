@@ -34,7 +34,7 @@
   - role: openstack-create
     type: "nfs"
     image_name: "{{ openshift_openstack_image_name }}"
-    security_groups: "default"
+    security_groups: "{{ openshift_openstack_nfs_security_groups }}"
     key_name: "{{ openstack_key_name }}"
     flavor_name: "{{ openshift_openstack_flavor_name }}"
     register_host_group: "nfs,openshift"

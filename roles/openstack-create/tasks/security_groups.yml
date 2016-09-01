@@ -1,0 +1,39 @@
+---
+- name: "Create Security Groups if required"
+  os_security_group:
+    name: "{{ item.name }}"
+    state: present
+  with_items: "{{ security_groups }}"
+  when: neutron_in_use
+
+- name: "Create SSH Rule in matching Security Group if required"
+  os_security_group_rule:
+    security_group: "{{ item.0.name }}"
+    protocol: "{{ item.1.protocol }}"
+    port_range_min: "{{ item.1.from_port }}"
+    port_range_max: "{{ item.1.to_port }}"
+    remote_ip_prefix: "{{ item.1.cidr }}"
+  when:
+    - item.1.name is defined
+    - item.1.protocol is defined
+    - item.1.from_port is defined
+    - item.1.to_port is defined
+    - item.1.cidr is defined
+    - neutron_in_use
+  with_subelements:
+    - "{{ security_groups }}"
+    - rules
+
+# Build a comma-separated list of security groups defined in the array
+# Initialize list variable so previous runs are not concatenated
+- set_fact:
+    security_groups_list: ""
+
+- name: "Build a list of Security Groups"
+  set_fact:
+    security_groups_list: "{{ [item.name,security_groups_list | default('')] | join(',') }}"
+  with_items: "{{ security_groups }}"
+
+# This is an optional task as it cleans up the string variable, otherwise the way it is constructed would result in an extra comma at the end as such 'group1,group2," and this can be passed to the nova_compute module just fine but this extra step just cleans it up
+- set_fact:
+    security_groups_list: "{{ security_groups_list | regex_replace('^(.*),$', '\\1') }}"
