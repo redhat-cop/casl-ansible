@@ -31,6 +31,8 @@
     src: docker-storage-setup.j2
     dest: /etc/sysconfig/docker-storage-setup
   when: docker_storage_setup is undefined
+  notify:
+  - restart docker
 
 # - name: "Run Docker Storage Setup"
 #   command: docker-storage-setup

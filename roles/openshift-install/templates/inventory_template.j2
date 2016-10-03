@@ -56,6 +56,16 @@ openshift_master_cluster_public_hostname={{ rhc_ose_cluster_public_hostname }}
 openshift_authorized_key_url={{ openshift_authorized_key_url }}
 {% endif %}
 
+{% if openshift_hosted_metrics_deploy is defined %}
+openshift_hosted_metrics_deploy=true
+openshift_hosted_metrics_storage_kind={{ openshift_hosted_metrics_storage_kind }}
+openshift_hosted_metrics_storage_access_modes={{ openshift_hosted_metrics_storage_access_modes }}
+openshift_hosted_metrics_storage_nfs_directory={{ openshift_hosted_metrics_storage_nfs_directory }}
+openshift_hosted_metrics_storage_nfs_options={{ openshift_hosted_metrics_storage_nfs_options }}
+openshift_hosted_metrics_storage_volume_name={{ openshift_hosted_metrics_storage_volume_name }}
+openshift_hosted_metrics_storage_volume_size={{ openshift_hosted_metrics_storage_volume_size }}
+{% endif %}
+
 # override the default controller lease ttl
 #osm_controller_lease_ttl=30
 
