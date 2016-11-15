@@ -1,0 +1,4 @@
+---
+
+- name: cleanup openshift login
+  file: path="{{ kubeconfig | dirname }}" state=absent

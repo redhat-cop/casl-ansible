@@ -1,0 +1,5 @@
+---
+- name: Prune Images
+  shell: oc adm prune images --keep-tag-revisions={{ openshift_prune_images_tag_revisions }}  --keep-younger-than={{ openshift_prune_images_keep_younger }} --confirm
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
