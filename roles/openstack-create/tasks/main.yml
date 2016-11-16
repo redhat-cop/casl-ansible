@@ -49,7 +49,7 @@
     hostname: "{{ item.openstack.name }}"
     ansible_ssh_host: "{{ item.openstack.public_v4 }}"
     dns_public_ip: "{{ item.openstack.public_v4 }}"
-    dns_private_ip: "{{ item.openstack.private_v4}}"
+    dns_private_ip: "{{ item.openstack.private_v4 }}"
     ansible_ssh_user: root
     id: "{{ item.id }}"
     private_ip: "{{ item.openstack.private_v4 }}"
