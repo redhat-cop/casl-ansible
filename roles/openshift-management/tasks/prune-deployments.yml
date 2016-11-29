@@ -1,0 +1,5 @@
+---
+- name: Prune Deployments
+  shell: oc adm prune deployments --keep-complete={{ openshift_prune_deployments_complete }}  --keep-failed={{ openshift_prune_deployments_failed }} --keep-younger-than={{ openshift_prune_deployments_keep_younger }} --orphans --confirm
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"

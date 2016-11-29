@@ -1,0 +1,26 @@
+---
+- name: Validate OpenShift Token Provided
+  fail: msg="OpenShift Token Not Provided"
+  failed_when: (openshift_token is undefined) or (openshift_token is none) or (openshift_token|trim == '')
+  tags: always
+- name: Set Facts
+  set_fact: kubeconfig="/tmp/openshift-management-{{ ansible_date_time.epoch }}/config"
+  tags: always
+- name: Create Directory
+  file: path="{{ kubeconfig | dirname }}" state=directory
+  notify: cleanup openshift login
+  tags: always
+- name: Login to OpenShift
+  shell: oc login --token={{ openshift_token }} {{ openshift_login_insecure_flag }} {{ openshift_master_url }} 
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  tags: always
+- include: prune-builds.yml
+  when: "{{ openshift_prune_builds | default(False) }}"
+  tags: openshift-management-builds
+- include: prune-deployments.yml
+  when: "{{ openshift_prune_deployments | default(False) }}"
+  tags: openshift-management-deployments
+- include: prune-images.yml
+  when: "{{ openshift_prune_images | default(False) }}"
+  tags: openshift-management-images
