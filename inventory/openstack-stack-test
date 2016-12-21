@@ -1,0 +1,6 @@
+[all:vars]
+openstack_ssh_public_key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDItH07bgHmT7oEzwDudTL0KuGUdItSXx+Wt4Ru7tkGN4UK5R2MGHv2Md+J7CByy/d+abhBWGmC75+HOI+MZU1KudrCDnax5vuIGIMYPRzL1m18FSLpQ6pTabnjVPM3ZMMRHJR2LxiVUYm0iOdAmK4sA67+bbaWYctsaudPGg/qRAwkt+TisGTeHh4//OPFRo0bYILVF6vno0UXStZ6AX4fILCZ7iTfrXyoATldSWzxP4qPMA7dJ42M62RnTIJIVujHKm7amFyIT/6mDypI+mn4WJNXbumNFlhTRD8oXJxLKy/CRpt9qTcmAmhyO4vSRhc+NAAVP0jIk5ouz+xdNhpT esauer@redhat.com"
+openstack_default_image_name="rhel-guest-image-7.2"
+openstack_default_flavor="m1.medium"
+openstack_external_network_name="external"
+

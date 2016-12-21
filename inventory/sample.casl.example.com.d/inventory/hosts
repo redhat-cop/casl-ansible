@@ -1,0 +1,62 @@
+[all:vars]
+ansible_user=openshift
+ansible_become=True
+
+# OpenStack Provisioning Variables
+openstack_ssh_public_key="esauer-util3"
+openstack_default_image_name="rhel-guest-image-7.2"
+openstack_default_flavor="m1.large"
+openstack_external_network_name="external"
+openstack_dns_domain="casl.example.com"
+openstack_subnet_prefix=192.168.99
+openstack_nameservers=10.9.48.31
+openstack_num_nodes=1
+openstack_num_infra=1
+dns_domain="casl.example.com"
+cluster_id="casl.example.com"
+public_dns_forwarder=10.9.48.31
+#env_id=""
+
+# Subscription Management Details
+rhsm_register=True
+rhsm_satellite='sat6.example.com'
+rhsm_org='Emerging_Tech_Lab'
+rhsm_activationkey='rhel-7-ose'
+rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.3-rpms", "rhel-7-server-extras-rpms"]'
+rhsm_password=''
+
+
+# Create an OSEv3 group that contains the master, nodes, etcd, and lb groups.
+# The lb group lets Ansible configure HAProxy as the load balancing solution.
+# Comment lb out if your load balancer is pre-configured.
+[OSEv3:children]
+masters
+nodes
+etcd
+
+# Set variables common for all OSEv3 hosts
+#[OSEv3:vars]
+
+# For OSEv3 normal group vars, see ./group_vars/OSEv3.yml
+
+# Host Groups
+
+[masters]
+
+[etcd]
+
+[nodes:children]
+masters
+infra_hosts
+node_hosts
+
+[node_hosts]
+[node_hosts:vars]
+openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+[infra_hosts]
+[infra_hosts:vars]
+openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+
+
+[dns]

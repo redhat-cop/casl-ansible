@@ -1,0 +1,37 @@
+---
+deployment_type: openshift-enterprise
+openshift_deployment_type: openshift-enterprise
+
+openshift_master_default_subdomain: "apps.{{ env_id }}.casl.example.com"
+
+openshift_master_identity_providers:
+ - 'name': 'htpasswd_auth'
+   'login': 'true'
+   'challenge': 'true'
+   'kind': 'HTPasswdPasswordIdentityProvider'
+   'filename': '/etc/origin/master/htpasswd'
+
+# LDAP Identity Provider
+#openshift_master_identity_providers:
+# - 'bindDN': 'uid=ldap-casl,cn=users,cn=accounts,dc=ldap,dc=example,dc=com'
+#   'kind': 'LDAPPasswordIdentityProvider'
+#   'name': 'paas_ldap_provider'
+#   'bindPassword': 'password'
+#   'url': 'ldaps://ldap.example.com:636/dc=ldap,dc=example,dc=com?uid?sub?(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=ldap,dc=example,dc=com)'
+#   challenge': 'true'
+#   'attributes':
+#     'email': ['mail']
+#     'preferredUsername': ['uid']
+#     'id': ['dn']
+#     'name': ['displayName']
+#   'login': 'true'
+#   'insecure': 'false'
+#   'ca': '/etc/pki/ca-trust/source/anchors/ipa.crt'
+#openshift_master_ldap_ca_file: "{{ inventory_dir }}/../files/ipa-ca.crt"
+
+create_users:
+  num_users: 5
+  prefix: 'rdu-user'
+  passwd_file: '/etc/origin/master/htpasswd'
+  password: 'rdu-demo'
+

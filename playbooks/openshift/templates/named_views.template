@@ -1,0 +1,14 @@
+---
+named_config_views:
+  - name: "private"
+    acl_entry:
+{% for host in groups[named_views_hostgroup]%}
+    - "{{ hostvars[host]['openstack']['private_v4'] }}/32"
+{% endfor %}
+    zone:
+    - "dns_domain": "{{ full_dns_domain }}"
+  - name: "public"
+    zone:
+    - "dns_domain": "{{ full_dns_domain }}"
+    forwarder:
+    - "{{ public_dns_forwarder }}"

@@ -109,7 +109,7 @@
       line: "IP4_NAMESERVERS={%for host in groups['dns']%}{{ hostvars[host].dns_private_ip }}{% endfor %}"
   roles:
     - { role: docker, tags: 'docker' }
-    - { role: openshift-provision, tags: 'openshift-provision', ansible_sudo: true }
+    - { role: openshift-prep, tags: 'openshift-prep', ansible_sudo: true }
 
 - hosts: localhost
   roles:

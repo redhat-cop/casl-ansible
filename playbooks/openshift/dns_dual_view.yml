@@ -1,0 +1,11 @@
+---
+  - name: "Set dual view dns group"
+    set_fact:
+      named_views_hostgroup: "OSEv3"
+
+  - name: "Setting up views"
+    template:
+      dest: /tmp/named_views.yml
+      src: ./templates/named_views.template
+      force: true
+    delegate_to: localhost
