@@ -12,24 +12,44 @@ default_openshift_openstack_master_security_groups:
     rules: []
   - name: ose3_master
     rules:
-    - name: ssh
+    - name: tcp-22
       from_port: 22
       to_port: 22
       protocol: tcp
       cidr: 0.0.0.0/0
-    - name: http
+    - name: tcp-80
       from_port: 80
       to_port: 80
       protocol: tcp
       cidr: 0.0.0.0/0
-    - name: https
+    - name: tcp-443
       from_port: 443
       to_port: 443
       protocol: tcp
       cidr: 0.0.0.0/0
-    - name: https-8443
+    - name: tcp-8443
       from_port: 8443
       to_port: 8443
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: udp-4789
+      from_port: 4789
+      to_port: 4789
+      protocol: udp
+      cidr: 0.0.0.0/0
+    - name: tcp-53
+      from_port: 53
+      to_port: 53
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: udp-53
+      from_port: 53
+      to_port: 53
+      protocol: udp
+      cidr: 0.0.0.0/0
+    - name: tcp-8053
+      from_port: 8053
+      to_port: 8053
       protocol: tcp
       cidr: 0.0.0.0/0
     - name: udp-8053
@@ -37,19 +57,49 @@ default_openshift_openstack_master_security_groups:
       to_port: 8053
       protocol: udp
       cidr: 0.0.0.0/0
+    - name: tcp-2379
+      from_port: 2379
+      to_port: 2379
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: tcp-2380
+      from_port: 2380
+      to_port: 2380
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: tcp-4001
+      from_port: 4001
+      to_port: 4001
+      protocol: tcp
+      cidr: 0.0.0.0/0
 default_openshift_openstack_node_security_groups:
   - name: default
     rules: []
   - name: ose3_nodes
     rules:
-    - name: ssh
+    - name: tcp-22
       from_port: 22
       to_port: 22
       protocol: tcp
       cidr: 0.0.0.0/0
-    - name: http
+    - name: tcp-80
       from_port: 80
       to_port: 80
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: tcp-443
+      from_port: 443
+      to_port: 443
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: udp-4789
+      from_port: 4789
+      to_port: 4789
+      protocol: udp
+      cidr: 0.0.0.0/0
+    - name: tcp-10250
+      from_port: 10250
+      to_port: 10250
       protocol: tcp
       cidr: 0.0.0.0/0
 default_openshift_openstack_dns_security_groups:
@@ -57,7 +107,17 @@ default_openshift_openstack_dns_security_groups:
     rules: []
   - name: dns
     rules:
-    - name: dns
+    - name: ssh
+      from_port: 22
+      to_port: 22
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: dns-tcp-53
+      from_port: 53
+      to_port: 53
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: dns-udp-53
       from_port: 53
       to_port: 53
       protocol: udp
@@ -65,3 +125,30 @@ default_openshift_openstack_dns_security_groups:
 default_openshift_openstack_nfs_security_groups:
   - name: default
     rules: []
+  - name: nfs
+    rules:
+    - name: ssh
+      from_port: 22
+      to_port: 22
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: nfs-tcp-111
+      from_port: 111
+      to_port: 111
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: nfs-udp-111
+      from_port: 111
+      to_port: 111
+      protocol: udp
+      cidr: 0.0.0.0/0
+    - name: nfs-tcp-2049
+      from_port: 2049
+      to_port: 2049
+      protocol: tcp
+      cidr: 0.0.0.0/0
+    - name: nfs-udp-2049
+      from_port: 2049
+      to_port: 2049
+      protocol: udp
+      cidr: 0.0.0.0/0
