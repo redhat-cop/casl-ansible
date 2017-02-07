@@ -52,6 +52,8 @@
     add_host:
       name: "{{ item }}"
       groups: masters, etcd, nodes, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      openshift_node_labels:
+        region: "masters"
     with_items: "{{ master_hosts }}"
     changed_when: false
 
@@ -59,6 +61,8 @@
     add_host:
       name: "{{ item }}"
       groups: nodes, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      openshift_node_labels:
+        region: "app"
     with_items: "{{ node_hosts }}"
     changed_when: false
 
@@ -66,6 +70,8 @@
     add_host:
       name: "{{ item }}"
       groups: nodes, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      openshift_node_labels:
+        region: "infra"
     with_items: "{{ infra_hosts }}"
     changed_when: false
 

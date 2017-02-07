@@ -8,5 +8,5 @@
 
 - hosts: masters
   roles:
-  - { role: create_users, when: create_users is defined }
+  - { role: create_users }
 

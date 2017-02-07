@@ -29,7 +29,7 @@ openshift_master_identity_providers:
 #   'ca': '/etc/pki/ca-trust/source/anchors/ipa.crt'
 #openshift_master_ldap_ca_file: "{{ inventory_dir }}/../files/ipa-ca.crt"
 
-create_users:
+demo_users:
   num_users: 5
   prefix: 'rdu-user'
   passwd_file: '/etc/origin/master/htpasswd'

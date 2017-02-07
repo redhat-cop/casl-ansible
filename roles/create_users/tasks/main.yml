@@ -1,14 +1,15 @@
 ---
-# - include: create_users.yml
-#   when: users_to_create is defined and users_to_create != "" and users_to_create|length > 0
+ - name: "Initialize create_users facts"
+   set_fact:
+     users: ''
 
- - htpasswd:
-     path: "{{ users_to_create.passwd_file }}"
-     name: "{{ item }}"
-     password: "{{ users_to_create.password }}"
-     owner: root
-     group: root
-     mode: 0600
-   with_sequence: start=0 end="{{ users_to_create.num_users }}" format="{{ users_to_create.prefix }}%02d"
+ - name: "Take demo_user input when defined"
+   set_fact:
+     users: "{{ demo_users }}"
+   when: demo_users is defined
+
+ - include: create_users.yml  
+   static: no
+   when: False
 
 
