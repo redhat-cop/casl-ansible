@@ -2,7 +2,48 @@
 
 Automation of OpenShift 3 using [Ansible](http://www.ansible.com/)
 
-## **Note: This section is currently under active development.**
+## Provisioning Quickstart
+
+### Local Setup (one time, only)
+
+In addition to _cloning this repo_, you'll need the following:
+
+* Access to an OpenStack environment using an link:http://docs.openstack.org/user-guide/common/cli-set-environment-variables-using-openstack-rc.html[OpenStack RC File]
+  * File should be placed at `~/.config/openstack/openrc.sh`
+>**NOTE**: OpenStack environment currently requires HEAT to be enabled, and the user must have the `heat_stack_owner` role assigned.
+* A link:https://github.com/naturalis/openstack-docs/wiki/Howto:-Creating-and-using-OpenStack-SSH-keypairs-on-Linux-and-OSX[Key-pair created in OpenStack]
+* Docker installed (`yum install -y docker` on RHEL/Centos, `dnf install docker -y` on Fedora)
+  * If you plan to run docker as yourself (non-root), your username must be added to the `docker` user group.
+* An `~/.ansible.cfg` file containing the following:
+```
+[defaults]
+roles_path=/root/repository/casl-ansible/roles:/root/repository/openshift-ansible/roles
+filter_plugins= /usr/share/ansible_plugins/filter_plugins:/root/repository/openshift-ansible/filter_plugins
+host_key_checking = False
+```
+* Clone this, and dependent `openshift-ansible` repositories into the same directory
+```
+cd ~/src/
+git clone git@github.com:redhat-cop/casl-ansible.git
+git clone git@github.com:openshift/openshift-ansible.git
+```
+* Copy `casl-ansible/inventory/sample.casl.example.com.d/inventory/clouds.yaml` to `~/.config/openstack/clouds.yaml`
+
+Cool! Now you're ready to provision OpenShift clusters
+
+### Provision a Cluster
+
+To start, we'll provision the `sample.casl.example.com` cluster defined in the `casl-ansible/inventory` directory.
+
+1. Edit `casl-ansible/inventory/sample.casl.example.com/hosts` and edit the `# OpenStack Provisioning Variables` and `# Subscription Management` sections at the top to match your environment/project/tenant.
+2. Start the `openstack-client` container.
+```
+./casl-ansible/docker/openstack-client-centos/run.sh --repository=/path/to/repos/dir/
+```
+3. Run the `end-to-end` provisioning playbook
+```
+ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml
+```
 
 ## Roles
 
@@ -29,29 +70,3 @@ The following are a list of Ansible playbooks
 		* Attach persistent storage
 	* Install prerequisite packages
 	* Install and configure Java, Groovy, Maven, Jenkins, Nexus, Docker
-
-
-## Provisioning an OpenShift Environment
-
-### Prerequisites
-
-A client environment with the appropriate entitlements to Red Hat Enterprise 7 and OpenShift Enterprise 3 is required to provision new OpenShift environments. A [host builder docker image](../docker/openshift-host-builder) is available to provide an execution environment. 
-
-### Configuring the Inventory
-
-The current supported method of provisioning new OpenShift environments is to utilize OpenStack. The `openstack_key_name` in the `ose3` inventory file at the root of this folder must have the SSH key name specified in order for Ansible to be able to communicate with the newly provisioned machines
-
-### Running the OpenShift Playbook
- 
-Execute the following command to run the playbook
-
-    ansible-playbook -i inventory/ose-provision ose-provision.yml
-    
-
-### Running the CICD Playbook
- 
-Execute the following command to run the playbook
-
-    ansible-playbook -i inventory/cicd-provision cicd-provision.yml
-    
-
