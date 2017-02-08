@@ -8,10 +8,10 @@ Automation of OpenShift 3 using [Ansible](http://www.ansible.com/)
 
 In addition to _cloning this repo_, you'll need the following:
 
-* Access to an OpenStack environment using an link:http://docs.openstack.org/user-guide/common/cli-set-environment-variables-using-openstack-rc.html[OpenStack RC File]
+* Access to an OpenStack environment using an [OpenStack RC File](http://docs.openstack.org/user-guide/common/cli-set-environment-variables-using-openstack-rc.html)
   * File should be placed at `~/.config/openstack/openrc.sh`
 >**NOTE**: OpenStack environment currently requires HEAT to be enabled, and the user must have the `heat_stack_owner` role assigned.
-* A link:https://github.com/naturalis/openstack-docs/wiki/Howto:-Creating-and-using-OpenStack-SSH-keypairs-on-Linux-and-OSX[Key-pair created in OpenStack]
+* A [Key-pair created in OpenStack](https://github.com/naturalis/openstack-docs/wiki/Howto:-Creating-and-using-OpenStack-SSH-keypairs-on-Linux-and-OSX)
 * Docker installed (`yum install -y docker` on RHEL/Centos, `dnf install docker -y` on Fedora)
   * If you plan to run docker as yourself (non-root), your username must be added to the `docker` user group.
 * An `~/.ansible.cfg` file containing the following:
