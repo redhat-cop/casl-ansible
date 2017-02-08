@@ -5,7 +5,7 @@
 
 SCRIPT_BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 OPENSTACK_CONFIG_DIR=~/.config/openstack/
-OPENSTACK_CLIENT_IMAGE="rhtconsulting/rhc-openstack-client"
+OPENSTACK_CLIENT_IMAGE="redhat-cop/openstack-client-centos"
 SSH_DIR=~/.ssh
 REMOVE_CONTAINER_ON_EXIT="--rm"
 REPOSITORY=
@@ -16,10 +16,10 @@ usage() {
     echo "
      Usage: $0 [options]
      Options:
-     --configdir=<configdir>       : Directory containing Openstack configuration files (Default: ~/.config/openstack/)
-     --image-name=<name>           : Name of the image to build or use (Default: rhtconsulting/rhc-openstack-client)
+     --configdir=<configdir>       : Directory containing Openstack configuration files (Default: ${OPENSTACK_CONFIG_DIR})
+     --image-name=<name>           : Name of the image to build or use (Default: ${OPENSTACK_CLIENT_IMAGE})
      --keep                        : Whether to keep the the container after exiting
-     --ssh=<ssh>                   : Location of SSH keys to mount into the container (Default: ~/.ssh)
+     --ssh=<ssh>                   : Location of SSH keys to mount into the container (Default: ${SSH_DIR})
      --repository=<repository>     : Directory containing a repository to mount inside the container
      --help                        : Show Usage Output
 	 "
