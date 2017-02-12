@@ -1,0 +1,11 @@
+---
+- name: "Set up the nagios targets"
+  hosts: nagios-targets
+  roles:
+  - role: nagios-target
+    
+- name: "Set up nagios server"
+  hosts: nagios-servers
+  roles:
+  - role: nagios-server
+
