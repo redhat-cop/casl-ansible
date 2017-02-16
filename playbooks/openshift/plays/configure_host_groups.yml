@@ -44,7 +44,7 @@
   - name: Add cluster hosts to cluster groups
     add_host:
       name: "{{ item }}"
-      groups: cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      groups: cluster_hosts, cluster_{{ env_id }}_{{ cluster_id }}
     with_items: "{{ env_cluster_hosts }}"
     changed_when: false
 
