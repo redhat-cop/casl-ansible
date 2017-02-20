@@ -25,22 +25,40 @@ host_key_checking = False
 ```
 cd ~/src/
 git clone git@github.com:redhat-cop/casl-ansible.git
-git clone git@github.com:openshift/openshift-ansible.git
 ```
 * Copy `casl-ansible/inventory/sample.casl.example.com.d/inventory/clouds.yaml` to `~/.config/openstack/clouds.yaml`
+
+* Download/untar `openshift-ansible` for use as part of the install. Make sure to do so within the same directory as above (i.e.: `~/src`), and either rename the directory to `openshift-ansible` or create symlink to it (see example below). See table below for versions / urls to be used for the download. Note that other versions may work as well, but these are the ones we have tested and found to be stable. Feel free to submit PRs with updated versions as they are found to be functional. 
+
+(*hint* right-click the `openshift-ansible` version number in the table below and copy the URL)
+
+```
+wget <url> -O - | tar -xz
+ln -fs openshift-ansible-*<version>* openshift-ansible
+```
+
+| openshift-ansible url     | OpenShift version | 
+|:-------------------------:|:-----------------:|
+| [3.4.50-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.4.60-1.tar.gz) | OCP 3.4 |
 
 Cool! Now you're ready to provision OpenShift clusters
 
 ### Provision a Cluster
 
-To start, we'll provision the `sample.casl.example.com` cluster defined in the `casl-ansible/inventory` directory.
+To start, we'll provision the `sample.casl.example.com` cluster defined in the `casl-ansible/inventory` directory. 
 
-1. Edit `casl-ansible/inventory/sample.casl.example.com/hosts` and edit the `# OpenStack Provisioning Variables` and `# Subscription Management` sections at the top to match your environment/project/tenant.
-2. Start the `openstack-client` container.
+**Note**: *It is recommended that you use a different inventory by duplicating the `sample.casl.example.com` directory and keep it elsewhere. In that way, you can update/remove/change your casl-ansble directory without losing your inventory. It may take some time to get the inventory just right, hence it is very beneficial to keep it around for future use without having to redo everything.*
+
+The following is just an example on how the `sample.casl.example.com` inventory can be used:
+
+1) Edit `casl-ansible/inventory/sample.casl.example.com/inventory/hosts` and edit the `# OpenStack Provisioning Variables` and `# Subscription Management` sections at the top to match your environment/project/tenant. See comments in the file for more detailed information on how to fill these in.
+
+2) Start the `openstack-client` container.
 ```
 ./casl-ansible/docker/openstack-client-centos/run.sh --repository=/path/to/repos/dir/
 ```
-3. Run the `end-to-end` provisioning playbook
+
+3) Run the `end-to-end` provisioning playbook
 ```
 ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml
 ```

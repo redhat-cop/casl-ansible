@@ -1,34 +1,86 @@
+########## Default variables ##########################################
+# - typically just leave as-is -
+
 [all:vars]
 ansible_user=openshift
 ansible_become=True
 
-# OpenStack Provisioning Variables
-openstack_ssh_public_key="mykey"
-openstack_default_image_name="rhel-guest-image-7.2"
-openstack_default_flavor="m1.large"
-openstack_external_network_name="external"
+
+
+
+########### OpenStack Provisioning Variables ##########################
+#
+
+# Set to a valid SSH key name for your OpenStack tenant
+openstack_ssh_public_key=""
+
+# Set to a valid image within your hosting environment, e.g.: "rhel-guest-image-7.2"
+openstack_default_image_name=""
+
+# # Change to the desirable flavor (size) - note: ensure that you don't exceed the capacity of your tenant
+openstack_default_flavor=""
+
+# Set this to the name of a valid external network for your OpenStack tenant
+openstack_external_network_name="external" 
+
+# DNS domain to use for this installation
+# - for now, make sure to fill in all 3 with the same value
 openstack_dns_domain="casl.example.com"
-openstack_subnet_prefix=192.168.99
-openstack_nameservers=8.8.8.8
-openstack_num_nodes=1
-openstack_num_infra=1
 dns_domain="casl.example.com"
 cluster_id="casl.example.com"
+
+# Fill in a desirable subnet prefix here, for example: 192.168.x (where x is a number between 0-255)
+openstack_subnet_prefix=   
+
+# Nameserver to be used with the installation. If you don't have an internal name server, just use a public one, f.eks: 8.8.8.8
+openstack_nameservers=8.8.8.8
 public_dns_forwarder=8.8.8.8
+
+# Number of application nodes for your OpenShift cluster
+openstack_num_nodes=1
+
+# Number of infrastructure nodes for your OpenShift cluster 
+# - 1 is typically enough
+openstack_num_infra=1
+
+# Leave the env_id blank if you want one generated. Otherwise, set it to something descriptive, e.g.: "d1" (for "development env 1") or "env1" (recommended to leave this fairly short and avoid special characters)
 #env_id=""
 
-# Subscription Management Details
+# Adjust the volume size used for docker on the nodes
+# tip: A good starting point is 15-20, but bigger may be needed
+docker_volume_size="20"
+docker_storage_block_device="/dev/vdb"
+
+
+############# Subscription Management Details ########################
+#
+
+# Set to to True if using RHEL as the base os and need it to be subscribed
+# - typically you'd want this to be set to True
 rhsm_register=True
-rhsm_satellite='sat6.example.com'
-rhsm_org='my-org'
-rhsm_activationkey='my-key'
-rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.3-rpms", "rhel-7-server-extras-rpms"]'
+
+# NOTE: If you do not have access to an internal satellite server, use the "rhsm_username" and "rhsm_password" to subscribe to redhat.com and your account available there. Make sure to use an account that has valid OpenShift subscriptions.
+rhsm_username=''
 rhsm_password=''
 
+# Satellite variables - leave blank if subscribing to redhat.com
+rhsm_satellite=''
+rhsm_org=''
+rhsm_activationkey=''
 
-# Create an OSEv3 group that contains the master, nodes, etcd, and lb groups.
-# The lb group lets Ansible configure HAProxy as the load balancing solution.
-# Comment lb out if your load balancer is pre-configured.
+# If a specific subscription manager pool is to be used, make sure to specify it here
+rhsm_pool=''
+
+# Respos to be enabled as part of the subscription
+# - the default repos will install / provision OCP 3.3
+rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.3-rpms", "rhel-7-server-extras-rpms"]'
+
+
+
+################## OpenShift specific variables ##############################
+# For the most part, leave this as-is
+#
+# Create an OSEv3 group that contains the groups to be provisioned
 [OSEv3:children]
 masters
 nodes
@@ -40,7 +92,6 @@ etcd
 # For OSEv3 normal group vars, see ./group_vars/OSEv3.yml
 
 # Host Groups
-
 [masters]
 
 [etcd]
@@ -60,3 +111,5 @@ openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
 
 
 [dns]
+
+
