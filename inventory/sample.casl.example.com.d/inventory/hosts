@@ -43,9 +43,16 @@ openstack_num_nodes=1
 # - 1 is typically enough
 openstack_num_infra=1
 
-# Leave the env_id blank if you want one generated. Otherwise, set it to something descriptive, e.g.: "d1" (for "development env 1") or "env1" (recommended to leave this fairly short and avoid special characters)
-#env_id=""
+# if env_id is left disabled, the tools will auto-generate a unique id to be used - ex: 'master-0.casl-userid-12312334.example.com'
+# if env_id is enabled, but left blank, (e.g.: env_id=), no id will be inserted - ex: 'master-0.example.com'
+# if env_id is set to a fixed value, it will be used as the id - ex: if set to 'env1', the outcome will be 'master-0.env1.example.com'
+#env_id=
 
+# What sub-domain to use for apps url - should match the wild card DNS record
+# For example, if set to "apps", the default subdomain would be: '*.apps.env1.example.com'
+# Default value is 'apps'.
+#openshift_app_domain=apps
+#
 # Adjust the volume size used for docker on the nodes
 # tip: A good starting point is 15-20, but bigger may be needed
 docker_volume_size="20"

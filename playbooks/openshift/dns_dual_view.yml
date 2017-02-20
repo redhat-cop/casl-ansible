@@ -1,7 +1,8 @@
 ---
   - name: "Set dual view dns group"
     set_fact:
-      named_views_hostgroup: "OSEv3"
+      named_views_hostgroup: "cluster_hosts"
+      named_views_infragroup: "infra_hosts"
 
   - name: "Setting up views"
     template:

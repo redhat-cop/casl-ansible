@@ -60,7 +60,7 @@
   - name: Add nodes to requisite groups
     add_host:
       name: "{{ item }}"
-      groups: nodes, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      groups: nodes, app_hosts, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
       openshift_node_labels:
         region: "app"
     with_items: "{{ node_hosts }}"
@@ -69,7 +69,7 @@
   - name: Add infra nodes to requisite groups
     add_host:
       name: "{{ item }}"
-      groups: nodes, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
+      groups: nodes, infra_hosts, cluster_hosts, OSEv3, cluster_{{ env_id }}_{{ cluster_id }}
       openshift_node_labels:
         region: "infra"
     with_items: "{{ infra_hosts }}"
