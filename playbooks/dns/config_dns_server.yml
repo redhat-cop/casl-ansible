@@ -1,0 +1,11 @@
+---
+
+# Configure DNS Server(s)
+- hosts: dns
+  pre_tasks:
+  - name: "Include the views"
+    include_vars: vars/views.yml
+    delegate_to: localhost
+  roles:
+    - role: dns-server
+

@@ -1,0 +1,3 @@
+
+[dns]
+dns.example.com ansible_user=fedora ansible_become=yes

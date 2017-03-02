@@ -1,0 +1,8 @@
+---
+
+named_config_views:
+- name: "casl"
+  zone:
+  - "dns_domain": "casl.example.com"
+  forwarder:
+  - "8.8.8.8"
