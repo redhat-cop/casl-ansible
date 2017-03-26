@@ -11,3 +11,7 @@ openshift_prune_deployments_failed: 1
 openshift_prune_deployments_keep_younger: 1h0m0s
 openshift_prune_images_tag_revisions: 3
 openshift_prune_images_keep_younger: 1h0m0s
+openshift_prune_projects_keep_younger: 24 # 24 hrs by default
+openshift_prune_projects_user_excludes: []
+openshift_prune_projects_system_excludes: ['default', 'management-infra', 'openshift', 'openshift-infra', 'kube-system', 'logging']
+

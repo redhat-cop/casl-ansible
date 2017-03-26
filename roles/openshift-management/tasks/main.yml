@@ -24,3 +24,7 @@
 - include: prune-images.yml
   when: "{{ openshift_prune_images | default(False) }}"
   tags: openshift-management-images
+- include: prune-projects.yml
+  when: "{{ openshift_prune_projects | default(False) }}"
+  tags: openshift-management-projects
+

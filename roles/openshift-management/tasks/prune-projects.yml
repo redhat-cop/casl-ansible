@@ -1,0 +1,49 @@
+---
+- name: Setup variables used in this task
+  set_fact:
+    projects_to_process: []
+
+- name: Set username fact (if this is run by an Ansible Tower job)
+  set_fact:
+    run_as: "--as='{{ tower_user_name }}'"
+  when: 
+  - tower_user_name is defined
+  - tower_user_name|trim != ''
+
+- name: Get list of projects
+  shell: oc {{ run_as | default('') }} get project --no-headers | awk '{print $1}'
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  register: projects 
+
+- name: Remove excluded projects from the list to process
+  set_fact:
+    projects_to_process: "{{ projects_to_process }} + [ '{{ item }}' ]"
+  with_items: "{{ projects.stdout_lines }}"
+  when:
+  - item not in openshift_prune_projects_system_excludes
+  - item not in openshift_prune_projects_user_excludes
+
+- name: Get OpenShift project details (timestamps)
+  shell: oc {{ run_as | default('') }} get project {{ item }} -o json
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  register: project_details
+  with_items: "{{ projects_to_process }}"
+
+- name: Convert timestamps (already in UTC) to seconds
+  shell: date -d '{{ (item.stdout | from_json).metadata.creationTimestamp }}' +%s
+  register: project_timestamp_seconds
+  with_items: "{{ project_details.results }}"
+
+- name: Get timestamp for X hrs ago (default 24 hrs) in seconds (UTC) 
+  shell: date -u -d '{{ openshift_prune_projects_keep_younger | default(24) }} hour ago' +%s
+  register: cutoff_timestamp_seconds
+
+- name: Prune projects
+  shell: oc {{ run_as | default('') }} delete project {{ item.item.item }}
+  environment:
+    KUBECONFIG: "{{ kubeconfig }}"
+  when:
+  - "{{ item.stdout }} < {{ cutoff_timestamp_seconds.stdout }}"
+  with_items: "{{ project_timestamp_seconds.results }}"
