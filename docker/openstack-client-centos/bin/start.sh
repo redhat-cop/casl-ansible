@@ -7,22 +7,21 @@ INPUT_SSH_DIR=/mnt/.ssh
 CONFIG_DIR=/root/.config/openstack
 
 # Copy mounted .ssh directory to ~/.ssh
-if [ -d $INPUT_SSH_DIR ]; then
+if [ -d "${INPUT_SSH_DIR}" ]; then
 
 	mkdir -p $SSH_DIR
 	cp $INPUT_SSH_DIR/* $SSH_DIR/
 
 fi
 
-# Attempt to source files for OpenStack
-if [ -d $CONFIG_DIR ]; then
+# Attempt to source the RC file for OpenStack
+# - note: if more than one file, only the first one will be sourced 
+if [ -d "${CONFIG_DIR}" ]; then
 
 	FILES=$CONFIG_DIR/*.sh
-
-	for file in $FILES
-	do
-		source $file
-	done
+	rc_files=($FILES)
+	echo "Sourcing ${rc_files[1]}"
+	source ${rc_files[1]}
 
 fi
 
