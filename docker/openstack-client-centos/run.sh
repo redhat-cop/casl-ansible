@@ -76,7 +76,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-OPENSTACK_IMAGE=$(echo -e "${DOCKER_IMAGES}" | awk '{ print "|$1|" }' | grep "|${OPENSTACK_CLIENT_IMAGE}|")
+OPENSTACK_IMAGE=$(echo -e "${DOCKER_IMAGES}" | awk '{ print "|"$1"|" }' | grep "|${OPENSTACK_CLIENT_IMAGE}|")
 
 if [ $? -gt 1 ]; then
   echo "Error: Failed to parse the Docker images to find ${OPENSTACK_CLIENT_IMAGE} image."
