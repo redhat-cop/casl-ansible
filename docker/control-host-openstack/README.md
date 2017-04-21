@@ -7,8 +7,8 @@ Produces a container capable of acting as a client for OpenStack
 
 The following steps are required to run the docker client.
 
-1. Install docker
-  1. on RHEL/Fedora: ```{yum/dnf} install docker```
+1. Install docker and docker-compose
+  1. on RHEL/Fedora: ```{yum/dnf} install docker docker-compose```
   2. on Windows: [Install Docker for Windows](https://docs.docker.com/windows/step_one/)
   3. on OSX: [Max OS X](https://docs.docker.com/installation/mac/)
   4. on all other Operating Systems: [Supported Platforms](https://docs.docker.com/installation/)
@@ -20,45 +20,47 @@ systemctl enable docker
 systemctl restart docker
 ```
 
-
 ## Running
 
-The process of creating and running the docker container is facilitated through the ```run.sh``` script inside this repository.  
+There are two options for running the `control-node` containers:
 
-It will produce the docker image based on a *Dockerfile* and run the docker container based on the following parameters:
+1. Raw `docker run` command
+2. Background container via `docker-compose`
+
+### Docker Compose (recommended)
+
+Starting the container is done with the following:
 
 ```
-$ ./docker/openstack-docker-client/run.sh --help
-
-     Usage: ./docker/openstack-docker-client/run.sh [options]
-     Options:
-     --configdir=<configdir>       : Directory containing Openstack configuration files (Default: ~/.openstack/)
-     --name=<name>                 : Name of the assembled image (Default: rhc-openstack-client)
-     --keep                        : Whether to keep the the container after exiting
-     --ssh=<ssh>                   : Location of SSH keys to mount into the container (Default: ~/.ssh)
-     --repository=<repository>     : Directory containing a repository to mount inside the container
-     --help                        : Show Usage Output
+cd ./docker/control-host-openstack
+docker-compose up -d
 ```
 
-The script can be run as is with  ```run.sh``` which will create a new image if one was not created previously and then start the container.
+Once the container is running, you can exec into the container to run ansible commands.
 
-## Customizing the parameters
+```
+docker exec -it openstackclientcentos_control-node_1 bash
+[]# ansible-playbook -i /root/code/casl-ansible/inventory/sample.casl.example.com.d/inventory/ code/casl-ansible/playbooks/openshift/end-to-end.yml
+```
 
-Executing the ```run.sh``` script with no arguments will provide a bare container with the openstack client tools installed. This is great if all you want to do is run manual `nova` commands, but in order to make this more useful, you'll need to pass some parameters to share resources from your local environment. The following parameters can be configured to customize the behavior of the container environment.
+### Raw Docker
+
+```
+docker run -it --name control-host -v $HOME/.ssh:/root/.ssh -v $HOME/.config/openstack:/root/.config/openstack -v $HOME/src:/root/code -v $HOME/.ansible.cfg:/root/.ansible.cfg docker.io/redhatcop/control-host-openstack bash
+[]# ansible-playbook -i /root/code/casl-ansible/inventory/sample.casl.example.com.d/inventory/ code/casl-ansible/playbooks/openshift/end-to-end.yml
+```
 
 ### OpenStack Configuration Files
 
-As part of the [OpenStack client configuration](provisioning/openstack/README.md), a client configuration file was downloaded from OpenStack and placed in the ```~/openstack``` directory. When the docker container is started, this directory is mounted inside the container and all ```*.sh``` files are sourced to allow the client to obtain the API endpoint and authentication details.
-
-You can choose to provide an alternate location by using the ```--configdir``` parameter of the ```run.sh``` script
+The above commands expect you to have an link:https://docs.openstack.org/user-guide/common/cli-set-environment-variables-using-openstack-rc.html[OpenStack RC file] at `~/.config/openstack/openrc.sh`.
 
 ### Repository Content & Scripts
 
-If you are using a repository or some other source folder containing scripts that you would like to have mounted in the container, the ```--repository``` option can be passed which will mount a folder in the container at ```/root/repository```.
+The above commands expect your ansible inventories and playbooks repos to live at `~/src`. If it lives elsewhere you'll need to update those file paths, either in the command, or in `docker-compose.yml`.
 
 ### SSH Keys
 
-Since the interaction with OpenStack typically requires the use of SSH communication, the private key from the logged in users running the Docker container will be copied to the containers' ```~/.ssh``` folder. You can choose to modify the default source location by providing the ```--ssh``` option with a reference to the directory  
+The above commands expect to mount the ssh keys needed to authenticate to openstack servers from ~/.ssh. If they live elsewhere, you'll need to update those paths in the command or in `docker-compose.yml`.
 
 ## Troubleshooting
 

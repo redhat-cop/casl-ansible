@@ -1,0 +1,10 @@
+version: '2'
+services:
+  control-node:
+    command: daemonize
+    volumes:
+    - $HOME/src:/root/code
+    - $HOME/.ssh:/root/.ssh/
+    - $HOME/.config/openstack:/root/.config/openstack
+    - $HOME/.ansible.cfg:/root/.ansible.cfg
+    image: redhatcop/openstack-client-centos

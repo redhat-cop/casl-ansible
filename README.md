@@ -1,4 +1,4 @@
-#  rhc-ose ansible Automation
+#  CASL Ansible
 
 Automation of OpenShift 3 using [Ansible](http://www.ansible.com/)
 
@@ -82,29 +82,3 @@ and then re-running the playbook.
 ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml
 ```
 
-
-## Roles
-
-The following are a list of Absible roles available
-
-* cicd - Installs and configures CICD tools such as Jenkins and Nexus
-* cicd-common - Sets common CICD related facts
-* common - Provides for the generation of an environment id per execution and sets common facts
-* openshift-common - Sets common OpenShift related facts
-* openshift-provision - Installs and configures OpenShift on a set of masters and nodes (Work in Progress)
-* openstack-create - Creates an OpenStack instances and attaches block storage
-
-## Playbooks
-
-The following are a list of Ansible playbooks
-
-* OpenShift Provision (ose-provision.yml)
-    * Provision machines on OpenStack for OpenShift
-	    * Attach persistent storage
-	    * Update machines with latest packages
-        * Additional work in progress
-* Continuous Integration/Continuous Delivery (cicd-provision.yml)
-	* Provision instance on OpenStack
-		* Attach persistent storage
-	* Install prerequisite packages
-	* Install and configure Java, Groovy, Maven, Jenkins, Nexus, Docker

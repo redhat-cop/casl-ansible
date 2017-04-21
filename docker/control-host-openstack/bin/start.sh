@@ -6,6 +6,10 @@ SSH_DIR=/root/.ssh
 INPUT_SSH_DIR=/mnt/.ssh
 CONFIG_DIR=/root/.config/openstack
 
+daemonize() {
+  while true; do sleep 500; done
+}
+
 # Copy mounted .ssh directory to ~/.ssh
 if [ -d "${INPUT_SSH_DIR}" ]; then
 
@@ -20,9 +24,15 @@ if [ -d "${CONFIG_DIR}" ]; then
 
 	FILES=$CONFIG_DIR/*.sh
 	rc_files=($FILES)
-	echo "Sourcing ${rc_files[1]}"
-	source ${rc_files[1]}
+	echo "Sourcing ${rc_files[0]}"
+	source ${rc_files[0]}
 
+fi
+
+if [ "$1" == "daemonize" ];then	
+  grep -q -F "source ${rc_files[0]}" /root/.bashrc || echo "source ${rc_files[0]}" >> /root/.bashrc
+  daemonize
+  shift
 fi
 
 exec "$@"
