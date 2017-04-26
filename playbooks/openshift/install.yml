@@ -1,4 +1,2 @@
 ---
-- include: plays/configure_host_groups.yml
-
 - include: "{{ openshift_ansible_path | default('../../../openshift-ansible') }}/playbooks/byo/config.yml"

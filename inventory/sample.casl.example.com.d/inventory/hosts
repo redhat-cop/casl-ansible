@@ -1,93 +1,13 @@
-########## Default variables ##########################################
-# - typically just leave as-is -
+#[all:vars]
+# For all group_vars, see ./group_vars/all.yml
 
-[all:vars]
-ansible_user=openshift
-ansible_become=True
+# Create an OSEv3 group that contains the master, nodes, etcd, and lb groups.
+# The lb group lets Ansible configure HAProxy as the load balancing solution.
+# Comment lb out if your load balancer is pre-configured.
+[cluster_hosts:children]
+OSEv3
+dns
 
-
-
-
-########### OpenStack Provisioning Variables ##########################
-#
-
-# Set to a valid SSH key name for your OpenStack tenant
-openstack_ssh_public_key=""
-
-# Set to a valid image within your hosting environment, e.g.: "rhel-guest-image-7.2"
-openstack_default_image_name=""
-
-# # Change to the desirable flavor (size) - note: ensure that you don't exceed the capacity of your tenant
-openstack_default_flavor=""
-
-# Set this to the name of a valid external network for your OpenStack tenant
-openstack_external_network_name="external" 
-
-# DNS domain to use for this installation
-# - for now, make sure to fill in all 3 with the same value
-openstack_dns_domain="casl.example.com"
-dns_domain="casl.example.com"
-cluster_id="casl.example.com"
-
-# Fill in a desirable subnet prefix here, for example: 192.168.x (where x is a number between 0-255)
-openstack_subnet_prefix=   
-
-# Nameserver to be used with the installation. If you don't have an internal name server, just use a public one, f.eks: 8.8.8.8
-openstack_nameservers=8.8.8.8
-public_dns_forwarder=8.8.8.8
-
-# Number of application nodes for your OpenShift cluster
-openstack_num_nodes=1
-
-# Number of infrastructure nodes for your OpenShift cluster 
-# - 1 is typically enough
-openstack_num_infra=1
-
-# if env_id is left disabled, the tools will auto-generate a unique id to be used - ex: 'master-0.casl-userid-12312334.example.com'
-# if env_id is enabled, but left blank, (e.g.: env_id=), no id will be inserted - ex: 'master-0.example.com'
-# if env_id is set to a fixed value, it will be used as the id - ex: if set to 'env1', the outcome will be 'master-0.env1.example.com'
-#env_id=
-
-# What sub-domain to use for apps url - should match the wild card DNS record
-# For example, if set to "apps", the default subdomain would be: '*.apps.env1.example.com'
-# Default value is 'apps'.
-#openshift_app_domain=apps
-#
-# Adjust the volume size used for docker on the nodes
-# tip: A good starting point is 15-20, but bigger may be needed
-docker_volume_size="20"
-docker_storage_block_device="/dev/vdb"
-
-
-############# Subscription Management Details ########################
-#
-
-# Set to to True if using RHEL as the base os and need it to be subscribed
-# - typically you'd want this to be set to True
-rhsm_register=True
-
-# NOTE: If you do not have access to an internal satellite server, use the "rhsm_username" and "rhsm_password" to subscribe to redhat.com and your account available there. Make sure to use an account that has valid OpenShift subscriptions.
-rhsm_username=''
-rhsm_password=''
-
-# Satellite variables - leave blank if subscribing to redhat.com
-rhsm_satellite=''
-rhsm_org=''
-rhsm_activationkey=''
-
-# If a specific subscription manager pool is to be used, make sure to specify it here
-rhsm_pool=''
-
-# Respos to be enabled as part of the subscription
-# - the default repos will install / provision OCP 3.3
-rhsm_repos='["rhel-7-server-rpms", "rhel-7-server-ose-3.3-rpms", "rhel-7-server-extras-rpms"]'
-
-
-
-################## OpenShift specific variables ##############################
-# For the most part, leave this as-is
-#
-# Create an OSEv3 group that contains the groups to be provisioned
 [OSEv3:children]
 masters
 nodes
@@ -99,24 +19,26 @@ etcd
 # For OSEv3 normal group vars, see ./group_vars/OSEv3.yml
 
 # Host Groups
-[masters]
 
-[etcd]
+[masters:children]
+masters.sample.casl.example.com
+
+[etcd:children]
+etcd.sample.casl.example.com
 
 [nodes:children]
 masters
-infra_hosts
-node_hosts
+infra.sample.casl.example.com
+nodes.sample.casl.example.com
 
-[node_hosts]
-[node_hosts:vars]
-openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+[infra_hosts:children]
+infra.sample.casl.example.com
 
-[infra_hosts]
-[infra_hosts:vars]
-openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+[dns:children]
+dns.sample.casl.example.com
 
-
-[dns]
-
-
+[masters.sample.casl.example.com]
+[etcd.sample.casl.example.com]
+[infra.sample.casl.example.com]
+[nodes.sample.casl.example.com]
+[dns.sample.casl.example.com]

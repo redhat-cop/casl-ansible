@@ -1,10 +1,8 @@
 ---
-- include: plays/configure_host_groups.yml
-
 - hosts: cluster_hosts
   roles:
     - role: sync-keys
-      key_url: "{{ openshift_authorized_key_url }}"
+      key_url: "{{ openshift_authorized_key_url | default('') }}"
 
 - hosts: masters
   roles:

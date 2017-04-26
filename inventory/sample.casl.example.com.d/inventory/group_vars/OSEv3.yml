@@ -1,9 +1,9 @@
 ---
-deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
+openshift_release: v3.5
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 
-openshift_master_default_subdomain: "apps.{{ env_id }}.casl.example.com"
-
+# HTPASSWD Identity Provider
 openshift_master_identity_providers:
  - 'name': 'htpasswd_auth'
    'login': 'true'
@@ -11,27 +11,32 @@ openshift_master_identity_providers:
    'kind': 'HTPasswdPasswordIdentityProvider'
    'filename': '/etc/origin/master/htpasswd'
 
-# LDAP Identity Provider
-#openshift_master_identity_providers:
-# - 'bindDN': 'uid=ldap-casl,cn=users,cn=accounts,dc=ldap,dc=example,dc=com'
-#   'kind': 'LDAPPasswordIdentityProvider'
-#   'name': 'paas_ldap_provider'
-#   'bindPassword': 'password'
-#   'url': 'ldaps://ldap.example.com:636/dc=ldap,dc=example,dc=com?uid?sub?(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=ldap,dc=example,dc=com)'
-#   challenge': 'true'
-#   'attributes':
-#     'email': ['mail']
-#     'preferredUsername': ['uid']
-#     'id': ['dn']
-#     'name': ['displayName']
-#   'login': 'true'
-#   'insecure': 'false'
-#   'ca': '/etc/pki/ca-trust/source/anchors/ipa.crt'
-#openshift_master_ldap_ca_file: "{{ inventory_dir }}/../files/ipa-ca.crt"
+openshift_hosted_logging_deploy: true
 
-demo_users:
-  num_users: 5
-  prefix: 'rdu-user'
-  passwd_file: '/etc/origin/master/htpasswd'
-  password: 'rdu-demo'
+openshift_hosted_metrics_deploy: true
 
+openshift_node_kubelet_args:
+  minimum-container-ttl-duration:
+  - "10s"
+  maximum-dead-containers-per-container:
+  - "2"
+  maximum-dead-containers:
+  - "50"
+  pods-per-core: 
+  - '10'
+  max-pods: 
+  - '250'
+  image-gc-high-threshold: 
+  - '80'
+  image-gc-low-threshold: 
+  - '60'
+
+osm_default_node_selector: 'region=primary'
+osm_use_cockpit: true
+osm_cockpit_plugins: 
+- 'cockpit-kubernetes'
+#create_users:
+#  num_users: 5
+#  prefix: 'rdu-user'
+#  passwd_file: '/etc/origin/master/htpasswd'
+#  password: 'rdu-sample'
