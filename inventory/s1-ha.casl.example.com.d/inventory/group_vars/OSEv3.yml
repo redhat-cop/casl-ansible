@@ -1,0 +1,35 @@
+---
+openshift_deployment_type: openshift-enterprise
+openshift_release: v3.5
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
+
+# HTPASSWD Identity Provider
+openshift_master_identity_providers:
+ - 'name': 'htpasswd_auth'
+   'login': 'true'
+   'challenge': 'true'
+   'kind': 'HTPasswdPasswordIdentityProvider'
+   'filename': '/etc/origin/master/htpasswd'
+
+openshift_hosted_logging_deploy: true
+openshift_hosted_metrics_deploy: true
+
+openshift_node_kubelet_args:
+  minimum-container-ttl-duration:
+  - "10s"
+  maximum-dead-containers-per-container:
+  - "2"
+  maximum-dead-containers:
+  - "50"
+  pods-per-core: 
+  - '10'
+  max-pods: 
+  - '250'
+  image-gc-high-threshold: 
+  - '80'
+  image-gc-low-threshold: 
+  - '60'
+
+osm_use_cockpit: true
+osm_cockpit_plugins: 
+- 'cockpit-kubernetes'
