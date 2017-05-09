@@ -7,14 +7,15 @@ ansible_become: True
 openstack_default_image_name: "rhel-guest-image-7.3-35.x86_64"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "external"
-openstack_dns_domain: "casl.example.com" 
+openstack_dns_domain: "casl.example.com"
 openstack_subnet_prefix: 192.168.99
-openstack_nameservers: 10.9.48.31
+openstack_nameservers:
+- 192.168.1.1
 openstack_num_nodes: 2
 openstack_num_infra: 1
 dns_domain: "casl.example.com"
 cluster_id: "casl.example.com"
-public_dns_forwarder: 10.9.48.31
+public_dns_forwarder: 192.168.1.1
 env_id: "sample"
 #
 docker_volume_size: "5"
@@ -22,13 +23,21 @@ docker_storage_block_device: "/dev/vdb"
 #
 # # Subscription Management Details
 rhsm_register: True
-rhsm_satellite: 'sat-6.example.com'
-rhsm_org: 'CASL_ORG'
-rhsm_activationkey: 'casl-latest'
 rhsm_repos:
  - "rhel-7-server-rpms"
  - "rhel-7-server-ose-3.5-rpms"
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
+
+# Using Red Hat Satellite:
+rhsm_satellite: 'sat-6.example.com'
+rhsm_org: 'CASL_ORG'
+rhsm_activationkey: 'casl-latest'
 rhsm_password: ''
+
+# # Or using RHN username, password and optionally pool:
+# rhsm_username: ''
+# rhsm_password: ''
+# # leave commented out if you want to `--auto-attach` a pool
+# rhsm_pool: ''
 

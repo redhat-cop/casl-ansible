@@ -46,7 +46,7 @@ docker exec -it openstackclientcentos_control-node_1 bash
 ### Raw Docker
 
 ```
-docker run -it --name control-host -v $HOME/.ssh:/root/.ssh -v $HOME/.config/openstack:/root/.config/openstack -v $HOME/src:/root/code -v $HOME/.ansible.cfg:/root/.ansible.cfg docker.io/redhatcop/control-host-openstack bash
+docker run -it --name control-host -v $HOME/.ssh:/root/.ssh -v $HOME/.config/openstack:/root/.config/openstack -v $HOME/src:/root/repository -v $HOME/.ansible.cfg:/root/.ansible.cfg docker.io/redhatcop/control-host-openstack bash
 []# ansible-playbook -i /root/code/casl-ansible/inventory/sample.casl.example.com.d/inventory/ code/casl-ansible/playbooks/openshift/end-to-end.yml
 ```
 

@@ -10,7 +10,7 @@ In addition to _cloning this repo_, you'll need the following:
 
 * Access to an OpenStack environment using an [OpenStack RC File](http://docs.openstack.org/user-guide/common/cli-set-environment-variables-using-openstack-rc.html)
   * File should be placed at `~/.config/openstack/openrc.sh`
->**NOTE**: OpenStack environment currently requires HEAT to be enabled, and the user must have the `heat_stack_owner` role assigned.
+>**NOTE**: OpenStack environment currently requires Heat to be enabled, and the user must have the `heat_stack_owner` role assigned.
 * A [Key-pair created in OpenStack](https://github.com/naturalis/openstack-docs/wiki/Howto:-Creating-and-using-OpenStack-SSH-keypairs-on-Linux-and-OSX)
 * Docker installed (`yum install -y docker` on RHEL/Centos, `dnf install docker -y` on Fedora)
   * If you plan to run docker as yourself (non-root), your username must be added to the `docker` user group.
@@ -47,21 +47,29 @@ Cool! Now you're ready to provision OpenShift clusters
 
 To start, we'll provision the `sample.casl.example.com` cluster defined in the `casl-ansible/inventory` directory. 
 
-**Note**: *It is recommended that you use a different inventory by duplicating the `sample.casl.example.com` directory and keep it elsewhere. In that way, you can update/remove/change your casl-ansble directory without losing your inventory. It may take some time to get the inventory just right, hence it is very beneficial to keep it around for future use without having to redo everything.*
+**Note**: *It is recommended that you use a different inventory by duplicating the `sample.casl.example.com.d` directory and keep it elsewhere. In that way, you can update/remove/change your casl-ansble directory without losing your inventory. It may take some time to get the inventory just right, hence it is very beneficial to keep it around for future use without having to redo everything.*
 
 The following is just an example on how the `sample.casl.example.com` inventory can be used:
 
-1) Edit `casl-ansible/inventory/sample.casl.example.com/inventory/hosts` and edit the `# OpenStack Provisioning Variables` and `# Subscription Management` sections at the top to match your environment/project/tenant. See comments in the file for more detailed information on how to fill these in.
+1) Edit `casl-ansible/inventory/sample.casl.example.com.d/inventory/hosts` and edit the `# OpenStack Provisioning Variables` and `# Subscription Management` sections at the top to match your environment/project/tenant. See comments in the file for more detailed information on how to fill these in.
 
 2) Start the `openstack-client` container.
 ```
-./casl-ansible/docker/openstack-client-centos/run.sh --repository=/path/to/repos/dir/
+cd ~/src/casl-ansible/docker/control-host-openstack
+docker-compose up -d
+docker exec -it <container-name> bash
 ```
+
+**Note**: If you see an error saying that there are no `config/*.sh` files, try
+temporarily disabling SELinux (`sudo setenforce 0`) and running a new
+container.
 
 3) Run the `end-to-end` provisioning playbook
 ```
-ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml
+ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml -e openstack_ssh_public_key=<your_ssh_key_name>
 ```
+
+The `openstack_ssh_public_key` variable at the end should specify the name of your OpenStack keypair (`openstack keypair list`).
 
 ### Updating a Cluster
 
