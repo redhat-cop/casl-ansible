@@ -5,21 +5,21 @@ ansible_become: True
 # use the "-e" option to set "openstack_ssh_public_key"
 #openstack_ssh_public_key:
 openstack_default_image_name: "rhel-guest-image-7.3-35.x86_64"
-openstack_default_flavor: "m1.large"
+openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "external"
-openstack_dns_domain: "casl.example.com" 
+openstack_dns_domain: "casl.example.com"
 openstack_subnet_prefix: 192.168.99
-openstack_nameservers: 10.9.48.31
+openstack_nameservers:
+- 192.168.1.1
 openstack_num_masters: 3
 openstack_num_nodes: 2
-openstack_num_infra: 2
+openstack_num_infra: 1
 dns_domain: "casl.example.com"
 cluster_id: "casl.example.com"
-public_dns_forwarder: 10.9.48.31
+public_dns_forwarder: 192.168.1.1
 env_id: "s1-ha"
-openshift_authorized_key_url: "https://raw.githubusercontent.com/rhtconsulting/rhc-ose/openshift-enterprise-3/ose3eval/ose3_public_keys"
 #
-docker_volume_size: "50"
+docker_volume_size: "10"
 docker_storage_block_device: "/dev/vdb"
 #
 # # Subscription Management Details
@@ -33,4 +33,3 @@ rhsm_repos:
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
 rhsm_password: ''
-

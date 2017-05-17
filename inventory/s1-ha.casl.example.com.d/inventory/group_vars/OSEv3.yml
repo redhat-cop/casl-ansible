@@ -1,9 +1,11 @@
 ---
+deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
-openshift_release: v3.5
+openshift_master_cluster_method: native
+openshift_master_cluster_hostname: "{{ groups.lb.0 }}"
+openshift_master_cluster_public_hostname: "{{ groups.lb.0 }}"
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 
-# HTPASSWD Identity Provider
 openshift_master_identity_providers:
  - 'name': 'htpasswd_auth'
    'login': 'true'
@@ -12,8 +14,9 @@ openshift_master_identity_providers:
    'filename': '/etc/origin/master/htpasswd'
 
 openshift_hosted_logging_deploy: true
-openshift_hosted_metrics_deploy: true
 
+openshift_hosted_metrics_deploy: true
+openshift_node_labels: "{{ openstack.metadata.node_labels}}"
 openshift_node_kubelet_args:
   minimum-container-ttl-duration:
   - "10s"
@@ -30,6 +33,3 @@ openshift_node_kubelet_args:
   image-gc-low-threshold: 
   - '60'
 
-osm_use_cockpit: true
-osm_cockpit_plugins: 
-- 'cockpit-kubernetes'
