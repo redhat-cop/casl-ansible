@@ -3,7 +3,7 @@ FROM centos:7
 MAINTAINER Andrew Block “andrew.block@redhat.com”
 
 # Update System and install clients
-RUN yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/openstack/openstack-newton/rdo-release-newton-4.noarch.rpm centos-release-openshift-origin; \
+RUN yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/openstack/openstack-ocata/rdo-release-ocata-3.noarch.rpm centos-release-openshift-origin; \
   yum update -y; \
   yum install -y python-devel epel-release; \
   yum install -y git tar gcc libffi-devel openssl-devel bind-utils httpd-tools java-1.8.0-openjdk-headless\
