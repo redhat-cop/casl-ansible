@@ -3,13 +3,11 @@
    set_fact:
      users: ''
 
- - name: "Take demo_user input when defined"
+ - name: "Take create_users input when defined"
    set_fact:
-     users: "{{ demo_users }}"
-   when: demo_users is defined
+     users: "{{ create_users }}"
+   when: create_users is defined
 
- - include: create_users.yml  
+ - include: create_users.yml
    static: no
-   when: False
-
-
+   when: create_users is defined
