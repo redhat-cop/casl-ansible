@@ -17,6 +17,7 @@ RUN yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/
                  origin-clients; \
   yum clean all; \
   pip install --upgrade pip; \
+  pip install --upgrade jinja2; \
   pip install shade six git+git://github.com/ansible/ansible.git@stable-2.3
 
 ADD bin/start.sh /root/
