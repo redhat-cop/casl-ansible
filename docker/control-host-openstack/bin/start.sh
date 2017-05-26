@@ -29,6 +29,8 @@ if [ -d "${CONFIG_DIR}" ]; then
 
 fi
 
+echo "export TERM=xterm" >> /root/.bashrc
+
 if [ "$1" == "daemonize" ];then	
   grep -q -F "source ${rc_files[0]}" /root/.bashrc || echo "source ${rc_files[0]}" >> /root/.bashrc
   daemonize
