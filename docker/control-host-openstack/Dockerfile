@@ -13,7 +13,7 @@ RUN yum install -y epel-release; \
                  python-heatclient python-neutronclient \
                  python-novaclient python-saharaclient \
                  python-swiftclient python-troveclient \
-                 python-openstackclient \
+                 python-openstackclient python-dns \
                  pyOpenSSL \
                  origin-clients; \
   yum clean all; \

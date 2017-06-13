@@ -1,8 +1,11 @@
 ---
 
 named_config_views:
-- name: "casl"
+- name: "casl-private"
   zone:
-  - "dns_domain": "casl.example.com"
+  - "dns_domain": "private.example.com"
+- name: "casl-public"
+  zone:
+  - "dns_domain": "public.example.com"
   forwarder:
   - "8.8.8.8"

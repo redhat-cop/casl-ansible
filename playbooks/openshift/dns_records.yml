@@ -1,8 +1,0 @@
----
-  - name: "Creating DNS records"
-    template:
-      dest: "/tmp/records.yml"
-      src: "./templates/records.template.yml"
-      force: yes
-    delegate_to: localhost
-

@@ -1,7 +1,0 @@
----
-  - name: "Setting up views"
-    template:
-      dest: /tmp/named_views.yaml
-      src: ./playbooks/templates/named_views.template
-      force: true
-    delegate_to: localhost

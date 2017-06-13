@@ -7,20 +7,33 @@ ansible_become: True
 openstack_default_image_name: "rhel-guest-image-7.3-35.x86_64"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "external"
-openstack_dns_domain: "casl.example.com"
 openstack_subnet_prefix: 192.168.99
-openstack_nameservers:
-- 192.168.1.1
+openstack_num_masters: 1
 openstack_num_nodes: 2
 openstack_num_infra: 1
-dns_domain: "casl.example.com"
-cluster_id: "casl.example.com"
-public_dns_forwarder: 192.168.1.1
+
 env_id: "sample"
-#
+
+public_dns_domain: "casl.example.com"
+public_dns_nameservers:
+- 192.168.1.1
+
+# Roll-your-own DNS 
+openstack_num_dns: 0
+
+external_nsupdate_keys:
+  public:
+    key_secret: 'SKqKNdpfk7llKxZ57bbxUnUDobaaJp9t8CjXLJPl+fRI5mPcSBuxTAyvJPa6Y9R7vUg9DwCy/6WTpgLNqnV4Hg=='
+    key_algorithm: 'hmac-md5'
+    server: '192.168.1.1'
+  private:
+    key_secret: 'kVE2bVTgZjrdJipxPhID8BEZmbHD8cExlVPR+zbFpW6la8kL5wpXiwOh8q5AAosXQI5t95UXwq3Inx8QT58duw=='
+    key_algorithm: 'hmac-md5'
+    server: '192.168.1.2'
+
 docker_volume_size: "5"
 docker_storage_block_device: "/dev/vdb"
-#
+
 # # Subscription Management Details
 rhsm_register: True
 rhsm_repos:

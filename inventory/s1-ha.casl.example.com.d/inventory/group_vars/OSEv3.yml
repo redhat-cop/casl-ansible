@@ -4,7 +4,7 @@ openshift_deployment_type: openshift-enterprise
 openshift_master_cluster_method: native
 openshift_master_cluster_hostname: "{{ groups.lb.0 }}"
 openshift_master_cluster_public_hostname: "{{ groups.lb.0 }}"
-openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
 openshift_master_identity_providers:
  - 'name': 'htpasswd_auth'
@@ -16,7 +16,9 @@ openshift_master_identity_providers:
 openshift_hosted_logging_deploy: true
 
 openshift_hosted_metrics_deploy: true
+
 openshift_node_labels: "{{ openstack.metadata.node_labels}}"
+
 openshift_node_kubelet_args:
   minimum-container-ttl-duration:
   - "10s"
@@ -32,4 +34,3 @@ openshift_node_kubelet_args:
   - '80'
   image-gc-low-threshold: 
   - '60'
-
