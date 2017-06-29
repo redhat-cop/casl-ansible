@@ -1,4 +1,5 @@
 ---
+deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_release: v3.5
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"

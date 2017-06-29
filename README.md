@@ -17,8 +17,8 @@ In addition to _cloning this repo_, you'll need the following:
 * An `~/.ansible.cfg` file containing the following:
 ```
 [defaults]
-roles_path=/root/repository/casl-ansible/roles:/root/repository/openshift-ansible/roles
-filter_plugins= /usr/share/ansible_plugins/filter_plugins:/root/repository/openshift-ansible/filter_plugins
+roles_path=/root/code/casl-ansible/roles:/root/code/openshift-ansible/roles
+filter_plugins= /usr/share/ansible_plugins/filter_plugins:/root/code/openshift-ansible/filter_plugins
 host_key_checking = False
 ```
 * Clone this, and dependent `openshift-ansible` repositories into the same directory
@@ -66,7 +66,7 @@ container.
 
 3) Run the `end-to-end` provisioning playbook
 ```
-ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml -e openstack_ssh_public_key=<your_ssh_key_name>
+ansible-playbook -i /root/code/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/code/casl-ansible/playbooks/openshift/end-to-end.yml -e openstack_ssh_public_key=<your_ssh_key_name>
 ```
 
 The `openstack_ssh_public_key` variable at the end should specify the name of your OpenStack keypair (`openstack keypair list`).
@@ -87,6 +87,6 @@ openstack_num_infra=1
 and then re-running the playbook.
 
 ```
-ansible-playbook -i /root/repository/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/repository/casl-ansible/playbooks/openshift/end-to-end.yml
+ansible-playbook -i /root/code/casl-ansible/inventory/sample.casl.example.com.d/inventory /root/code/casl-ansible/playbooks/openshift/end-to-end.yml
 ```
 
