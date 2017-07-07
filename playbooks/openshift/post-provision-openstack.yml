@@ -24,7 +24,7 @@
   - name: "Generate dns-server views"
     include: openstack_dns_views.yml
   roles:
-  - role: dns-server
+  - role: infra-ansible/roles/dns-server
 
 # Build and process DNS Records
 - hosts: localhost
@@ -33,7 +33,7 @@
   - name: "Generate dns records"
     include: openstack_dns_records.yml
   roles:
-  - role: dns
+  - role: infra-ansible/roles/dns
 
 # Use newly configured DNS server for this container ...
 - hosts: localhost

@@ -21,14 +21,14 @@ roles_path=/root/code/casl-ansible/roles:/root/code/openshift-ansible/roles
 filter_plugins= /usr/share/ansible_plugins/filter_plugins:/root/code/openshift-ansible/filter_plugins
 host_key_checking = False
 ```
-* Clone this, and dependent `openshift-ansible` repositories into the same directory
+* Clone this repository (make sure to adjust paths as fit for your local environment - in this case `~src` is used):
 ```
 cd ~/src/
 git clone git@github.com:redhat-cop/casl-ansible.git
 ```
 * Copy `casl-ansible/inventory/sample.casl.example.com.d/inventory/clouds.yaml` to `~/.config/openstack/clouds.yaml`
 
-* Download/untar `openshift-ansible` for use as part of the install. Make sure to do so within the same directory as above (i.e.: `~/src`), and either rename the directory to `openshift-ansible` or create symlink to it (see example below). See table below for versions / urls to be used for the download. Note that other versions may work as well, but these are the ones we have tested and found to be stable. Feel free to submit PRs with updated versions as they are found to be functional. 
+* Download/untar `openshift-ansible` (or use git clone) for use as part of the install. Make sure to do so within the same directory as above (i.e.: `~/src`), and either rename the directory to `openshift-ansible` or create symlink to it (see example below). See table below for versions / urls to be used for the download. Note that other versions may work as well, but these are the ones we have tested and found to be stable. Feel free to submit PRs for this file with updated versions as they are found to be functional.
 
 (*hint* right-click the `openshift-ansible` version number in the table below and copy the URL)
 
@@ -39,7 +39,15 @@ ln -fs openshift-ansible-*<version>* openshift-ansible
 
 | openshift-ansible url     | OpenShift version | 
 |:-------------------------:|:-----------------:|
+| [3.5.77-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.5.77-1.tar.gz) | OCP 3.5.x |
 | [3.4.50-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.4.60-1.tar.gz) | OCP 3.4 |
+
+* Run `ansible-galaxy` to pull in the necssary requirements for the CASL provisioning:
+
+```
+cd ~/src/casl-ansible
+ansible-galaxy install -r casl-requirements.yml -p roles
+```
 
 Cool! Now you're ready to provision OpenShift clusters
 
