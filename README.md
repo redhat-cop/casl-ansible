@@ -14,13 +14,6 @@ In addition to _cloning this repo_, you'll need the following:
 * A [Key-pair created in OpenStack](https://github.com/naturalis/openstack-docs/wiki/Howto:-Creating-and-using-OpenStack-SSH-keypairs-on-Linux-and-OSX)
 * Docker installed (`yum install -y docker` on RHEL/Centos, `dnf install docker -y` on Fedora)
   * If you plan to run docker as yourself (non-root), your username must be added to the `docker` user group.
-* An `~/.ansible.cfg` file containing the following:
-```
-[defaults]
-roles_path=/root/code/casl-ansible/roles:/root/code/openshift-ansible/roles
-filter_plugins= /usr/share/ansible_plugins/filter_plugins:/root/code/openshift-ansible/filter_plugins
-host_key_checking = False
-```
 * Clone this repository (make sure to adjust paths as fit for your local environment - in this case `~src` is used):
 ```
 cd ~/src/
