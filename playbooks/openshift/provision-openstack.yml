@@ -1,9 +1,9 @@
 ---
 - hosts: localhost
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre-tasks.yml
   roles:
-  - role: openstack-stack
+  - role: openshift-ansible-contrib/roles/openstack-stack
     stack_name: "{{ env_id }}.{{ public_dns_domain }}"
     dns_domain: "{{ public_dns_domain }}"
     dns_nameservers: "{{ public_dns_nameservers }}"
@@ -26,7 +26,6 @@
     app_volume_size: "{{ docker_volume_size }}"
     infra_volume_size: "{{ docker_volume_size }}"
 
-
 - name: Refresh Server inventory
   hosts: localhost
   connection: local
@@ -44,5 +43,14 @@
   - name: waiting for server to come back
     local_action: wait_for host={{ hostvars[inventory_hostname]['ansible_ssh_host'] }} port=22 delay=30 timeout=300
     become: false
+
+- hosts: cluster_hosts
+  tasks:
+  - name: Copy the 'private_v4' address out of the 'openstack' section to make it generic
+    set_fact:
+      private_v4: "{{ openstack.private_v4 }}"
+  - name: Copy the 'public_v4' address out of the 'openstack' section to make it generic
+    set_fact:
+      public_v4: "{{ openstack.public_v4 }}"
 
 - include: post-provision-openstack.yml

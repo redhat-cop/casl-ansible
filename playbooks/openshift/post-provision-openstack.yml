@@ -3,24 +3,24 @@
 # Assign hostnames
 - hosts: cluster_hosts
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre-tasks.yml
   roles:
-  - role: hostnames
+  - role: openshift-ansible-contrib/roles/hostnames
 
 # Subscribe DNS Host to allow for configuration below
 - hosts: dns
   roles:
-    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
+    - { role: openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
 
 # Determine which DNS server(s) to use for our generated records
 - hosts: localhost
   roles: 
-  - dns-server-detect
+  - openshift-ansible-contrib/roles/dns-server-detect
 
 # Build the DNS Server Views and Configure DNS Server(s)
 - hosts: dns
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre-tasks.yml
   - name: "Generate dns-server views"
     include: openstack_dns_views.yml
   roles:
@@ -29,7 +29,7 @@
 # Build and process DNS Records
 - hosts: localhost
   pre_tasks:
-  - include: roles/common/pre_tasks/pre_tasks.yml
+  - include: pre-tasks.yml
   - name: "Generate dns records"
     include: openstack_dns_records.yml
   roles:

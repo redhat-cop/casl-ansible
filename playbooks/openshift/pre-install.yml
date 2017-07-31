@@ -9,7 +9,7 @@
 #
 - hosts: OSEv3
   roles:
-    - { role: subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - { role: docker, tags: 'docker' }
-    - { role: openshift-prep, tags: 'openshift-prep' }
+    - { role: openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
+    - { role: openshift-ansible-contrib/roles/docker, tags: 'docker' }
+    - { role: openshift-ansible-contrib/roles/openshift-prep, tags: 'openshift-prep' }
 

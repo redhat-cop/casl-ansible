@@ -1,1 +1,1 @@
-== The rhc-ose playbooks
+# The CASL Ansible playbooks

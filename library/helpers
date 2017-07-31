@@ -1,6 +1,0 @@
-#!/bin/bash
-# Usage: error_out <message> <error_code>
-error_out() {
-  echo "ERROR: ${1}"
-  exit $2
-}
