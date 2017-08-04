@@ -21,18 +21,16 @@
 - hosts: dns
   pre_tasks:
   - include: pre-tasks.yml
-  - name: "Generate dns-server views"
-    include: openstack_dns_views.yml
   roles:
+  - role: openshift-ansible-contrib/roles/dns-views
   - role: infra-ansible/roles/dns-server
 
 # Build and process DNS Records
 - hosts: localhost
   pre_tasks:
   - include: pre-tasks.yml
-  - name: "Generate dns records"
-    include: openstack_dns_records.yml
   roles:
+  - role: openshift-ansible-contrib/roles/dns-records
   - role: infra-ansible/roles/dns
 
 # Use newly configured DNS server for this container ...
