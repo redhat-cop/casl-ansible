@@ -1,0 +1,72 @@
+---
+kind: List
+apiVersion: v1
+metadata: {}
+items:
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    annotations:
+      openshift.io/description: ''
+      openshift.io/display-name: Stage Env for CakePHP App
+      openshift.io/requester: bob
+    creationTimestamp: 
+    name: cakephp-stage
+  spec: {}
+  status: {}
+- apiVersion: v1
+  groupNames:
+  - system:serviceaccounts:cakephp-stage
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: 
+    name: system:image-pullers
+    namespace: cakephp-stage
+  roleRef:
+    name: system:image-puller
+  subjects:
+  - kind: SystemGroup
+    name: system:serviceaccounts:cakephp-stage
+  userNames: 
+- apiVersion: v1
+  groupNames: 
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: 
+    name: system:image-builders
+    namespace: cakephp-stage
+  roleRef:
+    name: system:image-builder
+  subjects:
+  - kind: ServiceAccount
+    name: builder
+  userNames:
+  - system:serviceaccount:cakephp-stage:builder
+- apiVersion: v1
+  groupNames: 
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: 
+    name: system:deployers
+    namespace: cakephp-stage
+  roleRef:
+    name: system:deployer
+  subjects:
+  - kind: ServiceAccount
+    name: deployer
+  userNames:
+  - system:serviceaccount:cakephp-stage:deployer
+- apiVersion: v1
+  groupNames: 
+  kind: RoleBinding
+  metadata:
+    creationTimestamp: 
+    name: admin
+    namespace: cakephp-stage
+  roleRef:
+    name: admin
+  subjects:
+  - kind: User
+    name: bob
+  userNames:
+  - bob

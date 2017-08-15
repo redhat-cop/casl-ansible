@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: ${NAME}
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ${NAME}
+    namespace: ${NAMESPACE}
+    labels:
+      application: ${NAME}
+  spec:
+    dockerImageRepository: "${IMAGE_REGISTRY}"
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for application's service.
+    labels:
+      application: ${NAME}
+    name: ${NAME}
+    namespace: ${NAMESPACE}
+  spec:
+    to:
+      kind: Service
+      name: ${NAME}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      application: ${NAME}
+    name: ${NAME}
+    namespace: ${NAMESPACE}
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      application: ${NAME}
+      deploymentconfig: ${NAME}
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${NAME}
+    name: ${NAME}
+    namespace: ${NAMESPACE}
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: ${NAME}
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${NAME}
+          deploymentconfig: ${NAME}
+      spec:
+        containers:
+        - image: ${NAME}
+          imagePullPolicy: Always
+          name: ${NAME}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 8080
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}:${IMAGE_TAG}
+          namespace: ${NAMESPACE}
+      type: ImageChange
+    - type: ConfigChange
+  status: {}
+parameters:
+- name: NAME
+  description: Name of the Application
+  value: "cakephp"
+  required: true
+- description: The NameSpace to Deploy to
+  displayName: Namespace
+  name: NAMESPACE
+  required: true
+- description: Image Tag to be used for deployment
+  displayName: CakePHP Tag
+  name: IMAGE_TAG
+  value: "latest"
+  required: true
+- description: Location of the CakePHP Image
+  displayName: CakePHP Image
+  name: IMAGE_REGISTRY
+  value: ""

@@ -1,0 +1,30 @@
+---
+
+- name: "Create OpenShift objects for Cluster Namespaces"
+  command: >
+    oc apply -f {{ item.1.file }} 
+  with_subelements:
+  - "{{ openshift_cluster_content }}"
+  - content 
+  when:
+  - item.0.object == 'namespace'
+
+- name: "Create OpenShift objects for Cluster Policies"
+  command: >
+    oc apply -f {{ item.1.file }} 
+  with_subelements:
+  - "{{ openshift_cluster_content }}"
+  - content 
+  when:
+  - item.0.object == 'policy'
+
+- name: "Create OpenShift objects"
+  shell: >
+    oc process -f {{ item.1.template }} --param-file={{ item.1.params }} | oc apply -f -
+  with_subelements:
+  - "{{ openshift_cluster_content }}"
+  - content 
+  when:
+  - item.0.object not in [ 'namespace', 'policy' ]
+  - item.1.params is defined
+  - item.1.params|trim != ""

@@ -54,3 +54,35 @@ rhsm_password: ''
 # # leave commented out if you want to `--auto-attach` a pool
 # rhsm_pool: ''
 
+openshift_cluster_content:
+- object: namespace
+  content:
+  - name: "cakephp-development"
+    file: "{{ inventory_dir }}/../files/cakephp/namespace/development.yml"
+  - name: "cakephp-stage"
+    file: "{{ inventory_dir }}/../files/cakephp/namespace/stage.yml"
+  - name: "cakephp-production"
+    file: "{{ inventory_dir }}/../files/cakephp/namespace/production.yml"
+  - name: "MyApp-development"
+    file: "https://raw.githubusercontent.com/redhat-cop/cluster-lifecycle/master/namespaces/myapp-dev.yml"
+- object: policy
+  content:
+  - file: "{{ inventory_dir }}/../files/policy/clusterroles.yml"
+  - file: "{{ inventory_dir }}/../files/policy/clusterrolebindings.yml"
+  - file: "{{ inventory_dir }}/../files/policy/storageclass.yml"
+- object: builds
+  content:
+  - name: "cakephp"
+    template: "{{ inventory_dir }}/../files/cakephp/build/template.yml"
+    params: "{{ inventory_dir }}/../files/cakephp/build/development/params"
+- object: deployments
+  content:
+  - name: "cakephp-development"
+    template: "{{ inventory_dir }}/../files/cakephp/deployment/template.yml"
+    params: "{{ inventory_dir }}/../files/cakephp/deployment/development/params"
+  - name: "cakephp-stage"
+    template: "{{ inventory_dir }}/../files/cakephp/deployment/template.yml"
+    params: "{{ inventory_dir }}/../files/cakephp/deployment/stage/params"
+  - name: "cakephp-development"
+    template: "{{ inventory_dir }}/../files/cakephp/deployment/template.yml"
+    params: "{{ inventory_dir }}/../files/cakephp/deployment/production/params"
