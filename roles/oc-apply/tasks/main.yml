@@ -20,7 +20,7 @@
 
 - name: "Create OpenShift objects"
   shell: >
-    oc process -f {{ item.1.template }} --param-file={{ item.1.params }} | oc apply -f -
+    oc process -f {{ item.1.template }} --param-file={{ item.1.params }} | oc apply -n {{ lookup('ini', 'NAMESPACE type=properties file=' ~ item.1.params) }} -f -
   with_subelements:
   - "{{ openshift_cluster_content }}"
   - content 
@@ -28,3 +28,4 @@
   - item.0.object not in [ 'namespace', 'policy' ]
   - item.1.params is defined
   - item.1.params|trim != ""
+  - lookup('ini', 'NAMESPACE type=properties file=' ~ item.1.params) is defined
