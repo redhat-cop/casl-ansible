@@ -1,0 +1,15 @@
+---
+
+- name: "Create OpenShift objects for '{{ entry.object }}' with params"
+  shell: >
+    oc process -f {{ item.template }} --param-file={{ item.params }} | oc apply -n {{ lookup('ini', 'NAMESPACE type=properties file=' ~ item.params) }} -f -
+  with_items:
+  - "{{ entry.content }}"
+  when:
+  - item.template is defined 
+  - item.template != ''
+  - item.params is defined
+  - item.params != ''
+  - lookup('ini', 'NAMESPACE type=properties file=' ~ item.params) is defined
+
+

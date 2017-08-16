@@ -1,31 +1,41 @@
 ---
 
-- name: "Create OpenShift objects for Cluster Namespaces"
-  command: >
-    oc apply -f {{ item.1.file }} 
-  with_subelements:
-  - "{{ openshift_cluster_content }}"
-  - content 
-  when:
-  - item.0.object == 'namespace'
+# We need to create namespaces and policies first,
+# hence the special handling up front of these two...
 
-- name: "Create OpenShift objects for Cluster Policies"
-  command: >
-    oc apply -f {{ item.1.file }} 
-  with_subelements:
+- name: "Create OpenShift Cluster Namespaces"
+  include: apply-content.yml
+  with_items:
   - "{{ openshift_cluster_content }}"
-  - content 
+  loop_control:
+    loop_var: entry
   when:
-  - item.0.object == 'policy'
+  - entry.object == 'namespace'
 
-- name: "Create OpenShift objects"
-  shell: >
-    oc process -f {{ item.1.template }} --param-file={{ item.1.params }} | oc apply -n {{ lookup('ini', 'NAMESPACE type=properties file=' ~ item.1.params) }} -f -
-  with_subelements:
+- name: "Create OpenShift Cluster Policies"
+  include: apply-content.yml
+  with_items:
   - "{{ openshift_cluster_content }}"
-  - content 
+  loop_control:
+    loop_var: entry
   when:
-  - item.0.object not in [ 'namespace', 'policy' ]
-  - item.1.params is defined
-  - item.1.params|trim != ""
-  - lookup('ini', 'NAMESPACE type=properties file=' ~ item.1.params) is defined
+  - entry.object == 'policy'
+
+- name: "Create OpenShift cluster wide objects"
+  include: apply-content.yml
+  with_items:
+  - "{{ openshift_cluster_content }}"
+  loop_control:
+    loop_var: entry
+  when:
+  - entry.object not in [ 'namespace', 'policy' ]
+
+- name: "Create OpenShift objects with params"
+  include: process-content.yml
+  with_items:
+  - "{{ openshift_cluster_content }}"
+  loop_control:
+    loop_var: entry
+  when:
+  - entry.object not in [ 'namespace', 'policy' ]
+  - entry.content is defined 
