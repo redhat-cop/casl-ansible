@@ -77,6 +77,10 @@ openshift_cluster_content:
     params: "{{ inventory_dir }}/../files/cakephp/build/development/params"
 - object: deployments
   content:
+  - name: "jenkins"
+    namespace: "cakephp-dev"
+    template: "openshift//jenkins-ephemeral"
+    params: "{{ inventory_dir }}/../files/cakephp/deployment/development/jenkins-params"
   - name: "cakephp-development"
     template: "{{ inventory_dir }}/../files/cakephp/deployment/template.yml"
     params: "{{ inventory_dir }}/../files/cakephp/deployment/development/params"
