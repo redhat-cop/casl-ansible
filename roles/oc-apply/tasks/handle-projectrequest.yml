@@ -1,0 +1,4 @@
+---
+
+- name: "Create OpenShift Cluster ProjectRequest"
+  include: create-content.yml

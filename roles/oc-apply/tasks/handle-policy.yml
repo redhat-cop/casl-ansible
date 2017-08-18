@@ -1,0 +1,4 @@
+---
+
+- name: "Create OpenShift Cluster Policies"
+  include: apply-content.yml

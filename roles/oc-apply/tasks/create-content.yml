@@ -1,0 +1,21 @@
+---
+
+- name: "Create OpenShift Cluster '{{ entry.object }}' - based on individual files"
+  command: >
+    oc create -f {{ object.file }}
+  ignore_errors: True
+  with_items:
+  - "{{ entry.content | default([]) }}"
+  loop_control:
+    loop_var: object
+  when: 
+  - object.file is defined 
+  - object.file|trim != ''
+
+- name: "Create OpenShift Cluster '{{ entry.object }}' - based on directory"
+  command: >
+    oc create -f {{ entry.content_dir }}
+  ignore_errors: True
+  when:
+  - entry.content_dir is defined 
+  - entry.content_dir|trim != ''

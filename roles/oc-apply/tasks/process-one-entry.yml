@@ -34,4 +34,4 @@
 
 - name: "Create OpenShift objects for '{{ entry.object }}' with params"
   shell: >
-    oc process {{ process_f }} {{ item.template }} --param-file={{ item.params }} | oc apply {{ target_namespace }} -f -
+    oc process {{ process_f }} {{ item.template }} {{ target_namespace }} --param-file={{ item.params }} | oc apply {{ target_namespace }} -f -

@@ -55,6 +55,10 @@ rhsm_password: ''
 # rhsm_pool: ''
 
 openshift_cluster_content:
+- object: projectrequest
+  content:
+  - name: "my-cakephp-spaces"
+    file: "{{ inventory_dir }}/../files/cakephp/ProjectRequest/my-cakephp-spaces.yml"
 - object: namespace
   content:
   - name: "cakephp-development"
