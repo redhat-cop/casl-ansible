@@ -5,6 +5,18 @@
     process_f: ''
     target_namespace: ''
 
+- name: "Check if params file exists"
+  stat:
+    path: "{{ item.params }}"
+  ignore_errors: yes
+  register: params_result
+
+- name: "Fail if params file doesn't exist"
+  fail:
+    msg: "{{ item.params }} - params file doesn't exist."
+  when:
+  - params_result.stat.exists == False
+
 - name: "Check if the passed in template is a remote location (URL)"
   uri:
     url: "{{ item.template }}"
