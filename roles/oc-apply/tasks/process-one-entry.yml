@@ -1,0 +1,49 @@
+---
+
+- name: "Set default values"
+  set_fact:
+    process_f: ''
+    target_namespace: ''
+
+- name: "Check if params file exists"
+  stat:
+    path: "{{ item.params }}"
+  ignore_errors: yes
+  register: params_result
+
+- name: "Fail if params file doesn't exist"
+  fail:
+    msg: "{{ item.params }} - params file doesn't exist."
+  when:
+  - params_result.stat.exists == False
+
+- name: "Check if the passed in template is a remote location (URL)"
+  uri:
+    url: "{{ item.template }}"
+  ignore_errors: yes
+  register: url_result
+
+- name: "Check if passed in template is a local file (if not remote location)"
+  stat:
+    path: "{{ item.template }}"
+  ignore_errors: yes
+  register: file_result
+  when:
+  - (url_result.failed is defined and url_result.failed) or (url_result.status is defined and url_result.status != 200)
+
+- name: "Set the '-f' option if the template is either a remote or local file"
+  set_fact:
+    process_f: ' -f '
+  when: 
+  - (url_result.failed is defined and not url_result.failed) or (url_result.status is defined and url_result.status == 200) or file_result.stat.exists 
+
+- name: "Set the target namespace option if supplied"
+  set_fact:
+    target_namespace: "-n {{ item.namespace }}"
+  when:
+  - item.namespace is defined
+  - item.namespace|trim != ''
+
+- name: "Create OpenShift objects for '{{ entry.object }}' with params"
+  shell: >
+    oc process {{ process_f }} {{ item.template }} {{ target_namespace }} --param-file={{ item.params }} | oc apply {{ target_namespace }} -f -

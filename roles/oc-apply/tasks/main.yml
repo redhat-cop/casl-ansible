@@ -1,41 +1,51 @@
 ---
 
-# We need to create namespaces and policies first,
-# hence the special handling up front of these two...
 
-- name: "Create OpenShift Cluster Namespaces"
-  include: apply-content.yml
-  with_items:
-  - "{{ openshift_cluster_content }}"
-  loop_control:
-    loop_var: entry
-  when:
-  - entry.object == 'namespace'
+# We need to create a few objects first,
+# hence the special handling up front of these ...
 
-- name: "Create OpenShift Cluster Policies"
-  include: apply-content.yml
-  with_items:
+- name: "Build special handling list"
+  set_fact:
+    special_handling:
+    - 'projectrequest'
+    - 'namespace'
+    - 'policy'
+
+- name: "Handle special cases first"
+  include: handle-{{ case.1 }}.yml entry={{ case.0 }}
+  with_together:
   - "{{ openshift_cluster_content }}"
+  - "{{ special_handling }}"
   loop_control:
-    loop_var: entry
+    loop_var: case
   when:
-  - entry.object == 'policy'
+  - case.0.object == case.1
+
+- name: "Eliminate the special handling cases now that they are done"
+  set_fact:
+    remaining_openshift_cluster_content: "{{ remaining_openshift_cluster_content | default([]) + [ case.0 ] }}"
+  with_together:
+  - "{{ openshift_cluster_content }}"
+  - "{{ special_handling }}"
+  loop_control:
+    loop_var: case
+  when:
+  - case.0.object != case.1
 
 - name: "Create OpenShift cluster wide objects"
   include: apply-content.yml
   with_items:
-  - "{{ openshift_cluster_content }}"
+  - "{{ remaining_openshift_cluster_content }}"
   loop_control:
     loop_var: entry
   when:
-  - entry.object not in [ 'namespace', 'policy' ]
+  - entry.content is defined 
 
 - name: "Create OpenShift objects with params"
   include: process-content.yml
   with_items:
-  - "{{ openshift_cluster_content }}"
+  - "{{ remaining_openshift_cluster_content }}"
   loop_control:
     loop_var: entry
   when:
-  - entry.object not in [ 'namespace', 'policy' ]
   - entry.content is defined 
