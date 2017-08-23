@@ -20,8 +20,9 @@
 - name: "Check if the passed in template is a remote location (URL)"
   uri:
     url: "{{ item.template }}"
-  ignore_errors: yes
   register: url_result
+  failed_when:
+  - '"unknown url" not in url_result.msg and url_result.url is not defined'
 
 - name: "Check if passed in template is a local file (if not remote location)"
   stat:
@@ -29,13 +30,13 @@
   ignore_errors: yes
   register: file_result
   when:
-  - (url_result.failed is defined and url_result.failed) or (url_result.status is defined and url_result.status != 200)
+  - '"unknown url" in url_result.msg or (url_result.status is defined and url_result.status != 200)'
 
 - name: "Set the '-f' option if the template is either a remote or local file"
   set_fact:
     process_f: ' -f '
-  when: 
-  - (url_result.failed is defined and not url_result.failed) or (url_result.status is defined and url_result.status == 200) or file_result.stat.exists 
+  when:
+  - '"unknown url" not in url_result.msg or file_result.stat.exists'
 
 - name: "Set the target namespace option if supplied"
   set_fact:
