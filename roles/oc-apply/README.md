@@ -28,9 +28,16 @@ openshift_cluster_content:
     namespace: <target_openshift_namespace>
 ```
 
-You have the choice of sourcing a `file` or a `template`. The `file` definition expects that the sourced file has all definitions set and will not pass any parameters. The `template` definition expects a `params` file to be sourced along with it which will be passed into the template. 
+You have the choice of sourcing a `file` or a `template`. The `file` definition expects that the sourced file has all definitions set and will not pass any parameters. The `template` definition expects a `params` file to be sourced along with it which will be passed into the template.
 
 Both choices give you the option of defining target namespaces in the template manually, or adding the `namespace` variable alongside the template and params. 
+
+You can source a directory composed of files (without parameters) using `content_dir` instead of defining each file individually. That would look like this:
+```yaml
+- object: policy
+  content_dir: <dir_with_policy_files>
+```
+In this example above, all of the files in the `<dir_with_policy_files>` directory would get sourced and applied to the cluster.
 
 ### namespace objects (cluster-admin only)
 
