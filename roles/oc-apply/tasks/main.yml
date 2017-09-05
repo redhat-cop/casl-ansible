@@ -19,6 +19,7 @@
   loop_control:
     loop_var: case
   when:
+  - case.0.object is defined
   - case.0.object == case.1
 
 - name: "Eliminate the special handling cases now that they are done"
@@ -30,6 +31,7 @@
   loop_control:
     loop_var: case
   when:
+  - case.0.object is defined
   - case.0.object != case.1
 
 - name: "Create OpenShift cluster wide objects"
