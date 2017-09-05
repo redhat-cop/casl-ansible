@@ -35,7 +35,7 @@
 - name: "Create OpenShift cluster wide objects"
   include: apply-content.yml
   with_items:
-  - "{{ remaining_openshift_cluster_content }}"
+  - "{{ remaining_openshift_cluster_content | default([]) }}"
   loop_control:
     loop_var: entry
   when:
@@ -44,7 +44,7 @@
 - name: "Create OpenShift objects with params"
   include: process-content.yml
   with_items:
-  - "{{ remaining_openshift_cluster_content }}"
+  - "{{ remaining_openshift_cluster_content | default([]) }}"
   loop_control:
     loop_var: entry
   when:
