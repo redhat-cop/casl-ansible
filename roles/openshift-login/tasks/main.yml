@@ -1,0 +1,100 @@
+---
+# This role requires the following facts to be set before execution:
+# - openshift_login_url
+# - openshift_user/openshift_password OR openshift_token
+# - oc_login (optional - only set to False if a valid session / token already exists)
+
+- name: "Set Default Login Facts"
+  set_fact:
+    auth_token: False
+    auth_user_pass: False
+
+- name: "Fail for Missing OpenShift Hosting Env"
+  fail: msg="This role requires openshift_login_url to be set and non empty"
+  when: 
+  - openshift_login_url|trim == ""
+
+- name: "Set variable openshift_user when not set"
+  set_fact:
+    openshift_user: ''
+  when: openshift_user is not defined
+
+- name: "Set variable openshift_password when not set"
+  set_fact:
+    openshift_password: ''
+  when: openshift_password is not defined
+
+- name: "Set variable openshift_token when not set"
+  set_fact:
+    openshift_token: ''
+  when: openshift_token is not defined
+
+- name: "Default oc_login to True when not set"
+  set_fact:
+    oc_login: True
+  when: oc_login is not defined
+
+- name: "Check whether we will authenticate with username & password"
+  set_fact:
+    auth_user_pass: True
+  when:
+  - openshift_user|trim != ''
+  - openshift_password|trim != ''
+  - oc_login|bool == True
+
+- name: "Check whether we will authenticate with a token"
+  set_fact:
+    auth_token: True
+  when:
+  - openshift_token|trim != ''
+  - oc_login|bool == True
+
+- name: "Fail for Missing Authentication method"
+  fail: msg="This role requires either openshift_token, or openshift_user and openshift_password to be set"
+  when:
+  - auth_token|bool == False
+  - auth_user_pass|bool == False
+  - oc_login|bool == True
+
+- name: "Log in to OpenShift Client (username/password)"
+  command: >
+    {{ openshift.common.client_binary }} login {{ openshift_login_url }}
+    --insecure-skip-tls-verify=true --username={{ openshift_user }} --password={{ openshift_password }}
+  changed_when: False
+  when:
+  - auth_user_pass|bool == True
+  - auth_token|bool == False
+  - oc_login|bool == True
+
+- name: "Log in to OpenShift Client (token)"
+  command: >
+    {{ openshift.common.client_binary }} login {{ openshift_login_url }}
+    --insecure-skip-tls-verify=true --token={{ openshift_token }}
+  changed_when: False
+  when:
+  - auth_user_pass|bool == False
+  - auth_token|bool == True
+  - oc_login|bool == True
+
+- name: "Add token to all openshift client comands when token is set"
+  set_fact:
+    openshift:
+      common:
+        client_binary: "{{ openshift.common.client_binary }} --token={{ openshift_token }}"
+        admin_binary: "{{ openshift.common.admin_binary }} --token={{ openshift_token }}"
+  when: auth_token|bool == True
+
+- name: "Gather the openshift token, if not already set"
+  command: >
+    {{ openshift.common.client_binary }} whoami -t
+  register: token_output
+  when:
+  - openshift_token|trim == ''
+
+- name: "Set openshift_token fact when not already set"
+  set_fact:
+    openshift_token: "{{ token_output.stdout }}"
+  when: 
+  - token_output.stdout is defined
+  - token_output|trim != ''
+
