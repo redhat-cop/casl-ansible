@@ -1,0 +1,84 @@
+---
+
+- name: Fail if Required Parameters Not Provided
+  fail:
+    msg: "Required Parameters have Not Been Provided"
+  when: (cfme_host | trim == "") or (cfme_host is none) or (cfme_host is undefined) or (cfme_username | trim == "") or (cfme_username is none) or (cfme_username is undefined) or (cfme_password | trim == "") or (cfme_password is none) or (cfme_password is undefined)
+
+- name: Retrieve Default Service Account Token
+  command: >
+    oc serviceaccounts get-token -n {{ default_token_sa_namespace }} {{ default_token_sa_name }}
+  ignore_errors: True
+  register: default_management_token
+  
+- name: Set Default OpenShift Token if Not Provided
+  set_fact:
+    ocp_token: "{{ default_management_token.stdout }}"
+  when: default_management_token.rc == 0 and ((ocp_token | trim == "") or (ocp_token is none) or (ocp_token is undefined))
+    
+- name: Set Default Hawkular Token if Not Provided
+  set_fact:
+    hawkular_token: "{{ default_management_token.stdout }}"
+  when: default_management_token.rc == 0 and ((hawkular_token | trim == "") or (hawkular_token is none) or (hawkular_token is undefined))
+
+- name: Query Existing Providers
+  uri:
+    url: https://{{ cfme_host }}/api/providers
+    method: GET
+    user: "{{ cfme_username }}"
+    password: "{{ cfme_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: providers_result
+
+- name: Query Details From Each Provider
+  include: query_provider.yml
+  vars:    
+    provider_url: "{{ item }}"
+  with_items : "{{ providers_result.json.resources | default([]) }}"
+  when: providers_result is defined
+
+- name: Create Container Provider
+  uri:
+    url: https://{{ cfme_host }}/api/providers
+    method: POST
+    body: "{{ lookup('template', '{{role_path}}/templates/container_provider_rest.j2') }}"
+    user: "{{ cfme_username }}"
+    password: "{{ cfme_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+    body_format: json
+  register: container_provider_result
+  when: ocp_provider_found is not defined or ocp_provider_found != True
+
+- name: Update Container Provider
+  uri:
+    url: https://{{ cfme_host }}/api/providers/{{ ocp_provider_id }}
+    method: POST
+    body: "{{ lookup('template', '{{role_path}}/templates/container_provider_rest.j2') }}"
+    user: "{{ cfme_username }}"
+    password: "{{ cfme_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+    body_format: json
+  when: ocp_provider_found is defined and ocp_provider_found == True
+
+- name: Set Provider ID for New Provider
+  set_fact:
+    ocp_provider_id: "{{ container_provider_result.json.results[0].id }}"
+  when: ocp_provider_id is not defined
+
+- name: Refresh Container Provider
+  uri:
+    url: https://{{ cfme_host }}/api/providers/{{ ocp_provider_id }}
+    method: POST
+    body: "{\"action\" : \"refresh\"}"
+    user: "{{ cfme_username }}"
+    password: "{{ cfme_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+    body_format: json

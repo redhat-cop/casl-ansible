@@ -1,0 +1,14 @@
+---
+
+cfme_host:
+cfme_username:
+cfme_password:
+ocp_master_host: kubernetes.default.svc.cluster.local
+ocp_master_port: 443
+ocp_token:
+hawkular_token:
+hawkular_host: hawkular-metrics.openshift-infra.svc.cluster.local
+hawkular_port: 443
+ocp_container_provier_name: OCP
+default_token_sa_namespace: management-infra
+default_token_sa_name: management-admin

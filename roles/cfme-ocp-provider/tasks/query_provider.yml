@@ -1,0 +1,18 @@
+---
+
+- name: Query Provider
+  uri:
+    url: "{{ provider_url.href }}"
+    method: GET
+    user: "{{ cfme_username }}"
+    password: "{{ cfme_password }}"
+    force_basic_auth: true
+    validate_certs: false
+    status_code: 200
+  register: provider_result
+
+- name: Set Provider Facts When Match Found
+  set_fact:
+    ocp_provider_found: True
+    ocp_provider_id: "{{ provider_result.json.id }}"
+  when: "provider_result.json.name == ocp_container_provier_name"
