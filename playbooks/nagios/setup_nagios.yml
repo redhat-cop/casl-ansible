@@ -2,10 +2,10 @@
 - name: "Set up the nagios targets"
   hosts: nagios-targets
   roles:
-  - role: nagios-target
+  - role: infra-ansible/roles/nagios-target
     
 - name: "Set up nagios server"
   hosts: nagios-servers
   roles:
-  - role: nagios-server
+  - role: infra-ansible/roles/nagios-server
 
