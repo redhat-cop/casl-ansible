@@ -1,0 +1,40 @@
+---
+
+- name: "Set default values"
+  set_fact:
+    target_namespace: ''
+    file: "{{ item.file }}"
+
+- name: "Check if the passed in file is a remote location (URL)"
+  uri:
+    url: "{{ file }}"
+  register: url_result
+  failed_when:
+  - '"unknown url" not in url_result.msg and url_result.url is not defined'
+
+- name: "Check if passed in file is a local file (if not remote location)"
+  stat:
+    path: "{{ tmp_inv_dir }}{{ file }}"
+  ignore_errors: yes
+  register: st
+  when:
+  - '"unknown url" in url_result.msg or (url_result.status is defined and url_result.status != 200)'
+
+- name: "Pre-pend the temporary dir if the file exists at the local location"
+  set_fact:
+    file: "{{ tmp_inv_dir }}{{ item.file }}"
+  when:
+  - st is defined
+  - st.stat is defined
+  - st.stat.exists
+
+- name: "Set the target namespace option if supplied"
+  set_fact:
+    target_namespace: "-n {{ item.namespace }}"
+  when:
+  - item.namespace is defined
+  - item.namespace|trim != ''
+
+- name: "Create/Apply '{{ file|basename }}'"
+  command: >
+    oc {{ action }} {{ target_namespace }} -f {{ file }}

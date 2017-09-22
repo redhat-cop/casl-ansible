@@ -1,4 +1,6 @@
 ---
 
 - name: "Create OpenShift Cluster ProjectRequest"
+  vars:
+    action: "create"
   include: create-content.yml

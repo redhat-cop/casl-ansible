@@ -4,10 +4,11 @@
   set_fact:
     process_f: ''
     target_namespace: ''
+    file: "{{ item.template }}"
 
 - name: "Check if params file exists"
   stat:
-    path: "{{ item.params }}"
+    path: "{{ tmp_inv_dir }}{{ item.params }}"
   ignore_errors: yes
   register: params_result
 
@@ -26,7 +27,7 @@
 
 - name: "Check if passed in template is a local file (if not remote location)"
   stat:
-    path: "{{ item.template }}"
+    path: "{{ tmp_inv_dir }}{{ item.template }}"
   ignore_errors: yes
   register: file_result
   when:
@@ -38,6 +39,14 @@
   when:
   - '"unknown url" not in url_result.msg or file_result.stat.exists'
 
+- name: "Pre-pend the temporary dir if the file exists at the local location"
+  set_fact:
+    file: "{{ tmp_inv_dir }}{{ item.template }}"
+  when:
+  - file_result is defined
+  - file_result.stat is defined
+  - file_result.stat.exists
+
 - name: "Set the target namespace option if supplied"
   set_fact:
     target_namespace: "-n {{ item.namespace }}"
@@ -47,4 +56,4 @@
 
 - name: "Create OpenShift objects for '{{ entry.object }}' with params"
   shell: >
-    oc process {{ process_f }} {{ item.template }} {{ target_namespace }} --param-file={{ item.params }} | oc apply {{ target_namespace }} -f -
+    oc process {{ process_f }} {{ file }} {{ target_namespace }} --param-file={{ tmp_inv_dir }}{{ item.params }} | oc apply {{ target_namespace }} -f -

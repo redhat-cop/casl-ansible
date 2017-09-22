@@ -1,0 +1,7 @@
+---
+
+- name: "Copy dir to target directory"
+  copy: 
+    src: "{{ dir }}/"
+    dest: "{{ tmp_inv_dir }}{{ dir }}"
+  failed_when: false

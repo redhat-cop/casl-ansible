@@ -1,0 +1,14 @@
+---
+
+- name: "Create target directory to ensure it exists"
+  file:
+    path: "{{ tmp_inv_dir }}{{ file|dirname }}"
+    state: directory
+  when:
+  - file|dirname != ''
+
+- name: "Copy file to target directory"
+  copy: 
+    src: "{{ file }}"
+    dest: "{{ tmp_inv_dir }}{{ file }}"
+  failed_when: false

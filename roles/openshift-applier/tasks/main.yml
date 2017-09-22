@@ -1,5 +1,9 @@
 ---
 
+- name: "Copy inventory content to remote host(s) if not running 'locally'"
+  include: copy-inventory-to-remote.yml
+  when:
+  - ansible_connection != 'local'
 
 # We need to create a few objects first,
 # hence the special handling up front of these ...
@@ -12,7 +16,9 @@
     - 'policy'
 
 - name: "Handle special cases first"
-  include: handle-{{ case.1 }}.yml entry={{ case.0 }}
+  vars:
+    entry: "{{ case.0 }}"
+  include: handle-{{ case.1 }}.yml
   with_together:
   - "{{ openshift_cluster_content }}"
   - "{{ special_handling }}"
@@ -35,7 +41,9 @@
   - case.0.object != case.1
 
 - name: "Create OpenShift cluster wide objects"
-  include: apply-content.yml
+  vars:
+    action: "apply"
+  include: create-content.yml
   with_items:
   - "{{ remaining_openshift_cluster_content | default([]) }}"
   loop_control:
