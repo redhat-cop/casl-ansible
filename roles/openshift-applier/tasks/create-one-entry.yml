@@ -38,3 +38,7 @@
 - name: "Create/Apply '{{ file|basename }}'"
   command: >
     oc {{ action }} {{ target_namespace }} -f {{ file }}
+  register: command_result
+  failed_when:
+  - command_result.rc != 0
+  - "'AlreadyExists' not in command_result.stderr"

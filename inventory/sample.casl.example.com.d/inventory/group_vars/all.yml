@@ -59,6 +59,12 @@ openshift_cluster_content:
   content:
   - name: "my-cakephp-spaces"
     file: "{{ inventory_dir }}/../files/cakephp/ProjectRequest/my-cakephp-spaces.yml"
+  - name: "projectrequest-test1"
+    template: "{{ inventory_dir }}/../files/ProjectRequest/template.yml"
+    params: "{{ inventory_dir }}/../files/ProjectRequest/test1.param"
+  - name: "projectrequest-test2"
+    template: "{{ inventory_dir }}/../files/ProjectRequest/template.yml"
+    params: "{{ inventory_dir }}/../files/ProjectRequest/test2.param"
 - object: namespace
   content:
   - name: "cakephp-development"
@@ -68,11 +74,11 @@ openshift_cluster_content:
   - name: "cakephp-production"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/production.yml"
   - name: "MyApp-development"
-    file: "https://raw.githubusercontent.com/redhat-cop/cluster-lifecycle/master/namespaces/myapp-dev.yml"
+    file: "https://raw.githubusercontent.com/redhat-cop/cluster-lifecycle/inception-poc/namespaces/myapp-dev.yml"
 - object: policy
   content:
-  - file: "{{ inventory_dir }}/../files/policy/clusterroles.yml"
-  - file: "{{ inventory_dir }}/../files/policy/clusterrolebindings.yml"
+  - file: "{{ inventory_dir }}/../files/policy/01-clusterroles.yml"
+  - file: "{{ inventory_dir }}/../files/policy/02-clusterrolebindings.yml"
   - file: "{{ inventory_dir }}/../files/policy/storageclass.yml"
 - object: builds
   content:

@@ -1,6 +1,11 @@
 ---
 
-- name: "Create OpenShift Cluster Policies"
+- name: "Create OpenShift Cluster Policies (based on 'static' files)"
   vars:
     action: "apply"
   include: create-content.yml
+
+- name: "Create OpenShift Cluster Policies (based on templates)"
+  vars:
+    action: "apply"
+  include: process-content.yml

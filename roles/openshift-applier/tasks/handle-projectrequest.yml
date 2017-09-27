@@ -1,6 +1,12 @@
 ---
 
-- name: "Create OpenShift Cluster ProjectRequest"
+- name: "Create OpenShift Cluster ProjectRequest (based on 'static' files)"
   vars:
     action: "create"
   include: create-content.yml
+
+- name: "Create OpenShift Cluster ProjectRequest (based on templates)"
+  vars:
+    action: "create"
+    process_local: "--local"
+  include: process-content.yml

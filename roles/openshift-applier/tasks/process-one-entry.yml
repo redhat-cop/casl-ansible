@@ -56,4 +56,13 @@
 
 - name: "Create OpenShift objects for '{{ entry.object }}' with params"
   shell: >
-    oc process {{ process_f }} {{ file }} {{ target_namespace }} --param-file={{ tmp_inv_dir }}{{ item.params }} | oc apply {{ target_namespace }} -f -
+    oc process \
+      {{ process_local | default('') }} \
+      {{ process_f }} {{ file }} \
+      {{ target_namespace }} \
+      --param-file={{ tmp_inv_dir }}{{ item.params }} | \
+    oc {{ action | default('apply') }} {{ target_namespace }} -f -
+  register: command_result
+  failed_when:
+  - command_result.rc != 0
+  - "'AlreadyExists' not in command_result.stderr"

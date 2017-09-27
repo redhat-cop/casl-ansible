@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Template
+labels:
+  template: test-template
+message: |-
+  The following service(s) have been created in your project: ${NAME}
+metadata:
+  annotations:
+    description: |-
+      A test
+  creationTimestamp: null
+  name: ${NAME}
+objects:
+- apiVersion: v1
+  kind: ProjectRequest
+  metadata:
+    name: ${NAME}
+  description:  
+  displayName: '${DISPLAY_NAME}'
+parameters:
+- description: Name
+  displayName: Name
+  name: NAME
+  required: true
+- description: DisplayName
+  displayName: DisplayName
+  name: DISPLAY_NAME
+  required: true
+
