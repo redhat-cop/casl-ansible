@@ -76,10 +76,7 @@ openshift_cluster_content:
   - name: "MyApp-development"
     file: "https://raw.githubusercontent.com/redhat-cop/cluster-lifecycle/inception-poc/namespaces/myapp-dev.yml"
 - object: policy
-  content:
-  - file: "{{ inventory_dir }}/../files/policy/01-clusterroles.yml"
-  - file: "{{ inventory_dir }}/../files/policy/02-clusterrolebindings.yml"
-  - file: "{{ inventory_dir }}/../files/policy/storageclass.yml"
+  content_dir: "{{ inventory_dir }}/../files/policy"
 - object: builds
   content:
   - name: "cakephp"
