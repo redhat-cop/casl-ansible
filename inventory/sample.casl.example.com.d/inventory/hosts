@@ -42,3 +42,6 @@ dns.sample.casl.example.com
 [infra.sample.casl.example.com]
 [nodes.sample.casl.example.com]
 [dns.sample.casl.example.com]
+
+[seed-hosts:children]
+masters

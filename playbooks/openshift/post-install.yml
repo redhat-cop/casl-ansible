@@ -8,8 +8,6 @@
   roles:
   - { role: create_users }
 
-- hosts: masters[0]
-  roles:
-    - openshift-applier
+- include: ../openshift-cluster-seed.yml
   when:
   - openshift_cluster_content is defined

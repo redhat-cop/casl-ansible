@@ -46,3 +46,6 @@ infra.s1-ha.casl.example.com
 [nodes.s1-ha.casl.example.com]
 [infra.s1-ha.casl.example.com]
 [dns.s1-ha.casl.example.com]
+
+[seed-hosts:children]
+masters
