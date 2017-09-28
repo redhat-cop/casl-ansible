@@ -30,20 +30,22 @@ openshift_cluster_content:
     namespace: <target_openshift_namespace>
 ```
 
-You have the choice of sourcing a `file` or a `template`. The `file` definition expects that the sourced file has all definitions set and will not pass any parameters (i.e.: static content). The `template` definition expects a `params` file to be sourced along with it which will be passed into the template.
+You have the choice of sourcing a `file` or a `template`. The `file` definition expects that the sourced file has all definitions set and will NOT accept any parameters (i.e.: static content). The `template` definition expects a `params` file to be sourced along with it which will be passed into the template.
 
-Both choices give you the option of defining target namespaces in the template manually, or adding the `namespace` variable alongside the template and params (where applicable)
+**_TIP:_** Both choices give you the option of defining target namespaces in the template manually, or adding the `namespace` variable alongside the template and params (where applicable)
 
 #### Sourcing a directory with files
 
-You can source a directory composed of files (without parameters) using `content_dir` instead of defining each file individually. That would look like this:
+You can source a directory composed of static files (without parameters) using `content_dir` instead of defining each file individually. That would look like this:
 ```yaml
 - object: policy
   content_dir: <dir_with_policy_files>
 ```
-In this example above, all of the files in the `<dir_with_policy_files>` directory would get sourced and applied to the cluster.
+In this example above, all of the files in the `<dir_with_policy_files>` directory would get sourced and applied to the cluster (native OpenShift processing).
 
-### namespace objects (cluster-admin only)
+### Ordering of Objects in the inventory
+
+The inventory content is defined as an ordered list, and hence processed in the order it is written. This is important to understand from the perspective of dependencies between your inventory content. For example; it's important to have namespaces or projectrequests defined early to ensure these exists before any of the builds or deployments defined later on in the inventory attempts to use a namespace.
 
 One of the ways to define an OpenShift project using a file or template is to use define a `namespace` object. It would look like this:
 ```yaml
@@ -53,39 +55,13 @@ One of the ways to define an OpenShift project using a file or template is to us
     file: <file_source>
 ```
 
-If you need to add any cluster-admin level objects in the template, then using the `namespace` object is the way to go. Otherwise, it is best to use the `projectrequest` object so that any user with the ability to create projects is able to run it. 
+### Privileged Objects 
 
-**_NOTE:_** Since the file sourced by the namespace object is going to create the namespace, do not add the `namespace` variable to this object definition.
+Note that the `openshift-applier` runs at the permission level a user has, and hence defining objects requiring elevated privileges also requires the user running the `openshift-applier` to have the same level (or higher) of access to the OpenShift cluster.
 
-### projectrequest objects
+### Object Entries in the Inventory
 
-The other way to create an OpenShift project using a file is to use the `projectrequest` object. This is the preferred object-type for creating OpenShift projects as it doesn't require elevated privileges (such as *cluster-admin* ) to be applied. The object would look like this:
-```yaml
-- object: projectrequest
-  content:
-  - name: <namespace_name>
-    file: <file_source>
-```
-
-**_TIP:_** It is important that no cluster-admin level objects are present in the file being sourced. The tasks will fail if run by a non-cluster-admin user.
-
-**_NOTE:_** Since the file sourced by the projectrequest object is going to create the namespace, do not add the `namespace` variable to this object definition.
-
-### policy objects (cluster-admin only)
-
-To create policy level objects like persistent volumes, cluster rolebindings, groups, storage classes, etc. you will need to create a `policy` object which will source a file with the definitions. This would look like this:
-```yaml
-- object: policy
-  content:
-  - name: <policy_name>
-    file: <file_source>
-```
-
-**_NOTE:_** Since these are cluster-wide objects, do not add the `namespace` variable to this object definition.
-
-### other objects
-
-The previously named objects require that the name be written as shown above. Any other objects can be named as you please. In these objects definitions, you source templates that will add any in-project OpenShift objects including buildconfigs, deploymentconfigs, services, routes, etc.
+Objects and entries can be named as you please. In these objects definitions, you source templates that will add any in-project OpenShift objects including buildconfigs, deploymentconfigs, services, routes, etc. (*note:* these are standard OpenShift templates and no limitations is imposed from the `openshift-applier` for this content). 
 
 You can source as many templates and static files as you like.
 
@@ -101,9 +77,18 @@ These objects look like this:
     template: <template_source>
     params: <params_file_source>
     namespace: <target_namespace>
+  - name: <name_of_second_template>
+    file: <yaml/json_source>
+    namespace: <target_namespace>
+- object: <relevant_name>
+  content:
+  - name: <name_of_another_template>
+    template: <template_source>
+    params: <params_file_source>
+    namespace: <target_namespace>
 ```
 
-**_TIP:_** The objects are sourced and applied in the order found in the list. For objects with inter-dependencies, it is important to consider the order these are defined. 
+**_NOTE:_** The objects are sourced and applied in the order found in the list. For objects with inter-dependencies, it is important to consider the order these are defined. 
 
 **_NOTE:_** If the target namespace is not defined in each of the objects within the template, be sure to add the `namespace` variable. 
 
