@@ -4,5 +4,6 @@
   pre_tasks:
   - include: pre-tasks.yml
   roles:
-  - role: openshift-ansible-contrib/roles/openstack-stack-delete
+  - role: openshift-ansible-contrib/roles/openstack-stack
     stack_name: "{{ env_id }}.{{ public_dns_domain }}"
+    stack_state: 'absent'
