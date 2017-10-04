@@ -1,4 +1,8 @@
 ---
+
+ansible_user: openshift
+ansible_become: True
+
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_release: v3.5

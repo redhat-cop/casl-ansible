@@ -1,5 +1,11 @@
-ansible_user: openshift
-ansible_become: True
+---
+
+# 'hosting_infrastructure' is used to drive the correct behavior based
+# on the hosting infrastructure, cloud provider, etc. Valid values are:
+# - 'openstack'
+# - 'aws'
+# - 'azure'
+hosting_infrastructure: openstack
 
 # OpenStack Provisioning Variables
 # use the "-e" option to set "openstack_ssh_public_key"
