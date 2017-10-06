@@ -1,11 +1,13 @@
 ---
 
-- name: "Create OpenShift objects for '{{ entry.object }}' with params"
+- name: "Create/Apply OpenShift Cluster Content ('{{ entry.object }}') - based on individual files"
   include: process-one-entry.yml
   with_items:
-  - "{{ entry.content }}"
+  - "{{ entry.content | default([]) }}"
+
+- name: "Apply OpenShift Cluster Content ('{{ entry.object }}') - based on directory"
+  command: >
+    oc apply -f {{ tmp_inv_dir }}{{ entry.content_dir }}
   when:
-  - item.template is defined 
-  - item.template != ''
-  - item.params is defined
-  - item.params != ''
+  - entry.content_dir is defined 
+  - entry.content_dir|trim != ''

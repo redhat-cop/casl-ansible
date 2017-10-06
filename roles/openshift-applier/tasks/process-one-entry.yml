@@ -2,50 +2,65 @@
 
 - name: "Set default values"
   set_fact:
-    process_f: ''
     target_namespace: ''
-    file: "{{ item.template }}"
+    file: "{{ item.file | default('') }}"
+    file_f_option: ''
+    file_action: "{{ item.file_action | default(omit) }}"
+    template: "{{ item.template | default('') }}"
+    template_f_option: ''
+    template_action: "{{ item.template_action | default(omit) }}"
+    params: "{{ item.params | default('') }}"
+    process_local: ''
 
-- name: "Check if params file exists"
+- name: "Fail if template but no params is specified"
+  fail:
+    msg: "Template specified, but no params file supplied"
+  when:
+  - template|trim != ''
+  - params|trim == ''
+
+- name: "Check if params file exists (if applicable)"
   stat:
-    path: "{{ tmp_inv_dir }}{{ item.params }}"
+    path: "{{ tmp_inv_dir }}{{ params }}"
   ignore_errors: yes
   register: params_result
-
-- name: "Fail if params file doesn't exist"
-  fail:
-    msg: "{{ item.params }} - params file doesn't exist."
   when:
+  - params|trim != ''
+
+- name: "Fail if params file doesn't exist (if applicable)"
+  fail:
+    msg: "{{ params }} - params file doesn't exist."
+  when:
+  - params|trim != ''
   - params_result.stat.exists == False
 
-- name: "Check if the passed in template is a remote location (URL)"
-  uri:
-    url: "{{ item.template }}"
-  register: url_result
-  failed_when:
-  - '"unknown url" not in url_result.msg and url_result.url is not defined'
-
-- name: "Check if passed in template is a local file (if not remote location)"
-  stat:
-    path: "{{ tmp_inv_dir }}{{ item.template }}"
-  ignore_errors: yes
-  register: file_result
+- name: "Determine location for the 'file' (if applicable)"
+  vars:
+    path: "{{ file }}"
+  include: check-file-location.yml
   when:
-  - '"unknown url" in url_result.msg or (url_result.status is defined and url_result.status != 200)'
+  - file|trim != ''
 
-- name: "Set the '-f' option if the template is either a remote or local file"
+- name: "Set 'file' values (if applicable)"
   set_fact:
-    process_f: ' -f '
+    file: "{{ file_path }}"
+    file_f_option: "{{ option_f }}" 
   when:
-  - '"unknown url" not in url_result.msg or file_result.stat.exists'
+  - file|trim != ''
 
-- name: "Pre-pend the temporary dir if the file exists at the local location"
-  set_fact:
-    file: "{{ tmp_inv_dir }}{{ item.template }}"
+- name: "Determine location for the 'template' (if applicable)"
+  vars:
+    path: "{{ template }}"
+  include: check-file-location.yml
   when:
-  - file_result is defined
-  - file_result.stat is defined
-  - file_result.stat.exists
+  - template|trim != ''
+
+- name: "Set 'template' values (if applicable)"
+  set_fact:
+    template: "{{ file_path }}"
+    template_f_option: "{{ option_f }}" 
+  when:
+  - template|trim != ''
 
 - name: "Set the target namespace option if supplied"
   set_fact:
@@ -54,15 +69,28 @@
   - item.namespace is defined
   - item.namespace|trim != ''
 
-- name: "Create OpenShift objects for '{{ entry.object }}' with params"
-  shell: >
-    oc process \
-      {{ process_local | default('') }} \
-      {{ process_f }} {{ file }} \
-      {{ target_namespace }} \
-      --param-file={{ tmp_inv_dir }}{{ item.params }} | \
-    oc {{ action | default('apply') }} {{ target_namespace }} -f -
+- name: "Create OpenShift objects based on static files for '{{ entry.object }}'"
+  command: >
+    oc {{ file_action }} {{ target_namespace }} -f {{ file }}
   register: command_result
   failed_when:
   - command_result.rc != 0
   - "'AlreadyExists' not in command_result.stderr"
+  when:
+  - file|trim != ''
+
+- name: "Create OpenShift objects based on templates with params for '{{ entry.object }}'"
+  shell: >
+    oc process \
+      {{ process_local }} \
+      {{ template_f_option }} {{ template }} \
+      {{ target_namespace }} \
+      --param-file={{ tmp_inv_dir }}{{ item.params }} | \
+    oc {{ template_action }} {{ target_namespace }} -f -
+  register: command_result
+  failed_when:
+  - command_result.rc != 0
+  - "'AlreadyExists' not in command_result.stderr"
+  when:
+  - template|trim != ''
+  - params|trim != ''

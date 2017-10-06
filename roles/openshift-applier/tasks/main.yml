@@ -5,58 +5,11 @@
   when:
   - ansible_connection != 'local'
 
-
-# We need to create a few objects first,
-# hence the special handling up front of these ...
-
-- name: "Build special handling list"
-  set_fact:
-    special_handling:
-    - 'projectrequest'
-    - 'namespace'
-    - 'policy'
-
-- name: "Handle special cases first"
-  vars:
-    entry: "{{ case.0 }}"
-  include: handle-{{ case.1 }}.yml
-  with_together:
-  - "{{ openshift_cluster_content }}"
-  - "{{ special_handling }}"
-  loop_control:
-    loop_var: case
-  when:
-  - case.0.object is defined
-  - case.0.object == case.1
-
-- name: "Eliminate the special handling cases now that they are done"
-  set_fact:
-    remaining_openshift_cluster_content: "{{ remaining_openshift_cluster_content | default([]) + [ case.0 ] }}"
-  with_together:
-  - "{{ openshift_cluster_content }}"
-  - "{{ special_handling }}"
-  loop_control:
-    loop_var: case
-  when:
-  - case.0.object is defined
-  - case.0.object != case.1
-
-- name: "Create OpenShift cluster wide objects"
-  vars:
-    action: "apply"
-  include: create-content.yml
-  with_items:
-  - "{{ remaining_openshift_cluster_content | default([]) }}"
-  loop_control:
-    loop_var: entry
-  when:
-  - entry.content is defined or entry.content_dir is defined
-
-- name: "Create OpenShift objects with params"
+- name: "Create OpenShift objects"
   include: process-content.yml
   with_items:
-  - "{{ remaining_openshift_cluster_content | default([]) }}"
+  - "{{ openshift_cluster_content | default([]) }}"
   loop_control:
     loop_var: entry
   when:
-  - entry.content is defined 
+  - entry.content is defined or entry.content_dir is defined 

@@ -15,17 +15,19 @@ Role Variables
 #### Sourcing OpenShift Object Definitions
 
 The variable definitions come in the form of an object, `openshift_cluster_content`, which contains sub-objects containing file, template, and parameter definitions. At its simplest, this definition looks like this:
- 
+
 ```yaml
 openshift_cluster_content:
 - object: <object_type>
   content:
   - name: <definition_name>
     file: <file source>
+    file_action: <apply|create> # Optional: Defaults to 'apply'
 - object: <object_type>
   content:
   - name: <definition_name>
     template: <template_source>
+    template_action: <apply|create> # Optional: Defaults to 'apply'
     params: <params_file_source>
     namespace: <target_openshift_namespace>
 ```
@@ -55,13 +57,13 @@ One of the ways to define an OpenShift project using a file or template is to us
     file: <file_source>
 ```
 
-### Privileged Objects 
+### Privileged Objects
 
 Note that the `openshift-applier` runs at the permission level a user has, and hence defining objects requiring elevated privileges also requires the user running the `openshift-applier` to have the same level (or higher) of access to the OpenShift cluster.
 
 ### Object Entries in the Inventory
 
-Objects and entries can be named as you please. In these objects definitions, you source templates that will add any in-project OpenShift objects including buildconfigs, deploymentconfigs, services, routes, etc. (*note:* these are standard OpenShift templates and no limitations is imposed from the `openshift-applier` for this content). 
+Objects and entries can be named as you please. In these objects definitions, you source templates that will add any in-project OpenShift objects including buildconfigs, deploymentconfigs, services, routes, etc. (*note:* these are standard OpenShift templates and no limitations is imposed from the `openshift-applier` for this content).
 
 You can source as many templates and static files as you like.
 
@@ -88,9 +90,27 @@ These objects look like this:
     namespace: <target_namespace>
 ```
 
-**_NOTE:_** The objects are sourced and applied in the order found in the list. For objects with inter-dependencies, it is important to consider the order these are defined. 
+**_NOTE:_** The objects are sourced and applied in the order found in the list. For objects with inter-dependencies, it is important to consider the order these are defined.
 
-**_NOTE:_** If the target namespace is not defined in each of the objects within the template, be sure to add the `namespace` variable. 
+**_NOTE:_** If the target namespace is not defined in each of the objects within the template, be sure to add the `namespace` variable.
+
+
+### Override default actions with `file_action` and `template_action`
+
+The file and template entries have default handling of `apply` - i.e.: how the `oc` command applies the object(s). This can be overridden with with the inventory variables `file_action` and `template_action`. Normally this should not be necessary, but in some cases it may be necessary for various reasons such as permission levels. One example is if a `ProjectRequest` is defined as templates. In that case, if a non-privileged user tries to apply the objects it will error out as the user's permissions do not allow for `oc apply` at the cluster scope. In that case, it will be required to override the action with `template_action: create`. For example:
+
+```
+openshift_cluster_content:
+- object: projectrequest
+  content:
+  - name: "my-space1"
+    file: "my-space.yml"
+  - name: "my-space2"
+    template: "my-space-template.yml"
+    params: "my-space-paramsfile"
+    template_action: create       # Note the template_action set to override the default 'apply' action
+```
+
 
 
 Dependencies

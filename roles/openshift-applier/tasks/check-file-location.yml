@@ -1,0 +1,37 @@
+---
+
+- name: "Set default values"
+  set_fact:
+    option_f: ''
+    file_path: "{{ path }}"
+
+- name: "Check if the passed in path is a remote location (URL)"
+  uri:
+    url: "{{ path }}"
+  register: url_result
+  failed_when:
+  - '"unknown url" not in url_result.msg and url_result.url is not defined'
+
+- name: "Check if passed in path is a local file (if not remote location)"
+  stat:
+    path: "{{ tmp_inv_dir }}{{ path }}"
+  ignore_errors: yes
+  register: file_result
+  when:
+  - '"unknown url" in url_result.msg or (url_result.status is defined and url_result.status != 200)'
+
+- name: "Set the '-f' option if the template is either a remote or local file"
+  set_fact:
+    option_f: ' -f '
+    process_local: ' --local '
+  when:
+  - '"unknown url" not in url_result.msg or file_result.stat.exists'
+
+- name: "Pre-pend the temporary dir if the file exists at the local location"
+  set_fact:
+    file_path: "{{ tmp_inv_dir }}{{ path }}"
+  when:
+  - file_result is defined
+  - file_result.stat is defined
+  - file_result.stat.exists
+
