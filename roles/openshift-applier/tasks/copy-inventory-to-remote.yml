@@ -16,4 +16,4 @@
   loop_control:
     loop_var: content_entry
   with_items:
-  - "{{ openshift_cluster_content }}"
+  - "{{ openshift_cluster_content | filter_applier_items(filter_tags) | default([]) }}"

@@ -8,7 +8,7 @@
 - name: "Create OpenShift objects"
   include: process-content.yml
   with_items:
-  - "{{ openshift_cluster_content | default([]) }}"
+  - "{{ openshift_cluster_content | filter_applier_items(filter_tags) | default([]) }}"
   loop_control:
     loop_var: entry
   when:

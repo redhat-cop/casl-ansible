@@ -23,6 +23,9 @@ openshift_cluster_content:
   - name: <definition_name>
     file: <file source>
     file_action: <apply|create> # Optional: Defaults to 'apply'
+    tags: # Optional: Tags can be left out - and only needed if `filter_tags` is used
+    - tag1
+    - tag2
 - object: <object_type>
   content:
   - name: <definition_name>
@@ -35,6 +38,8 @@ openshift_cluster_content:
 You have the choice of sourcing a `file` or a `template`. The `file` definition expects that the sourced file has all definitions set and will NOT accept any parameters (i.e.: static content). The `template` definition expects a `params` file to be sourced along with it which will be passed into the template.
 
 **_TIP:_** Both choices give you the option of defining target namespaces in the template manually, or adding the `namespace` variable alongside the template and params (where applicable)
+
+The `tags` definition is a list of tags that will be processed if the `filter_tags` variable/fact is supplied. See [Filtering content based on tags](https://github.com/redhat-cop/casl-ansible/tree/filter/roles/openshift-applier#filtering-content-based-on-tags) below for more details.
 
 #### Sourcing a directory with files
 
@@ -99,7 +104,7 @@ These objects look like this:
 
 The file and template entries have default handling of `apply` - i.e.: how the `oc` command applies the object(s). This can be overridden with with the inventory variables `file_action` and `template_action`. Normally this should not be necessary, but in some cases it may be necessary for various reasons such as permission levels. One example is if a `ProjectRequest` is defined as templates. In that case, if a non-privileged user tries to apply the objects it will error out as the user's permissions do not allow for `oc apply` at the cluster scope. In that case, it will be required to override the action with `template_action: create`. For example:
 
-```
+```yaml
 openshift_cluster_content:
 - object: projectrequest
   content:
@@ -111,6 +116,17 @@ openshift_cluster_content:
     template_action: create       # Note the template_action set to override the default 'apply' action
 ```
 
+
+### Filtering content based on tags
+
+The `openshift-applier` supports the use of tags in the inventory (see example above) to allow for filtering which content should be processed and not. The `filter_tags` variable/fact takes a comma separated list of tags that will be processed and only content/content_dir with matching tags will be applied. 
+
+**_NOTE:_** Entries in the inventory without tags will not be procssed when a valid list is supplied with the `filter_tags` option.
+
+```
+filter_tags=tag1,tag2
+
+``` 
 
 
 Dependencies
