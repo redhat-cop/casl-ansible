@@ -1,0 +1,51 @@
+---
+
+- hosts: masters:nodes
+  vars:
+    recycler_registry: registry.access.redhat.com
+    recycler_repository: openshift3
+    recycler_image: ose-recycler
+    recycler_tag: latest
+    recycler_serviceaccount: pv-recycler-controller
+    recycler_namespace: openshift-infra
+  tasks:
+
+    - name: Create Service Account
+      block:
+        - command: >
+            oc get serviceaccount {{ recycler_serviceaccount }} -n {{ recycler_namespace }}
+          ignore_errors: True
+          delegate_to: "{{ groups.masters[0] }}"
+          register: sa_exists
+        - command: >
+            oc create serviceaccount {{ recycler_serviceaccount }} -n {{ recycler_namespace }}
+          when: sa_exists.rc != 0
+          run_once: True
+          delegate_to: "{{ groups.masters[0] }}"
+
+    - name: Get OpenShift Version
+      command: >
+        oc version
+      run_once: True
+      delegate_to: "{{ groups.masters[0] }}"
+      register: ocp_version_result
+
+    - name: Set OpenShift Version
+      run_once: True
+      set_fact:
+        ocp_version: "{{ ocp_version_result.stdout_lines[0].split(' ')[1] }}"
+
+    - name: Pull Recycler Image
+      become: True
+      command: >
+        docker pull {{ recycler_registry }}/{{ recycler_repository }}/{{ recycler_image }}:{{ recycler_tag }}
+
+    - name: Tag Recycler Image
+      become: True
+      command: >
+        docker tag {{ recycler_registry }}/{{ recycler_repository }}/{{ recycler_image }}:{{ recycler_tag }} {{ recycler_registry }}/{{ recycler_repository }}/{{ recycler_image }}:{{ ocp_version }}
+
+    - name: Remove Recycler Latest Tag
+      become: True
+      command: >
+        docker rmi {{ recycler_registry }}/{{ recycler_repository }}/{{ recycler_image }}:{{ recycler_tag }}
