@@ -1,0 +1,5 @@
+---
+
+- include: start-aws.yml
+  when:
+  - hosting_infrastructure == 'aws'

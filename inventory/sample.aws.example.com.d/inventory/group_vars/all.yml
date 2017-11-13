@@ -1,0 +1,79 @@
+# 'hosting_infrastructure' is used to drive the correct behavior based
+# on the hosting infrastructure, cloud provider, etc. Valid values are:
+# - 'openstack'
+# - 'aws'
+# - 'azure' (Coming Soon)
+hosting_infrastructure: aws
+
+## AWS Provisioning Variables
+# Amazon image name to use for instances. Check that the same 'image' has different name on each region
+aws_image_name: ami-2b9d6c52
+# Number of master Nodes to deploy. This is a non-HA sample inventory so don't change this value
+aws_num_masters: 1
+# Number of computer Nodes to deploy
+aws_num_nodes: 3
+# Number of infra Nodes to deploy. This is a non-HA sample inventory so don't change this value
+aws_num_infra: 1
+aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+aws_region: eu-west-1
+aws_key_name: my-ssh-region-key
+aws_subnet: subnet-a5ab10c1
+
+# If aws_create_vpc is 'true', aws_subnet variable will be ignored
+aws_create_vpc: true
+# These are the security groups created when aws_create_vpc is 'true'. Modify accordingly to your environment in case using existing VPC and SGs
+aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-node']
+aws_infra_sgroups: ['ocp-ssh', 'ocp-infra', 'ocp-node']
+aws_node_sgroups: ['ocp-ssh', 'ocp-node']
+
+# AWS instances specific tags
+master_flavor: m4.xlarge
+infra_flavor: i3.xlarge
+node_flavor: m4.xlarge
+master_tag: master
+etcd_tag: etcd
+infranode_tag: infranode
+computenode_tag: computenode
+user_tag: sre
+role_tag: ocp
+group_masters_tag: masters_aws
+group_infra_tag: infra_aws
+group_compute_tag: nodes_aws
+labels_master_tag: '{"region": "default"}'
+labels_infra_tag: '{"region": "infra"}'
+label_compute_tag: '{"region": "primary"}'
+instances_termination_protection: yes
+
+
+# Cluster variables
+env_id: "sample"
+public_dns_domain: "sre.tests.com"
+public_dns_nameservers:
+- 8.8.8.8
+ha_mode: false
+
+
+# Docker configuration variables
+docker_volume_size: "40"
+docker_storage_block_device: "/dev/xvdb"
+
+# Subscription Management Details
+rhsm_register: True
+rhsm_repos:
+ - "rhel-7-server-rpms"
+ - "rhel-7-server-ose-3.6-rpms"
+ - "rhel-7-server-extras-rpms"
+ - "rhel-7-fast-datapath-rpms"
+
+# Using Red Hat Satellite:
+#rhsm_satellite: 'sat-6.example.com'
+#rhsm_org: 'CASL_ORG'
+#rhsm_activationkey: 'casl-latest'
+#rhsm_password: ''
+
+# # Or using RHN username, password and optionally pool:
+#rhsm_username: ''
+#rhsm_password: ''
+# # leave commented out if you want to `--auto-attach` a pool
+#rhsm_pool: ''

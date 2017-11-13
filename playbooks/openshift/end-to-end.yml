@@ -1,6 +1,6 @@
 ---
 # Provision Openstack Instances
-- include: provision-openstack.yml
+- include: provision-instances.yml
 
 # Pre-Install Steps
 - include: pre-install.yml
@@ -10,4 +10,3 @@
 
 # Post Install
 - include: post-install.yml
-

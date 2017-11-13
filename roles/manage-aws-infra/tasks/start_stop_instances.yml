@@ -1,0 +1,10 @@
+# Start and Stop AWS OCP Cluster based on given state
+---
+- name: Ensure ec2 instances are in {{ operation }} state
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    instance_tags:
+      env_id: "{{ env_id }}"
+    state: "{{ operation }}"

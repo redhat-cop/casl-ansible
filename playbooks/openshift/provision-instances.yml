@@ -1,0 +1,8 @@
+---
+# Provision Openstack Instances
+- include: provision-openstack.yml
+  when: hosting_infrastructure == "openstack"
+
+# Provision Openstack Instances
+- include: provision-aws.yml
+  when: hosting_infrastructure == "aws"
