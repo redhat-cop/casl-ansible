@@ -53,6 +53,10 @@ public_dns_nameservers:
 - 8.8.8.8
 ha_mode: false
 
+# root (/) volume size for the instances
+master_root_volume_size: 50
+infra_root_volume_size: 50
+node_root_volume_size: 50
 
 # Docker configuration variables
 docker_volume_size: "40"

@@ -4,6 +4,7 @@ ansible_become: true
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_release: v3.6
+
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 
 # HTPASSWD Identity Provider
@@ -16,7 +17,7 @@ openshift_master_identity_providers:
 
 openshift_hosted_logging_deploy: false
 openshift_hosted_metrics_deploy: false
-openshift_disable_check: memory_availability,disk_availability
+
 openshift_node_labels: "{{ ec2_tag_node_labels }}"
 openshift_node_kubelet_args:
   minimum-container-ttl-duration:

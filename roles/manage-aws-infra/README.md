@@ -3,8 +3,6 @@ manage-aws-infra
 
 This role deploys and manages the underlying OCP required Infrastructure in AWS based in the variables defined in the inventory.
 
-Even this role is meant to be used for Red Hat Open Innovation Labs and Emerging Technology Labs, it should be agnostic to be used for any other inventory.
-
 As this is a shared environment, specific tags not related to OCP are added as well to every ec2 and ebs created objects so they can be easily identified. These can be found and modified under 'instance_tags' option on every ec2 instance creation.
 
 Requirements
@@ -21,7 +19,7 @@ Role Variables
 |**aws_num_masters**| number of OCP Master instances to be deployed
 |**aws_num_nodes**| number of OCP Compute Node instances to be deployed
 |**aws_num_infra**| number of OCP Infra Node instances to be deployed
-|**aws_access_key**| aws access key from AWS_ACCESS_KEY environment variable
+|**aws_access_key**| aws access key from AWS_ACCESS_KEY_ID environment variable
 |**aws_secret_key**| aws Secret access key from AWS_SECRET_ACCESS_KEY environment variable
 |**aws_region**| aws Region where to deploy the Infrastructure
 |**aws_key_name**| aws Key pair name to be used with the instances

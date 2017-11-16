@@ -94,18 +94,15 @@ docker exec -it <container-name> bash
 
 6) Run the `end-to-end` provisioning playbook
 ```
-ansible-playbook -i <inventory> /root/code/casl-ansible/playbooks/openshift/end-to-end.yml -e openstack_ssh_public_key=<your_ssh_key_name>
+ansible-playbook -i <inventory> /root/code/casl-ansible/playbooks/openshift/end-to-end.yml [-e openstack_ssh_public_key=<your_ssh_key_name>]
 ```
 
-```
-ansible-playbook -i <inventory> /root/code/casl-ansible/playbooks/openshift/end-to-end.yml
-```
+> **Note 1:** Where `<inventory>` is the path to your inventory directory as mentioned above.
 
-Where `<inventory>` is the path to your inventory directory as mentioned above.
+> **Note 2:** The `openstack_ssh_public_key` is applicable for OpenStack deployments only and should be set to the name of your OpenStack keypair already configured within the environment.
 
-You would need to add the '--private-key' option to the playbook execution, depending on your Ansible/inventory configuration or if the default id_rsa isn't the key used.
+> **Note 3:** You may need to add the `--private-key` option to the playbook execution, depending on your Ansible/inventory configuration or if the default `id_rsa` isn't the key used.
 
-The `openstack_ssh_public_key` variable at the end should specify the name of your OpenStack keypair (`openstack keypair list`).
 
 Done! Wait till the provisioning completes and you should have an operational cluster. If something fails along the way, either update your inventory and re-run the above `end-to-end.yml` playbook, or it may be better to [delete the cluster](https://github.com/redhat-cop/casl-ansible#deleting-a-cluster) and re-start.
 
