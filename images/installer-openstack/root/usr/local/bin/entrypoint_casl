@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source /opt/app-root/src/.config/openstack/openrc.sh
+
+source /usr/local/bin/entrypoint

@@ -14,7 +14,7 @@
 
 # Determine which DNS server(s) to use for our generated records
 - hosts: localhost
-  roles: 
+  roles:
   - openshift-ansible-contrib/roles/dns-server-detect
 
 # Build the DNS Server Views and Configure DNS Server(s)
@@ -33,12 +33,6 @@
   - role: openshift-ansible-contrib/roles/dns-records
   - role: infra-ansible/roles/dns
 
-# Use newly configured DNS server for this container ...
-- hosts: localhost
-  tasks:
-  - name: "Edit /etc/resolv.conf in container"
-    shell: "sed '0,/.*nameserver.*/s/.*nameserver.*/nameserver {{ public_dns_server }} \\n&/' /etc/resolv.conf > /tmp/resolv.conf && /bin/cp -f /tmp/resolv.conf /etc/resolv.conf"
-
 # OpenShift Pre-Requisites
 - hosts: OSEv3
   tasks:
@@ -55,4 +49,3 @@
       dest: /etc/sysconfig/network
       regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
       line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
-

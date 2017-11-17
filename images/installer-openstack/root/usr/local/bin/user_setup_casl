@@ -1,0 +1,11 @@
+#!/bin/sh
+set -x
+
+chmod g+rw /etc/resolv.conf
+ls -l  /etc/resolv.conf
+
+mkdir -p ${HOME}/.ssh
+chown ${USER_UID}:0 ${HOME}/.ssh
+chmod ug+rwx ${HOME}/.ssh
+
+rm $0
