@@ -1,2 +1,3 @@
 ---
-- include: "{{ openshift_ansible_path | default('../../../openshift-ansible') }}/playbooks/byo/config.yml"
+
+- import_playbook: "{{ openshift_ansible_path | default('../../../openshift-ansible') }}/playbooks/byo/config.yml"

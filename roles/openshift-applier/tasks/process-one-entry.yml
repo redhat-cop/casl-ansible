@@ -37,7 +37,7 @@
 - name: "Determine location for the 'file' (if applicable)"
   vars:
     path: "{{ file }}"
-  include: check-file-location.yml
+  import_tasks: check-file-location.yml
   when:
   - file|trim != ''
 
@@ -51,7 +51,7 @@
 - name: "Determine location for the 'template' (if applicable)"
   vars:
     path: "{{ template }}"
-  include: check-file-location.yml
+  import_tasks: check-file-location.yml
   when:
   - template|trim != ''
 

@@ -1,3 +1,5 @@
+---
+
  - name: "Create {{ users.num_users }} htpasswd users"
    htpasswd:
      path: "{{ users.passwd_file }}"

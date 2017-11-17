@@ -1,4 +1,5 @@
 ---
+
  - name: "Initialize create_users facts"
    set_fact:
      users: ''
@@ -8,6 +9,6 @@
      users: "{{ create_users }}"
    when: create_users is defined
 
- - include: create_users.yml
+ - include_tasks: create_users.yml
    static: no
    when: create_users is defined

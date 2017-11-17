@@ -1,4 +1,5 @@
 ---
-- hosts: localhost
+
+- hosts: seed-hosts
   roles:
     - openshift-applier

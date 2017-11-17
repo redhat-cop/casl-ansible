@@ -3,10 +3,10 @@
   roles:
   - openshift-ansible-contrib/roles/openshift-pv-cleanup
 
-- include: delete-openstack.yml
+- import_playbook: delete-openstack.yml
   when:
   - hosting_infrastructure == 'openstack'
 
-- include: delete-aws.yml
+- import_playbook: delete-aws.yml
   when:
   - hosting_infrastructure == 'aws'

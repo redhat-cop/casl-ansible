@@ -1,7 +1,7 @@
 ---
 
 - name: "Create/Apply OpenShift Cluster Content ('{{ entry.object }}') - based on individual files"
-  include: process-one-entry.yml
+  include_tasks: process-one-entry.yml
   with_items:
   - "{{ entry.content | default([]) }}"
 

@@ -12,7 +12,7 @@
     tmp_inv_dir: "{{ tmp_dir.path }}/"
 
 - name: "Copy local inventory files to target host(s)"
-  include: copy-inventory-content.yml
+  include_tasks: copy-inventory-content.yml
   loop_control:
     loop_var: content_entry
   with_items:

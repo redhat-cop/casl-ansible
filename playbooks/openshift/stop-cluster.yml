@@ -1,5 +1,5 @@
 ---
 
-- include: stop-aws.yml
+- import_playbook: stop-aws.yml
   when:
   - hosting_infrastructure == 'aws'

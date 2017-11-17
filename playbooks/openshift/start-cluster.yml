@@ -1,5 +1,5 @@
 ---
 
-- include: start-aws.yml
+- import_playbook: start-aws.yml
   when:
   - hosting_infrastructure == 'aws'

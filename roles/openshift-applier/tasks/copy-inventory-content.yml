@@ -1,7 +1,7 @@
 ---
 
 - name: "Copy 'content' entries"
-  include: copy-inventory-entry.yml
+  include_tasks: copy-inventory-entry.yml
   loop_control:
     loop_var: entry
   with_items:
@@ -12,6 +12,6 @@
 - name: "Copy 'content_dir' entries"
   vars:
     dir: "{{ content_entry.content_dir }}"
-  include: copy-inventory-dir.yml
+  import_tasks: copy-inventory-dir.yml
   when:
   - content_entry.content_dir is defined 

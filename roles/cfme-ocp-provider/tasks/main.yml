@@ -33,7 +33,7 @@
   register: providers_result
 
 - name: Query Details From Each Provider
-  include: query_provider.yml
+  include_tasks: query_provider.yml
   vars:    
     provider_url: "{{ item }}"
   with_items : "{{ providers_result.json.resources | default([]) }}"

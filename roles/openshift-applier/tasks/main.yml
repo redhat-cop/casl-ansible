@@ -1,12 +1,12 @@
 ---
 
 - name: "Copy inventory content to remote host(s) if not running 'locally'"
-  include: copy-inventory-to-remote.yml
+  import_tasks: copy-inventory-to-remote.yml
   when:
   - ansible_connection != 'local'
 
 - name: "Create OpenShift objects"
-  include: process-content.yml
+  include_tasks: process-content.yml
   with_items:
   - "{{ openshift_cluster_content | filter_applier_items(filter_tags) | default([]) }}"
   loop_control:

@@ -1,12 +1,12 @@
 ---
 # Provision Openstack Instances
-- include: provision-instances.yml
+- import_playbook: provision-instances.yml
 
 # Pre-Install Steps
-- include: pre-install.yml
+- import_playbook: pre-install.yml
 
 # Install
-- include: install.yml
+- import_playbook: install.yml
 
 # Post Install
-- include: post-install.yml
+- import_playbook: post-install.yml
