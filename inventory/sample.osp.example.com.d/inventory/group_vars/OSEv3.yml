@@ -1,13 +1,13 @@
 ---
 
 # The username Ansible should use to access the instances with
-ansible_user: ec2-user
+ansible_user: openshift
 
 # Should Ansible use "become" to gain elevated privileges (i.e.: root)
-ansible_become: true
+ansible_become: True
 
 # Node Labels to use with the CASL tools
-openshift_node_labels: "{{ ec2_tag_node_labels }}"
+openshift_node_labels: "{{ openstack.metadata.node_labels}}"
 
 # OpenShift Specific Configuration Options
 # - Check the official OpenShift documentation for more details
@@ -20,6 +20,9 @@ osm_use_cockpit: true
 osm_cockpit_plugins:
 - 'cockpit-kubernetes'
 
+# Enable the Multi-Tenant plugin
+os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
+
 # OpenShift FQDNs, DNS, App domain specific configurations
 openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
 openshift_master_cluster_hostname: "master-0.{{ env_id }}.{{ public_dns_domain }}"
@@ -29,10 +32,15 @@ openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ public_dns_do
 openshift_master_api_port: 443
 openshift_master_console_port: 443
 
-# Cloud Provider Configuration
-openshift_cloudprovider_kind: aws
-openshift_cloudprovider_aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-openshift_cloudprovider_aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+# Enable the OpenStack cloud provider for i.e.: dynamic storage with Cinder
+openshift_cloudprovider_kind: openstack
+openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OCP_OSP_AUTH_URL') }}"
+openshift_cloudprovider_openstack_username: "{{ lookup('env','OCP_OSP_USERNAME') }}"
+openshift_cloudprovider_openstack_password: "{{ lookup('env','OCP_OSP_PASSWORD') }}"
+openshift_cloudprovider_openstack_domain_name: Default
+openshift_cloudprovider_openstack_tenant_id: "{{ lookup('env','OS_PROJECT_ID') }}"
+openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
+openshift_cloudprovider_openstack_region: "{{ lookup('env','OS_REGION_NAME') }}"
 
 # Deploy Logging with dynamic storage
 openshift_hosted_logging_deploy: true
@@ -64,7 +72,6 @@ openshift_master_identity_providers:
 #  prefix: 'rdu-user'
 #  passwd_file: '/etc/origin/master/htpasswd'
 #  password: 'rdu-sample'
-
 
 # OpenShift Node specific parameters
 openshift_node_kubelet_args:

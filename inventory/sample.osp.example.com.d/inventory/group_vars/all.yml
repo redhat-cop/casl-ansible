@@ -1,0 +1,92 @@
+---
+
+# 'hosting_infrastructure' is used to drive the correct behavior based
+# on the hosting infrastructure, cloud provider, etc. Valid values are:
+# - 'openstack'
+# - 'aws'
+# - 'azure'
+hosting_infrastructure: openstack
+
+# OpenStack Provisioning Variables
+# use the "-e" option to set "openstack_ssh_public_key"
+#openstack_ssh_public_key:
+
+# Image name to be used with the instance provisioning
+openstack_default_image_name: "<REPLACE WITH A VALID RHEL IMAGE NAME>"
+
+# Default instance flavor (i.e.: instance size) for the provisioned instances
+openstack_default_flavor: "m1.medium"
+
+# Override the default above with specific flabors
+#openstack_master_flavor: "m1.xlarge"
+#openstack_lb_flavor: "m1.small"
+#openstack_etcd_flavor: "m1.large"
+#openstack_node_flavor: "m1.xlarge"
+#openstack_infra_flavor: "m1.xlargse"
+#openstack_dns_flavor: "m1.small"
+
+# The name of the network providing external access for the OpenStack tenant
+openstack_external_network_name: "external"
+
+# Subnet Prefix to be used within the OpenStack Tenant network
+openstack_subnet_prefix: 192.168.99
+
+# Number of master instances to deploy.
+# This is a non-HA sample nventory so don't change this value
+openstack_num_masters: 1
+
+# Number of instances to be used as compute/app nodes
+openstack_num_nodes: 2
+
+# Number of instances to be used as infra nodes.
+# This is a non-HA sample inventory so don't change this value
+openstack_num_infra: 1
+
+# Cluster Environment ID to uniquely identify the environment
+env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
+
+# DNS configurations
+# the 'public_dns_domain' will be used as the base domain for the deployment
+# the 'public_dns_nameservers' is a list of DNS resolvers the cluster should use
+public_dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
+public_dns_nameservers:
+- 192.168.1.1
+
+# Uncomment this to prevent a DNS instance from being deployed
+#openstack_num_dns: 0
+
+# Sample configuration for the use of external DNS servers for name resolution
+#external_nsupdate_keys:
+#  public:
+#    key_secret: 'SKqKNdpfk7llKxZ57bbxUnUDobaaJp9t8CjXLJPl+fRI5mPcSBuxTAyvJPa6Y9R7vUg9DwCy/6WTpgLNqnV4Hg=='
+#    key_algorithm: 'hmac-md5'
+#    server: '192.168.1.1'
+#  private:
+#    key_secret: 'kVE2bVTgZjrdJipxPhID8BEZmbHD8cExlVPR+zbFpW6la8kL5wpXiwOh8q5AAosXQI5t95UXwq3Inx8QT58duw=='
+#    key_algorithm: 'hmac-md5'
+#    server: '192.168.1.2'
+
+
+# Docker Storage configuration variables
+docker_volume_size: "5"
+docker_storage_block_device: "/dev/vdb"
+
+# Subscription Management Details
+rhsm_register: True
+rhsm_repos:
+- "rhel-7-server-rpms"
+- "rhel-7-server-ose-3.5-rpms"
+- "rhel-7-server-extras-rpms"
+- "rhel-7-fast-datapath-rpms"
+
+# Keep this to use Red Hat Satellite:
+rhsm_satellite: 'sat-6.example.com'
+rhsm_org: 'CASL_ORG'
+rhsm_activationkey: 'casl-latest'
+rhsm_password: ''
+
+# Uncomment the following to use RHSM username, password and optionally pool:
+#rhsm_username: ''
+#rhsm_password: ''
+# leave commented out if you want to `--auto-attach` a pool
+#rhsm_pool: ''

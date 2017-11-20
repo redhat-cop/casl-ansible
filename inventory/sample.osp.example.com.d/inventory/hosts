@@ -12,7 +12,6 @@ dns
 masters
 nodes
 etcd
-lb
 
 # Set variables common for all OSEv3 hosts
 #[OSEv3:vars]
@@ -20,32 +19,29 @@ lb
 # For OSEv3 normal group vars, see ./group_vars/OSEv3.yml
 
 # Host Groups
-[lb:children]
-lb.s1-ha.casl.example.com
 
 [masters:children]
-masters.s1-ha.casl.example.com
+masters.sample.osp.example.com
 
 [etcd:children]
-masters.s1-ha.casl.example.com
+etcd.sample.osp.example.com
 
 [nodes:children]
 masters
-infra.s1-ha.casl.example.com
-nodes.s1-ha.casl.example.com
-
-[dns:children]
-dns.s1-ha.casl.example.com
+infra.sample.osp.example.com
+nodes.sample.osp.example.com
 
 [infra_hosts:children]
-infra.s1-ha.casl.example.com
+infra.sample.osp.example.com
 
-[lb.s1-ha.casl.example.com]
-[masters.s1-ha.casl.example.com]
-[etcds.s1-ha.casl.example.com]
-[nodes.s1-ha.casl.example.com]
-[infra.s1-ha.casl.example.com]
-[dns.s1-ha.casl.example.com]
+[dns:children]
+dns.sample.osp.example.com
+
+[masters.sample.osp.example.com]
+[etcd.sample.osp.example.com]
+[infra.sample.osp.example.com]
+[nodes.sample.osp.example.com]
+[dns.sample.osp.example.com]
 
 [seed-hosts:children]
 masters

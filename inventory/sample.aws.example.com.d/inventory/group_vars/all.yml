@@ -1,3 +1,5 @@
+---
+
 # 'hosting_infrastructure' is used to drive the correct behavior based
 # on the hosting infrastructure, cloud provider, etc. Valid values are:
 # - 'openstack'
@@ -6,36 +8,72 @@
 hosting_infrastructure: aws
 
 ## AWS Provisioning Variables
-# Amazon image name to use for instances. Check that the same 'image' has different name on each region
-aws_image_name: ami-2b9d6c52
-# Number of master Nodes to deploy. This is a non-HA sample inventory so don't change this value
+# Amazon image name to use for instances.
+# Note that each AWS region may utilize a different AMI for the same image.
+aws_image_name: <REPLACE WITH VALID AMI>
+
+# AWS instance flavors (i.e.: instance sizes)
+master_flavor: m4.xlarge
+infra_flavor: i3.xlarge
+node_flavor: m4.xlarge
+
+# Number of master instances to deploy.
+# This is a non-HA sample nventory so don't change this value
 aws_num_masters: 1
-# Number of computer Nodes to deploy
+
+# Number of instances to be used as compute/app nodes
 aws_num_nodes: 3
-# Number of infra Nodes to deploy. This is a non-HA sample inventory so don't change this value
+
+# Number of instances to be used as infra nodes.
+# This is a non-HA sample inventory so don't change this value
 aws_num_infra: 1
+
+# Cluster Environment ID to uniquely identify the environment
+env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
+
+# DNS configurations
+# the 'public_dns_domain' will be used as the base domain for the deployment
+# the 'public_dns_nameservers' is a list of DNS resolvers the cluster should use
+public_dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
+public_dns_nameservers:
+- 8.8.8.8
+
+# root (/) volume size for the instances
+master_root_volume_size: 50
+infra_root_volume_size: 50
+node_root_volume_size: 50
+
+# Docker Storage configuration variables
+docker_volume_size: "40"
+docker_storage_block_device: "/dev/xvdb"
+
+# AWS access keys used by the tools to interact with ec2
+# This example uses ENV variables (recommended), but the values
+# can also be specified here
 aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
 aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
-aws_region: eu-west-1
-aws_key_name: my-ssh-region-key
-aws_subnet: subnet-a5ab10c1
+
+aws_region: <REPLACE WITH VALID AWS REGION>
+aws_subnet: <REPLACE WITH VALID SUBNET ID>
+
+# use the "-e" option to set "aws_key_name"
+#aws_key_name: my-ssh-region-key
 
 # If aws_create_vpc is 'true', aws_subnet variable will be ignored
 aws_create_vpc: true
+
 # These are the security groups created when aws_create_vpc is 'true'. Modify accordingly to your environment in case using existing VPC and SGs
 aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-node']
 aws_infra_sgroups: ['ocp-ssh', 'ocp-infra', 'ocp-node']
 aws_node_sgroups: ['ocp-ssh', 'ocp-node']
 
-# AWS instances specific tags
-master_flavor: m4.xlarge
-infra_flavor: i3.xlarge
-node_flavor: m4.xlarge
+# Tags used to identify the instances
+# Note: Be careful when changing these as the tools rely on some of these values
+# to be set correctly.
 master_tag: master
 etcd_tag: etcd
 infranode_tag: infranode
 computenode_tag: computenode
-user_tag: sre
 role_tag: ocp
 group_masters_tag: masters_aws
 group_infra_tag: infra_aws
@@ -43,24 +81,13 @@ group_compute_tag: nodes_aws
 labels_master_tag: '{"region": "default"}'
 labels_infra_tag: '{"region": "infra"}'
 label_compute_tag: '{"region": "primary"}'
+
+# Should the Instance Termination Protection be set yes/no
 instances_termination_protection: yes
 
-
-# Cluster variables
-env_id: "sample"
-public_dns_domain: "sre.tests.com"
-public_dns_nameservers:
-- 8.8.8.8
+# Should the cluster be configured for HA
+# - currently not supported
 ha_mode: false
-
-# root (/) volume size for the instances
-master_root_volume_size: 50
-infra_root_volume_size: 50
-node_root_volume_size: 50
-
-# Docker configuration variables
-docker_volume_size: "40"
-docker_storage_block_device: "/dev/xvdb"
 
 # Subscription Management Details
 rhsm_register: True
@@ -70,14 +97,11 @@ rhsm_repos:
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
 
-# Using Red Hat Satellite:
-#rhsm_satellite: 'sat-6.example.com'
-#rhsm_org: 'CASL_ORG'
-#rhsm_activationkey: 'casl-latest'
-#rhsm_password: ''
 
-# # Or using RHN username, password and optionally pool:
-#rhsm_username: ''
-#rhsm_password: ''
-# # leave commented out if you want to `--auto-attach` a pool
+# Use RHSM username, password and optionally pool:
+# NOTE: use the -e option to specify on CLI instead of statically set here
+rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
+rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+
+# leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
