@@ -1,5 +1,12 @@
 ---
 
+ - name: 'Install required packages'
+   package:
+     name: '{{ item }}'
+     state: installed
+   with_items:
+   - python-passlib
+
  - name: "Initialize create_users facts"
    set_fact:
      users: ''
