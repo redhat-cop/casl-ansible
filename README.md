@@ -35,7 +35,6 @@ Below is a list of versions of `openshift-ansible` the CASL team has leveraged a
 | casl-ansible version | OpenShift version | openshift-ansible version | openshift-ansible-contrib version | infra-ansible version |
 |:-------------------------:|:-----------------:|:-----------:|:------------:|:-------------:|
 | [master](https://github.com/redhat-cop/casl-ansible/archive/master.tar.gz) | OCP 3.7.x | [3.7.11-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.7.11-1.tar.gz) | [v3.6.0](https://github.com/openshift/openshift-ansible-contrib/releases/tag/v3.6.0) | master |
-
 | [v3.6.1](https://github.com/redhat-cop/casl-ansible/releases/tag/v3.6.1) | OCP 3.6.x | [3.6.173.0.45-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.6.173.0.45-1.tar.gz) | [v3.6.0](https://github.com/openshift/openshift-ansible-contrib/releases/tag/v3.6.0) | master |
 | [v3.6.0](https://github.com/redhat-cop/casl-ansible/releases/tag/v3.6.0) | OCP 3.6.x | [3.6.173.0.45-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.6.173.0.45-1.tar.gz) | [v3.6.0](https://github.com/openshift/openshift-ansible-contrib/releases/tag/v3.6.0) | master |
 | [v3.5.0](https://github.com/redhat-cop/casl-ansible/releases/tag/v3.5.0) | OCP 3.5.x | [3.5.77-1](https://github.com/openshift/openshift-ansible/archive/openshift-ansible-3.5.77-1.tar.gz) | [v3.5.0](https://github.com/openshift/openshift-ansible-contrib/releases/tag/v3.5.0) | master |
