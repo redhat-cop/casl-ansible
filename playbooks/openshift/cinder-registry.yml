@@ -1,0 +1,20 @@
+--- 
+# Create a volume for the registry
+- hosts: localhost
+  roles: 
+  - infra-ansible/roles/osp/admin-volume
+
+- hosts: OSEv3
+  tasks:
+  - name: "set registry volumeID fact"
+    set_fact: 
+      openshift_hosted_registry_storage_openstack_volumeID: "{{ disk.volume.id }}"
+      openshift_hosted_registry_storage_openstack_volume_size: "{{ disk.volume.size }}Gi"
+    with_items: 
+    -  "{{ hostvars['localhost'].os_volumes.results }}"
+    when: 
+    - disk.item.purpose  == "ose_registry"
+    loop_control:
+      loop_var: disk
+
+

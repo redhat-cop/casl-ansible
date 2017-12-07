@@ -49,3 +49,11 @@
       dest: /etc/sysconfig/network
       regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
       line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
+
+# provision cinder volume
+- import_playbook: cinder-registry.yml
+  when:
+  - openshift_hosted_registry_storage_kind is defined
+  - openshift_hosted_registry_storage_kind == "openstack"
+  - openshift_hosted_registry_storage_openstack_volumeID is not defined
+

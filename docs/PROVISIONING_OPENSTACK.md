@@ -51,7 +51,20 @@ The following is just an example on how the `sample.osp.example.com` inventory c
 
 1) Edit `~/src/casl-ansible/inventory/sample.osp.example.com.d/inventory/hosts` to match your environment/project/tenant. See comments in the file for more detailed information on how to fill these in.
 
-2) Edit `~/src/casl-ansible/inventory/sample.osp.example.com.d/inventory/group_vars/all.yml` to match your cloud provider/environment/project/tenant. See comments in the file for more detailed information on how to fill these in.
+2) Edit `~/src/casl-ansible/inventory/sample.osp.example.com.d/inventory/group_vars/all.yml` to match your cloud provider/environment/project/tenant. See comments in the file for more detailed information on how to fill these in. To utilize OSP cinder storage for the registry add the following to `all.yml`
+```
+openshift_hosted_registry_storage_kind: openstack
+openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+openshift_hosted_registry_storage_openstack_filesystem: ext4
+
+osp_volumes:
+- name: "registry-vol"
+  display_description: "Registry Volume"
+  display_name: "registry-vol"
+  size: 50
+  purpose: "ose_registry"
+  ```
+> **Note 1:** `openshift_hosted_registry_storage_volume_size` and `openshift_hosted_registry_storage_openstack_volumeID` are automatically set during play execution
 
 3) Edit `~/src/casl-ansible/inventory/sample.osp.example.com.d/inventory/group_vars/OSEv3.yml` for your OpenShift specific configuration. See comments in the file for more detailed information on how to fill these in.
 
