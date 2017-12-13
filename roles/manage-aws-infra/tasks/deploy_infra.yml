@@ -13,10 +13,6 @@
     vpc_subnet_id: "{{ aws_subnet }}"
     exact_count: 1
     wait: yes
-    volumes:
-    - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: "{{ master_root_volume_size | default('50') }}"
     count_tag:
       Name: "{{ env_id }}-ocp-master-{{ item }}"
     instance_tags:
@@ -27,6 +23,21 @@
       node_labels: "{{ labels_master_tag }}"
       ocp_role: "{{ master_tag }} {{ etcd_tag}}"
       env_id: "{{ env_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ master_root_volume_size | default('50') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_type: gp2
+        volume_size: "{{ docker_volume_size | default('40') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
   with_sequence:
     count="{{ aws_num_masters }}"
   register: instances_master_etcd
@@ -44,10 +55,6 @@
     vpc_subnet_id: "{{ aws_subnet }}"
     exact_count: 1
     wait: yes
-    volumes:
-    - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: "{{ infra_root_volume_size | default('50') }}"
     count_tag:
       Name: "{{ env_id }}-ocp-infra-{{ item }}"
     instance_tags:
@@ -58,6 +65,21 @@
       node_labels: "{{ labels_infra_tag }}"
       ocp_role: "{{ infranode_tag }}"
       env_id: "{{ env_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ infra_root_volume_size | default('50') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_type: gp2
+        volume_size: "{{ docker_volume_size | default('40') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
   with_sequence:
     count="{{ aws_num_infra }}"
   register: instances_infra
@@ -75,10 +97,6 @@
     vpc_subnet_id: "{{ aws_subnet }}"
     exact_count: 1
     wait: yes
-    volumes:
-    - device_name: /dev/sda1
-      volume_type: gp2
-      volume_size: "{{ node_root_volume_size | default('50') }}"
     count_tag:
       Name: "{{ env_id }}-ocp-node-{{ item }}"
     instance_tags:
@@ -86,31 +104,27 @@
       user: "{{ user_tag }}"
       role: "{{ role_tag }}"
       group: "{{ group_compute_tag }}"
-      node_labels: "{{ label_compute_tag }}"
+      node_labels: "{{ labels_compute_tag }}"
       ocp_role: "{{ computenode_tag }}"
       env_id: "{{ env_id }}"
+    volumes:
+      - device_name: /dev/sda1
+        volume_type: gp2
+        volume_size: "{{ node_root_volume_size | default('50') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_type: gp2
+        volume_size: "{{ docker_volume_size | default('40') }}"
+        tags:
+          user: "{{ user_tag }}"
+          role: "{{ role_tag }}"
+          env_id: "{{ env_id }}"
   with_sequence:
     count="{{ aws_num_nodes }}"
   register: instances_compute
-
-- name: Add EBS for docker storage
-  ec2_vol:
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
-    region: "{{ aws_region }}"
-    delete_on_termination: yes
-    device_name: "{{ docker_storage_block_device }}"
-    instance: "{{ item.instance_ids[0] }}"
-    volume_size: "{{ docker_volume_size }}"
-    volume_type: gp2
-    tags:
-      user: "{{ user_tag }}"
-      role: "{{ role_tag }}"
-      env_id: "{{ env_id }}"
-  with_items:
-    - "{{ instances_master_etcd.results }}"
-    - "{{ instances_infra.results }}"
-    - "{{ instances_compute.results }}"
 
 - name: Create elastic IP for Master Node (Non HA Mode)
   ec2_eip:

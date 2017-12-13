@@ -10,8 +10,8 @@
 # separated list of regions. E.g. 'us-east-1,us-west-1,us-west-2'
 #regions = all
 #regions_exclude = us-gov-west-1,cn-north-1
-regions = eu-west-1
-instance_filters = tag:env_id=cluster01
+regions = {{ aws_region }}
+instance_filters = tag:env_id={{ env_id }}
 
 # When generating inventory, Ansible needs to know how to address a server.
 # Each EC2 instance has a lot of variables associated with it. Here is the list:
@@ -76,7 +76,7 @@ all_instances = True
 # By default, only EC2 instances in the 'running' state are returned. Specify
 # EC2 instance states to return as a comma-separated list. This
 # option is overriden when 'all_instances' is True.
-# instance_states = pending, running, shutting-down, terminated, stopping, stopped
+instance_states = pending, running, shutting-down, stopping, stopped
 
 # By default, only RDS instances in the 'available' state are returned.  Set
 # 'all_rds_instances' to True return all RDS instances regardless of state.

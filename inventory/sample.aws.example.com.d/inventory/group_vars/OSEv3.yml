@@ -9,10 +9,24 @@ ansible_become: true
 # Node Labels to use with the CASL tools
 openshift_node_labels: "{{ ec2_tag_node_labels }}"
 
+# CNS relative vars - Uncommented to automatically deploy CNS - 'cns_deploy' from all.yml must be 'true' in that case
+# openshift_storage_glusterfs_namespace: glusterfs
+# openshift_storage_glusterfs_name: cns
+
+# Uncommented to automatically integrate OCP with AWS so EBS can be used as Dynamic Storage backend
+openshift_cloudprovider_kind: aws
+openshift_cloudprovider_aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+openshift_cloudprovider_aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+openshift_clusterid: {{ env_id }}
+
+
 # OpenShift Specific Configuration Options
 # - Check the official OpenShift documentation for more details
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
+containerized: false
+
+### OCP version to install
 openshift_release: v3.6
 
 osm_default_node_selector: 'region=primary'
@@ -28,11 +42,6 @@ openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ public_dns_do
 # Change default ports to use standard 443
 openshift_master_api_port: 443
 openshift_master_console_port: 443
-
-# Cloud Provider Configuration
-openshift_cloudprovider_kind: aws
-openshift_cloudprovider_aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
-openshift_cloudprovider_aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 # Deploy Logging with dynamic storage
 openshift_hosted_logging_deploy: true

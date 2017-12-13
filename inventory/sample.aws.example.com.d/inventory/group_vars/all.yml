@@ -42,6 +42,7 @@ public_dns_nameservers:
 master_root_volume_size: 50
 infra_root_volume_size: 50
 node_root_volume_size: 50
+gluster_root_volume_size: 50
 
 # Docker Storage configuration variables
 docker_volume_size: "40"
@@ -54,13 +55,14 @@ aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
 aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 aws_region: <REPLACE WITH VALID AWS REGION>
+
+# If aws_create_vpc is 'true', aws_subnet variable will be ignored
+aws_create_vpc: true
 aws_subnet: <REPLACE WITH VALID SUBNET ID>
 
 # use the "-e" option to set "aws_key_name"
 #aws_key_name: my-ssh-region-key
 
-# If aws_create_vpc is 'true', aws_subnet variable will be ignored
-aws_create_vpc: true
 
 # These are the security groups created when aws_create_vpc is 'true'. Modify accordingly to your environment in case using existing VPC and SGs
 aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-node']
@@ -75,12 +77,25 @@ etcd_tag: etcd
 infranode_tag: infranode
 computenode_tag: computenode
 role_tag: ocp
+user_tag: <REPLACE WITH A TAG DESCRIBING THE USER OWNING THE CLUSTER>
 group_masters_tag: masters_aws
 group_infra_tag: infra_aws
 group_compute_tag: nodes_aws
 labels_master_tag: '{"region": "default"}'
 labels_infra_tag: '{"region": "infra"}'
-label_compute_tag: '{"region": "primary"}'
+labels_compute_tag: '{"region": "primary"}'
+
+# Tags used to identify the CNS instances
+# Note: Be careful when changing these as the tools rely on some of these values
+# to be set correctly.
+cns_deploy: false
+gluster_flavor: i3.xlarge
+gluster_tag: cns
+group_gluster_tag: cns_aws
+gluster_volume_size: "200"
+gluster_storage_block_device: "/dev/xvdg"
+aws_gluster_sgroups: ['ocp-ssh', 'ocp-node', 'ocp-cns']
+labels_cns_tag: '{"region": "primary"}'
 
 # Should the Instance Termination Protection be set yes/no
 instances_termination_protection: yes
@@ -96,6 +111,7 @@ rhsm_repos:
  - "rhel-7-server-ose-3.6-rpms"
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
+ - "rhel-server-rhscl-7-rpms"
 
 
 # Use RHSM username, password and optionally pool:

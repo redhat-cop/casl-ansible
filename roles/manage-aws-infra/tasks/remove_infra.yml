@@ -31,3 +31,14 @@
     wait: yes
   with_items:
     - "{{ destroy_instances.instances }}"
+
+- name: Remove env_id tag to avoid conflicts with same env_id clusters
+  ec2_tag:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region:  "{{ aws_region }}"
+    resource: "{{ item.id }}"
+    tags:
+      env_id: terminated
+  with_items:
+    - "{{ destroy_instances.instances }}"

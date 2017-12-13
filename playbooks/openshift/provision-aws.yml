@@ -2,7 +2,24 @@
 - hosts: localhost
   roles:
   - role: manage-aws-infra
+    operation: inventory_gen_e2c
+
+- hosts: localhost
+  roles:
+  - role: manage-aws-infra
     operation: deploy
+
+- name: Refresh Server inventory
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+  - meta: refresh_inventory
+
+- hosts: localhost
+  roles:
+  - role: manage-aws-infra
+    operation: inventory_gen_hosts
 
 - name: Refresh Server inventory
   hosts: localhost

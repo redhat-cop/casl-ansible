@@ -31,6 +31,7 @@ Role Variables
 |**master_flavor**| ec2 flavor to be used with master instances
 |**infra_flavor**| ec2 flavor to be used with infra instances
 |**node_flavor**| ec2 flavor to be used with compute instances
+|**gluster_flavor**| ec2 flavor to be used with gluster instances
 |**master_tag**| tag to be assigned to master instances
 |**etcd_tag**| tag to be assigned to etcd instances
 |**infranode_tag**| tag to be assigned to infra instances
@@ -44,6 +45,10 @@ Role Variables
 |**labels_infra_tag**| tag to feed infra node labels in OCP
 |**label_compute_tag**| tag to feed compute node labels in OCP
 |**instances_termination_protection**| boolean to protect instances to be terminated accidentally
+|**master_root_volume_size**| size in Gi for the / File System
+|**infra_root_volume_size**| size in Gi for the / File System
+|**node_root_volume_size**| size in Gi for the / File System
+|**gluster_root_volume_size**| size in Gi for the / File System
 |**env_id**| environment ID to use for the Cluster
 |**public_dns_domain**| public DNS Zone where to register de Cluster
 |**ha_mode**| either to create an HA Cluster or not &#45; true &#124; false

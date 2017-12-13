@@ -12,7 +12,7 @@
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
     zone: "{{ public_dns_domain }}."
-    record: "master.{{ env_id }}.{{ public_dns_domain }}."
+    record: "master-0.{{ env_id }}.{{ public_dns_domain }}."
     type: A
     value: "{{ master_eip.public_ip }}"
     command: create

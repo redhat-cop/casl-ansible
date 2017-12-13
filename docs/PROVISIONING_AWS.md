@@ -35,8 +35,6 @@ ansible-galaxy install -r casl-requirements.yml -p roles
 ## AWS specific requirements
 * Available parameters to use the AWS provision can be found in the Role's [README](../roles/manage-aws-infra/README.md)
 * A [Key-pair in AWS](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair)
-* Modify 'regions' entry (line 13) in the inventory 'ec2.ini' file to match the 'aws_region' variable in your inventory
-* Modify 'instance_filters' entry (line 14) in the inventory 'ec2.ini' file to match the 'env_id' variable in your inventory's `all.yml`
 
 Cool! Now you're ready to provision OpenShift clusters on AWS
 
@@ -52,9 +50,7 @@ The following is just an example on how the `sample.aws.example.com` inventory c
 
 2) Edit `~/src/casl-ansible/inventory/sample.aws.example.com.d/inventory/group_vars/OSEv3.yml` for your AWS specific configuration. See comments in the file for more detailed information on how to fill these in.
 
-3) Edit `~/src/casl-ansible/inventory/sample.aws.example.com.d/inventory/ec2.ini` to update `regions` and `instance_filters` as described above.
-
-4) Run the `end-to-end` provisioning playbook via our [AWS installer container image](../images/installer-aws/). ** COMING SOON **
+3) Run the `end-to-end` provisioning playbook via our [AWS installer container image](../images/installer-aws/). ** COMING SOON **
 
 ```
 docker run -u `id -u` \
