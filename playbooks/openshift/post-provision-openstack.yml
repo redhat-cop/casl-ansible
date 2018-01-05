@@ -7,24 +7,6 @@
   roles:
   - role: openshift-ansible-contrib/roles/hostnames
 
-# Subscribe DNS Host to allow for configuration below
-- hosts: dns
-  roles:
-    - { role: openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-
-# Determine which DNS server(s) to use for our generated records
-- hosts: localhost
-  roles:
-  - openshift-ansible-contrib/roles/dns-server-detect
-
-# Build the DNS Server Views and Configure DNS Server(s)
-- hosts: dns
-  pre_tasks:
-  - import_tasks: pre-tasks.yml
-  roles:
-  - role: openshift-ansible-contrib/roles/dns-views
-  - role: infra-ansible/roles/dns-server
-
 # Build and process DNS Records
 - hosts: localhost
   pre_tasks:
@@ -32,23 +14,6 @@
   roles:
   - role: openshift-ansible-contrib/roles/dns-records
   - role: infra-ansible/roles/dns
-
-# OpenShift Pre-Requisites
-- hosts: OSEv3
-  tasks:
-  - name: "Edit /etc/resolv.conf on masters/nodes"
-    lineinfile:
-      state: present
-      dest: /etc/resolv.conf
-      regexp: "nameserver {{ hostvars['localhost'].private_dns_server }}"
-      line: "nameserver {{ hostvars['localhost'].private_dns_server }}"
-      insertafter: search*
-  - name: "Include DNS configuration to ensure proper name resolution"
-    lineinfile:
-      state: present
-      dest: /etc/sysconfig/network
-      regexp: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
-      line: "IP4_NAMESERVERS={{ hostvars['localhost'].private_dns_server }}"
 
 # provision cinder volume
 - import_playbook: cinder-registry.yml

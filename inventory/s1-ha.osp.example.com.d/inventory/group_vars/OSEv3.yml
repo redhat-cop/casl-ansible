@@ -8,7 +8,7 @@ openshift_deployment_type: openshift-enterprise
 openshift_master_cluster_method: native
 openshift_master_cluster_hostname: "{{ groups.lb.0 }}"
 openshift_master_cluster_public_hostname: "{{ groups.lb.0 }}"
-openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 
 openshift_master_identity_providers:
  - 'name': 'htpasswd_auth'

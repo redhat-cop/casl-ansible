@@ -23,7 +23,6 @@ openstack_default_flavor: "m1.medium"
 #openstack_etcd_flavor: "m1.large"
 #openstack_node_flavor: "m1.xlarge"
 #openstack_infra_flavor: "m1.xlargse"
-#openstack_dns_flavor: "m1.small"
 
 # The name of the network providing external access for the OpenStack tenant
 openstack_external_network_name: "external"
@@ -46,25 +45,28 @@ openstack_num_infra: 1
 env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
 
 # DNS configurations
-# the 'public_dns_domain' will be used as the base domain for the deployment
-# the 'public_dns_nameservers' is a list of DNS resolvers the cluster should use
-public_dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
-public_dns_nameservers:
-- 192.168.1.1
-
-# Uncomment this to prevent a DNS instance from being deployed
-#openstack_num_dns: 0
+# The 'dns_domain' will be used as the base domain for the deployment
+# The 'dns_nameservers' is a list of DNS resolvers the cluster should use
+# - Note that the resolvers need to be able to resolve the "private/internal" IPs of the hosts.
+#   This is often the same IP as the 'server' listed for the 'private' nsupdate section below.
+dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
+dns_nameservers:
+- <REPLACE WITH THE IP OF THE 'private' DNS SERVER BELOW>
 
 # Sample configuration for the use of external DNS servers for name resolution
-#external_nsupdate_keys:
-#  public:
-#    key_secret: 'SKqKNdpfk7llKxZ57bbxUnUDobaaJp9t8CjXLJPl+fRI5mPcSBuxTAyvJPa6Y9R7vUg9DwCy/6WTpgLNqnV4Hg=='
-#    key_algorithm: 'hmac-md5'
-#    server: '192.168.1.1'
-#  private:
-#    key_secret: 'kVE2bVTgZjrdJipxPhID8BEZmbHD8cExlVPR+zbFpW6la8kL5wpXiwOh8q5AAosXQI5t95UXwq3Inx8QT58duw=='
-#    key_algorithm: 'hmac-md5'
-#    server: '192.168.1.2'
+external_nsupdate_keys:
+  private:
+    key_secret: '<REPLACE WITH THE PRIVATE DNS SERVER KEY SECRET>'
+    key_algorithm: '<REPLACE WITH THE PRIVATE DNS SERVER KEY ALGORITHM>'
+    key_name: '<REPLACE WITH THE PRIVATE DNS SERVER KEY NAME>'
+    server: '<REPLACE WITH THE PRIVATE DNS SERVER IP>'
+    zone: '<REPLACE WITH THE PRIVATE DNS SERVER ZONE NAME>'
+  public:
+    key_secret: '<REPLACE WITH THE PUBLIC DNS SERVER KEY SECRET>'
+    key_algorithm: '<REPLACE WITH THE PUBLIC DNS SERVER KEY ALGORITHM>'
+    key_name: '<REPLACE WITH THE PUBLIC DNS SERVER KEY NAME>'
+    server: '<REPLACE WITH THE PUBLIC DNS SERVER IP>'
+    zone: '<REPLACE WITH THE PUBLIC DNS SERVER ZONE NAME>'
 
 
 # Docker Storage configuration variables

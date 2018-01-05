@@ -5,5 +5,5 @@
   - import_tasks: pre-tasks.yml
   roles:
   - role: openshift-ansible-contrib/roles/openstack-stack
-    stack_name: "{{ env_id }}.{{ public_dns_domain }}"
+    stack_name: "{{ env_id }}.{{ dns_domain }}"
     stack_state: 'absent'
