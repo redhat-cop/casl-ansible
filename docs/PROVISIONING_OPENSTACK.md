@@ -15,6 +15,7 @@ In addition to _cloning this repo_, you'll need the following:
 ```
 cd ~/src/
 git clone https://github.com/redhat-cop/casl-ansible.git
+```
 
 * Run `ansible-galaxy` to pull in the necessary requirements for the CASL provisioning of OpenShift on OpenStack:
 
