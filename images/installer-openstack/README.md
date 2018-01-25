@@ -31,7 +31,7 @@ docker run -u `id -u` \
       -v $HOME/.config/openstack/:/opt/app-root/src/.config/openstack/ \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.casl.example.com.d/inventory/ \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/end-to-end.yml \
-      -e OPTS="-v openstack_ssh_public_key=my-public-key" -t \
+      -e OPTS="-e openstack_ssh_public_key=my-public-key" -t \
       redhatcop/installer-openstack
 ```
 
