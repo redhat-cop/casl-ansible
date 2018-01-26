@@ -7,6 +7,9 @@
 # - 'azure' (Coming Soon)
 hosting_infrastructure: aws
 
+# Cluster Environment ID to uniquely identify the environment
+env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
+
 ## AWS Provisioning Variables
 # Amazon image name to use for instances.
 # Note that each AWS region may utilize a different AMI for the same image.
@@ -14,39 +17,62 @@ aws_image_name: <REPLACE WITH VALID AMI>
 
 # AWS instance flavors (i.e.: instance sizes)
 master_flavor: m4.xlarge
-infra_flavor: i3.xlarge
-node_flavor: m4.xlarge
+infra_node_flavor: i3.xlarge
+app_node_flavor: m4.xlarge
+cns_node_flavor: i3.xlarge
 
 # Number of master instances to deploy.
 # This is a non-HA sample nventory so don't change this value
 aws_num_masters: 1
 
-# Number of instances to be used as compute/app nodes
-aws_num_nodes: 3
-
 # Number of instances to be used as infra nodes.
 # This is a non-HA sample inventory so don't change this value
-aws_num_infra: 1
+aws_num_infra_nodes: 1
 
-# Cluster Environment ID to uniquely identify the environment
-env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
+# Number of instances to be used as compute/app nodes
+aws_num_app_nodes: 3
+
+# Number of instances to be used as CNS (Container Native Storage) nodes
+aws_num_cns_nodes: 0
+
 
 # DNS configurations
-# the 'public_dns_domain' will be used as the base domain for the deployment
-# the 'public_dns_nameservers' is a list of DNS resolvers the cluster should use
-public_dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
-public_dns_nameservers:
+# the 'dns_domain' will be used as the base domain for the deployment and has
+# to be a domain that is managed by Route53 within your AWS account
+# the 'dns_nameservers' is a list of DNS resolvers the cluster should use
+dns_domain: "<REPLACE WITH A VALID ROUTE53 DNS DOMAIN>"
+dns_nameservers:
 - 8.8.8.8
 
-# root (/) volume size for the instances
-master_root_volume_size: 50
-infra_root_volume_size: 50
-node_root_volume_size: 50
-gluster_root_volume_size: 50
+# master(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#master_root_volume: "/dev/sda1"
+#master_root_volume_size: 50
 
-# Docker Storage configuration variables
-docker_volume_size: "40"
-docker_storage_block_device: "/dev/xvdb"
+# infra node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#infra_node_root_volume: "/dev/sda1"
+#infra_node_root_volume_size: 50
+
+# app node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#app_node_root_volume: "/dev/sda1"
+#app_node_root_volume_size: 50
+
+# cns node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#cns_node_root_volume: "/dev/sda1"
+#cns_node_root_volume_size: 50
+
+# Docker Storage configuration variables - for all nodes
+# - default values are "/dev/xvdb" and "40"
+#docker_storage_block_device: "/dev/xvdb"
+#docker_volume_size: "40"
+
+# CNS (GlusterFS) Storage configuration variables
+# - default values are "/dev/xvdg" and "200"
+#cns_node_glusterfs_volume: "/dev/xvdg"
+#cns_node_glusterfs_volume_size: "200"
 
 # AWS access keys used by the tools to interact with ec2
 # This example uses ENV variables (recommended), but the values
@@ -56,49 +82,41 @@ aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 aws_region: <REPLACE WITH VALID AWS REGION>
 
-# If aws_create_vpc is 'true', aws_subnet variable will be ignored
+# If aws_create_vpc is 'true', aws_vpc_id and aws_subnet_id variables will be ignored
 aws_create_vpc: true
-aws_subnet: <REPLACE WITH VALID SUBNET ID>
+aws_vpc_id: <REPLACE WITH VALID VPC ID>
+aws_subnet_id: <REPLACE WITH VALID SUBNET ID>
 
 # use the "-e" option to set "aws_key_name"
 #aws_key_name: my-ssh-region-key
 
-
 # These are the security groups created when aws_create_vpc is 'true'. Modify accordingly to your environment in case using existing VPC and SGs
-aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-node']
-aws_infra_sgroups: ['ocp-ssh', 'ocp-infra', 'ocp-node']
-aws_node_sgroups: ['ocp-ssh', 'ocp-node']
+aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-app-node']
+aws_infra_node_sgroups: ['ocp-ssh', 'ocp-infra-node', 'ocp-app-node']
+aws_app_node_sgroups: ['ocp-ssh', 'ocp-app-node']
+aws_cns_node_sgroups: ['ocp-ssh', 'ocp-app-node', 'ocp-cns']
 
-# Tags used to identify the instances
+# Tags and names used to identify the instances
 # Note: Be careful when changing these as the tools rely on some of these values
 # to be set correctly.
-master_tag: master
-etcd_tag: etcd
-infranode_tag: infranode
-computenode_tag: computenode
-role_tag: ocp
-user_tag: <REPLACE WITH A TAG DESCRIBING THE USER OWNING THE CLUSTER>
+master_name: master
+etcd_name: etcd
+infra_node_name: infra-node
+app_node_name: app-node
+cns_node_name: cns
+
 group_masters_tag: masters_aws
-group_infra_tag: infra_aws
-group_compute_tag: nodes_aws
-labels_master_tag: '{"region": "default"}'
-labels_infra_tag: '{"region": "infra"}'
-labels_compute_tag: '{"region": "primary"}'
+group_infra_nodes_tag: infra_nodes_aws
+group_app_nodes_tag: app_nodes_aws
+group_cns_nodes_tag: cns_nodes_aws
 
-# Tags used to identify the CNS instances
-# Note: Be careful when changing these as the tools rely on some of these values
-# to be set correctly.
-cns_deploy: false
-gluster_flavor: i3.xlarge
-gluster_tag: cns
-group_gluster_tag: cns_aws
-gluster_volume_size: "200"
-gluster_storage_block_device: "/dev/xvdg"
-aws_gluster_sgroups: ['ocp-ssh', 'ocp-node', 'ocp-cns']
-labels_cns_tag: '{"region": "primary"}'
+labels_masters_tag: '{"region": "default"}'
+labels_infra_nodes_tag: '{"region": "infra"}'
+labels_app_nodes_tag: '{"region": "primary"}'
+labels_cns_nodes_tag: '{"region": "primary"}'
 
 # Should the Instance Termination Protection be set yes/no
-instances_termination_protection: yes
+aws_termination_protection: yes
 
 # Should the cluster be configured for HA
 # - currently not supported
@@ -108,7 +126,7 @@ ha_mode: false
 rhsm_register: True
 rhsm_repos:
  - "rhel-7-server-rpms"
- - "rhel-7-server-ose-3.6-rpms"
+ - "rhel-7-server-ose-3.7-rpms"
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
  - "rhel-server-rhscl-7-rpms"

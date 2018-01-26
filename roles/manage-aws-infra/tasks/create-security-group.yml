@@ -1,0 +1,15 @@
+# Create Security Group (SG)
+---
+
+- name: "Create Security Group for {{ sg_name }}"
+  ec2_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    name: "{{ sg_name }}"
+    description: "{{ sg_description }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    region: "{{ aws_region }}"
+    state: "present"
+    tags:
+      env_id: "{{ env_id }}"
+    rules: "{{ sg_rules }}"

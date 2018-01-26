@@ -1,3 +1,98 @@
 ---
 
 delete_vpc: false
+
+default_root_volume: '/dev/sda1'
+default_docker_volume: '/dev/xvdb'
+default_cns_volume: '/dev/xvdg'
+
+default_root_volume_size: '50'
+default_docker_volume_size: '40'
+default_cns_volume_size: '200'
+
+
+default_ocp_ssh_sg_rules:
+  - proto: tcp
+    from_port: 22
+    to_port: 22
+    cidr_ip: 0.0.0.0/0
+
+default_ocp_master_sg_rules:
+  - proto: udp
+    from_port: 8053
+    to_port: 8053
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 8053
+    to_port: 8053
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 8443
+    to_port: 8443
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 443
+    to_port: 443
+    cidr_ip: 0.0.0.0/0
+  - proto: udp
+    from_port: 53
+    to_port: 53
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 53
+    to_port: 53
+    cidr_ip: 0.0.0.0/0
+  - proto: udp
+    from_port: 4789
+    to_port: 4789
+    cidr_ip: 0.0.0.0/0
+
+default_ocp_app_node_sg_rules:
+  - proto: udp
+    from_port: 4789
+    to_port: 4789
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 10250
+    to_port: 10250
+    cidr_ip: 0.0.0.0/0
+
+default_ocp_infra_node_sg_rules:
+  - proto: tcp
+    from_port: 80
+    to_port: 80
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 443
+    to_port: 443
+    cidr_ip: 0.0.0.0/0
+
+default_ocp_cns_node_sg_rules:
+  - proto: tcp
+    from_port: 24007
+    to_port: 24007
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 24008
+    to_port: 24008
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 2222
+    to_port: 2222
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 49152
+    to_port: 49664
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 24010
+    to_port: 24010
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 3260
+    to_port: 3260
+    cidr_ip: 0.0.0.0/0
+  - proto: tcp
+    from_port: 111
+    to_port: 111
+    cidr_ip: 0.0.0.0/0

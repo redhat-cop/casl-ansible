@@ -27,7 +27,7 @@ openshift_deployment_type: openshift-enterprise
 containerized: false
 
 ### OCP version to install
-openshift_release: v3.6
+openshift_release: v3.7
 
 osm_default_node_selector: 'region=primary'
 osm_use_cockpit: true
@@ -35,27 +35,27 @@ osm_cockpit_plugins:
 - 'cockpit-kubernetes'
 
 # OpenShift FQDNs, DNS, App domain specific configurations
-openshift_master_default_subdomain: "apps.{{ env_id }}.{{ public_dns_domain }}"
-openshift_master_cluster_hostname: "master-0.{{ env_id }}.{{ public_dns_domain }}"
-openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ public_dns_domain }}"
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
+openshift_master_cluster_hostname: "master-0.{{ env_id }}.{{ dns_domain }}"
+openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
 # Change default ports to use standard 443
 openshift_master_api_port: 443
 openshift_master_console_port: 443
 
 # Deploy Logging with dynamic storage
-openshift_hosted_logging_deploy: true
-openshift_logging_install_logging: true
-openshift_logging_es_pvc_dynamic: true
-openshift_logging_es_pvc_size: 40G
-openshift_logging_curator_default_days: 1
+openshift_hosted_logging_deploy: false
+#openshift_logging_install_logging: true
+#openshift_logging_es_pvc_dynamic: true
+#openshift_logging_es_pvc_size: 40G
+#openshift_logging_curator_default_days: 1
 
 # Deploy Metrics with dynamic storage
-openshift_hosted_metrics_deploy: true
-openshift_metrics_install_metrics: true
-openshift_metrics_cassandra_storage_type: dynamic
-openshift_metrics_cassandra_pvc_size: 40G
-openshift_metrics_duration: 2
+openshift_hosted_metrics_deploy: false
+#openshift_metrics_install_metrics: true
+#openshift_metrics_cassandra_storage_type: dynamic
+#openshift_metrics_cassandra_pvc_size: 40G
+#openshift_metrics_duration: 2
 
 # HTPASSWD Identity Provider
 # - update to other types of auth providers if necessary (i.e: LDAP, OAuth, ...)

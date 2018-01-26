@@ -11,3 +11,19 @@
     msg: "Both 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be defined"
   failed_when: (lookup('env','AWS_ACCESS_KEY_ID')  == "") or
                (lookup('env','AWS_SECRET_ACCESS_KEY')  == "")
+
+- name: Set Default values
+  set_fact:
+    master_root_volume: "{{ master_root_volume | default(default_root_volume) }}"
+    master_root_volume_size: "{{ master_root_volume_size | default(default_root_volume_size) }}"
+    infra_node_root_volume: "{{ infra_node_root_volume | default(default_root_volume) }}"
+    infra_node_root_volume_size: "{{ infra_node_root_volume_size | default(default_root_volume_size) }}"
+    app_node_root_volume: "{{ app_node_root_volume | default(default_root_volume) }}"
+    app_node_root_volume_size: "{{ app_node_root_volume_size | default(default_root_volume_size) }}"
+    cns_node_root_volume: "{{ cns_node_root_volume | default(default_root_volume) }}"
+    cns_node_root_volume_size: "{{ cns_node_root_volume_size | default(default_root_volume_size) }}"
+    cns_node_glusterfs_volume: "{{ cns_node_glusterfs_volume | default(default_cns_volume) }}" 
+    cns_node_glusterfs_volume_size: "{{ cns_node_glusterfs_volume_size | default(default_cns_volume_size) }}" 
+    docker_storage_block_device: "{{ docker_storage_block_device | default(default_docker_volume) }}"
+    docker_storage_volume_size: "{{ docker_storage_volume_size | default(default_docker_volume_size) }}"
+ 

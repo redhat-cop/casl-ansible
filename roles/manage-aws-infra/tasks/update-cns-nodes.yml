@@ -1,0 +1,6 @@
+---
+
+- name: "Set facts needed for CNS deployment"
+  set_fact:
+    
+

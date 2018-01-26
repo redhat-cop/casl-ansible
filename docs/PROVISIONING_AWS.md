@@ -17,14 +17,6 @@ cd ~/src/
 git clone https://github.com/redhat-cop/casl-ansible.git
 ```
 
-* Download/untar `openshift-ansible` for use as part of the install. Make sure to do so within the same directory as above (i.e.: `~/src`), and either rename the directory to `openshift-ansible` (or create symlink to it - see example below). See our [Compatibility Matrix](../README.md#compatability-matrix) for versions / urls to be used for the download.
-
-```
-cd ~/src/
-wget <url> -O - | tar -xz
-ln -fs openshift-ansible-*<version>* openshift-ansible
-```
-
 * Run `ansible-galaxy` to pull in the necessary requirements for the CASL provisioning of OpenShift on AWS:
 
 ```
@@ -35,6 +27,8 @@ ansible-galaxy install -r casl-requirements.yml -p roles
 ## AWS specific requirements
 * Available parameters to use the AWS provision can be found in the Role's [README](../roles/manage-aws-infra/README.md)
 * A [Key-pair in AWS](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair)
+* Modify 'regions' entry (line 13) in the inventory 'ec2.ini' file to match the 'aws_region' variable in your inventory
+* Modify 'instance_filters' entry (line 14) in the inventory 'ec2.ini' file to match the 'env_id' variable in your inventory's `all.yml`
 
 Cool! Now you're ready to provision OpenShift clusters on AWS
 

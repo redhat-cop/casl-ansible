@@ -1,0 +1,251 @@
+# Tasks to deploy AWS infra based in the requested intance numbers
+---
+
+################################################################################
+# Masters
+
+- name: "Prepare facts to Create Master(s)"
+  set_fact:
+    ec2_name: "{{ env_id }}-ocp-{{ master_name }}"
+    ec2_image: "{{ aws_image_name }}"
+    ec2_instance_type: "{{ master_flavor | default('m4.xlarge') }}"
+    ec2_group: "{{ aws_master_sgroups | default(['ocp-ssh', 'ocp-master', 'ocp-app-node']) }}"
+    ec2_instance_tags:
+      group: "{{ group_masters_tag }}"
+      node_labels: "{{ labels_masters_tag }}"
+      env_id: "{{ env_id }}"
+    ec2_volumes:
+      - device_name: "{{ master_root_volume }}"
+        volume_size: "{{ master_root_volume_size }}"
+        volume_type: gp2
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_size: "{{ docker_storage_volume_size }}"
+        volume_type: gp2
+    ec2_num_instances: "{{ aws_num_masters }}"
+    ec2_sg:
+      - name: "ocp-ssh"
+        description: "OCP SSH"
+        rules: "{{ ocp_ssh_sg_rules|default([]) + default_ocp_ssh_sg_rules }}"
+      - name: "ocp-master"
+        description: "OCP Master"
+        rules: "{{ ocp_master_sg_rules|default([]) + default_ocp_master_sg_rules }}"
+      - name: "ocp-app-node"
+        description: "OCP App Node"
+        rules: "{{ ocp_app_node_sg_rules|default([]) + default_ocp_app_node_sg_rules }}"
+
+- name: "Ensure the necessary Security Groups Exists for the Master(s)"
+  vars:
+    sg_name: "{{ item.name }}"
+    sg_description: "{{ item.description }}"
+    sg_rules: "{{ item.rules }}"
+  include_tasks: create-security-group.yml
+  with_items:
+    - "{{ ec2_sg }}"
+
+- name: "Create Master(s) based on above facts"
+  include_tasks: create-instance.yml
+  when:
+    - ec2_num_instances > 0
+
+- name: "Store away the instance information"
+  set_fact:
+    master_instances: "{{ ec2_instances }}"
+
+- name: "Clear facts"
+  set_fact:
+    ec2_instances: ''
+
+
+################################################################################
+# Infra Nodes
+
+- name: "Prepare facts to Create Infra Node(s)"
+  set_fact:
+    ec2_name: "{{ env_id }}-ocp-{{ infra_node_name }}"
+    ec2_image: "{{ infra_image_name | default(aws_image_name) }}"
+    ec2_instance_type: "{{ infra_flavor | default('i3.xlarge') }}"
+    ec2_group: "{{ aws_infra_node_sgroups | default(['ocp-ssh', 'ocp-infra-node', 'ocp-app-node']) }}"
+    ec2_instance_tags:
+      group: "{{ group_infra_nodes_tag }}"
+      node_labels: "{{ labels_infra_nodes_tag }}"
+      env_id: "{{ env_id }}"
+    ec2_volumes:
+      - device_name: "{{ infra_node_root_volume }}"
+        volume_size: "{{ infra_node_root_volume_size }}"
+        volume_type: gp2
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_size: "{{ docker_storage_volume_size }}"
+        volume_type: gp2
+    ec2_num_instances: "{{ aws_num_infra_nodes }}"
+    ec2_sg:
+      - name: "ocp-ssh"
+        description: "OCP SSH"
+        rules: "{{ ocp_ssh_sg_rules|default([]) + default_ocp_ssh_sg_rules }}"
+      - name: "ocp-app-node"
+        description: "OCP App Node"
+        rules: "{{ ocp_app_node_sg_rules|default([]) + default_ocp_app_node_sg_rules }}"
+      - name: "ocp-infra-node"
+        description: "OCP Infra Node"
+        rules: "{{ ocp_infra_node_sg_rules|default([]) + default_ocp_infra_node_sg_rules }}"
+
+- name: "Ensure the necessary Security Groups Exists for the Infra Node(s)"
+  vars:
+    sg_name: "{{ item.name }}"
+    sg_description: "{{ item.description }}"
+    sg_rules: "{{ item.rules }}"
+  include_tasks: create-security-group.yml
+  with_items:
+    - "{{ ec2_sg }}"
+
+- name: "Create Infra Node(s) based on above facts"
+  include_tasks: create-instance.yml
+  when:
+    - ec2_num_instances > 0
+
+- name: "Store away the instance information"
+  set_fact:
+    infra_node_instances: "{{ ec2_instances }}"
+
+- name: "Clear facts"
+  set_fact:
+    ec2_instances: ''
+
+
+################################################################################
+# App Nodes
+
+- name: "Prepare facts to Create App Node(s)"
+  set_fact:
+    ec2_name: "{{ env_id }}-ocp-{{ app_node_name }}"
+    ec2_image: "{{ app_node_image_name | default(aws_image_name) }}"
+    ec2_instance_type: "{{ app_node_flavor | default('m4.xlarge') }}"
+    ec2_group: "{{ aws_app_node_sgroups | default(['ocp-ssh', 'ocp-app-node']) }}"
+    ec2_instance_tags:
+      group: "{{ group_app_nodes_tag }}"
+      node_labels: "{{ labels_app_nodes_tag }}"
+      env_id: "{{ env_id }}"
+    ec2_volumes:
+      - device_name: "{{ app_node_root_volume }}"
+        volume_size: "{{ app_node_root_volume_size }}"
+        volume_type: gp2
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_size: "{{ docker_storage_volume_size }}"
+        volume_type: gp2
+    ec2_num_instances: "{{ aws_num_app_nodes }}"
+    ec2_sg:
+      - name: "ocp-ssh"
+        description: "OCP SSH"
+        rules: "{{ ocp_ssh_sg_rules|default([]) + default_ocp_ssh_sg_rules }}"
+      - name: "ocp-app-node"
+        description: "OCP App Node"
+        rules: "{{ ocp_app_node_sg_rules|default([]) + default_ocp_app_node_sg_rules }}"
+
+- name: "Ensure the necessary Security Groups Exists for the App Node(s)"
+  vars:
+    sg_name: "{{ item.name }}"
+    sg_description: "{{ item.description }}"
+    sg_rules: "{{ item.rules }}"
+  include_tasks: create-security-group.yml
+  with_items:
+    - "{{ ec2_sg }}"
+
+- name: "Create App Node(s) based on above facts"
+  include_tasks: create-instance.yml
+  when:
+    - ec2_num_instances > 0
+
+- name: "Store away the instance information"
+  set_fact:
+    app_node_instaces: "{{ ec2_instances }}"
+
+- name: "Clear facts"
+  set_fact:
+    ec2_instances: ''
+
+
+################################################################################
+# CNS Nodes
+
+- name: "Prepare facts to Create CNS Node(s)"
+  set_fact:
+    ec2_name: "{{ env_id }}-ocp-{{ cns_node_name | default('') }}"
+    ec2_image: "{{ cns_node_image_name | default(aws_image_name) }}"
+    ec2_instance_type: "{{ cns_node_flavor | default('m4.xlarge') }}"
+    ec2_group: "{{ aws_cns_node_sgroups | default(['ocp-ssh', 'ocp-app-node', 'ocp-cns-node']) }}"
+    ec2_instance_tags:
+      group: "{{ group_cns_nodes_tag | default('') }}"
+      node_labels: "{{ labels_cns_nodes_tag | default('') }}"
+      env_id: "{{ env_id }}"
+    ec2_volumes:
+      - device_name: "{{ cns_node_root_volume }}"
+        volume_size: "{{ cns_node_root_volume_size }}"
+        volume_type: gp2
+      - device_name: "{{ docker_storage_block_device }}"
+        volume_size: "{{ docker_storage_volume_size }}"
+        volume_type: gp2
+      - device_name: "{{ cns_node_glusterfs_volume }}"
+        volume_size: "{{ cns_node_glusterfs_volume_size }}"
+        volume_type: gp2
+    ec2_num_instances: "{{ aws_num_cns_nodes | default(0) }}"
+    ec2_sg:
+      - name: "ocp-ssh"
+        description: "OCP SSH"
+        rules: "{{ ocp_ssh_sg_rules|default([]) + default_ocp_ssh_sg_rules }}"
+      - name: "ocp-app-node"
+        description: "OCP App Node"
+        rules: "{{ ocp_app_node_sg_rules|default([]) + default_ocp_app_node_sg_rules }}"
+      - name: "ocp-cns-node"
+        description: "OCP CNS Node"
+        rules: "{{ ocp_cns_node_sg_rules|default([]) + default_ocp_cns_node_sg_rules }}"
+
+- name: "Ensure the necessary Security Groups Exists for the CNS Node(s)"
+  vars:
+    sg_name: "{{ item.name }}"
+    sg_description: "{{ item.description }}"
+    sg_rules: "{{ item.rules }}"
+  include_tasks: create-security-group.yml
+  with_items:
+    - "{{ ec2_sg }}"
+  when:
+    - ec2_num_instances > 0
+
+- name: "Create CNS Node(s) based on above facts"
+  include_tasks: create-instance.yml
+  when:
+    - ec2_num_instances > 0
+
+- name: "Store away the instance information"
+  set_fact:
+    cns_node_instances: "{{ ec2_instances }}"
+
+- name: "Clear facts"
+  set_fact:
+    ec2_instances: ''
+
+
+################################################################################
+# Elastic IP assignments
+
+- name: Create elastic IP for Master Node (Non HA Mode)
+  ec2_eip:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    in_vpc: yes
+    state: present
+    release_on_disassociation: yes
+    device_id: "{{ master_instances.results[0].instances[0].id }}"
+  when: not ha_mode
+  register: master_eip
+
+- name: Create elastic IP for Infra Node (Non HA Mode)
+  ec2_eip:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    in_vpc: yes
+    state: present
+    release_on_disassociation: yes
+    device_id: "{{ infra_node_instances.results[0].instances[0].id }}"
+  when: not ha_mode
+  register: infra_eip

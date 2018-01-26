@@ -1,0 +1,25 @@
+# Tasks to deploy AWS ec2 instance(s) based in the requested parameters
+---
+
+- name: "Create ec2 instance(s)"
+  ec2:
+    image: "{{ ec2_image }}"
+    instance_type: "{{ ec2_instance_type }}"
+    group: "{{ ec2_group }}"
+    termination_protection: "{{ aws_termination_protection }}"
+    key_name: "{{ aws_key_name }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+    exact_count: 1
+    wait: yes
+    count_tag:
+      Name: "{{ ec2_name }}-{{ item }}"
+    instance_tags:
+      "{{ ec2_instance_tags|combine({ 'Name': ec2_name + '-' + item,
+                                      'kubernetes.io/cluster/cluster-' + env_id: env_id } ) }}"
+    volumes: "{{ ec2_volumes }}"
+  with_sequence:
+    count="{{ ec2_num_instances }}"
+  register: ec2_instances

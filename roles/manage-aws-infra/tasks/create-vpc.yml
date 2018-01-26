@@ -1,0 +1,32 @@
+# Create VPC if requested
+---
+- name: "Create VPC if required"
+  ec2_vpc_net:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    name: "{{ env_id }}-vpc"
+    cidr_block: "{{ vpc_cidr_block | default('172.31.0.0/16') }}"
+    region: "{{ aws_region }}"
+    state: "present"
+    tags:
+      env_id: "{{ env_id }}"
+  register: new_vpc
+
+- name: "Store away the new VPC id for use later"
+  set_fact:
+    aws_vpc_id: "{{ new_vpc.vpc.id }}"
+
+- name: "Create an Internet Gateway for the new VPC"
+  ec2_vpc_igw:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    region: "{{ aws_region }}"
+    state: present
+    tags:
+      env_id: "{{ env_id }}"
+  register: new_gw
+
+- name: "Store away the new Internet Gateway id for use later"
+  set_fact:
+    aws_vpc_ig: "{{ new_gw.gateway_id }}"

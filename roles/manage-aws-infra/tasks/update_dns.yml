@@ -4,15 +4,15 @@
   route53_zone:
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
-    zone: "{{ public_dns_domain }}"
+    zone: "{{ dns_domain }}"
     state: present
 
 - name: Update Route53 with OCP master record
   route53:
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
-    zone: "{{ public_dns_domain }}."
-    record: "master-0.{{ env_id }}.{{ public_dns_domain }}."
+    zone: "{{ dns_domain }}."
+    record: "master-0.{{ env_id }}.{{ dns_domain }}."
     type: A
     value: "{{ master_eip.public_ip }}"
     command: create
@@ -24,8 +24,8 @@
   route53:
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
-    zone: "{{ public_dns_domain }}."
-    record: "*.apps.{{ env_id }}.{{ public_dns_domain }}."
+    zone: "{{ dns_domain }}."
+    record: "*.apps.{{ env_id }}.{{ dns_domain }}."
     type: A
     value: "{{ infra_eip.public_ip }}"
     command: create

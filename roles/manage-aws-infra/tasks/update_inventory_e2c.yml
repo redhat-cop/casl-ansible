@@ -1,6 +1,0 @@
-# Create ec2.ini properties file from variables
----
-- name: Generate ec2.ini from template
-  template:
-    src: "{{ role_path }}/templates/ec2.ini.j2"
-    dest: "{{ inventory_dir }}/ec2.ini"

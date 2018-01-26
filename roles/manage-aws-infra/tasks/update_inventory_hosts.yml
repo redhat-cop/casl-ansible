@@ -1,6 +1,0 @@
-# Create hosts inventory file from variables
----
-- name: Generate hosts from template
-  template:
-    src: "{{ role_path }}/templates/hosts.j2"
-    dest: "{{ inventory_dir }}/hosts"

@@ -1,37 +1,31 @@
-
 ---
+
 - import_tasks: pre-reqs.yml
 
-- import_tasks: update_inventory_e2c.yml
-  when:
-    - operation == "inventory_gen_e2c"
-
-- import_tasks: update_inventory_hosts.yml
-  when:
-    - operation == "inventory_gen_hosts"
-
-- import_tasks: deploy_vpc.yml
+- import_tasks: create-vpc.yml
   when:
     - aws_create_vpc
     - operation == "deploy"
 
-- import_tasks: deploy_infra.yml
-  when: operation == "deploy"
-
-- import_tasks: deploy_gluster.yml
+- import_tasks: create-subnet.yml
   when:
     - operation == "deploy"
-    - cns_deploy
+
+- import_tasks: deploy-cluster.yml
+  when:
+    - operation == "deploy"
 
 - import_tasks: update_dns.yml
-  when: operation == "deploy"
+  when:
+    - operation == "deploy"
 
 - import_tasks: start_stop_instances.yml
   when: (operation == "running") or
         (operation == "stopped")
 
 - import_tasks: remove_infra.yml
-  when: operation == "absent"
+  when:
+    - operation == "absent"
 
 - import_tasks: remove_vpc.yml
   when:

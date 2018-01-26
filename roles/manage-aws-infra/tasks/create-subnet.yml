@@ -1,0 +1,53 @@
+# Create the Subnets use by the OCP cluster
+---
+
+- name: "Create Subnets for the VPC (HA Mode)"
+  ec2_vpc_subnet:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    cidr: 172.31.{{ item }}.0/20
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    map_public: yes
+    az: "{{ aws_region }}{{ aws_region_az | default('a') }}"
+    state: "present"
+    tags:
+      env_id: "{{ env_id }}"
+  with_sequence: start=0 end=64 stride=16
+  when: ha_mode
+  register: new_subnets
+
+- name: "Create Subnet for the VPC (Non HA Mode)"
+  ec2_vpc_subnet:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    cidr: "{{ vpc_subnet_cidr | default('172.31.0.0/20') }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    map_public: yes
+    az: "{{ aws_region }}{{ aws_region_az | default('a') }}"
+    state: "present"
+    tags:
+      env_id: "{{ env_id }}"
+  when: not ha_mode
+  register: new_subnets
+
+- name: "Store away the (new) subnet id for use later"
+  set_fact:
+    aws_vpc_subnet_id: "{{ new_subnets.subnet.id }}"
+
+- name: "Create Gateway subnet route table for the VPC"
+  ec2_vpc_route_table:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    region: "{{ aws_region }}"
+    tags:
+      Name: "{{ env_id }}-route-table-gw"
+      env_id: "{{ env_id }}"
+    subnets:
+      - "{{ new_subnets.subnet.id }}"
+    routes:
+      - dest: "0.0.0.0/0"
+        gateway_id: "{{ aws_vpc_ig }}"
+
