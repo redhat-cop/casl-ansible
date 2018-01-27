@@ -1,7 +1,0 @@
----
-# Ansible Facts related to the 'dns' role
-# - NOTE: this is mostly used for provisioning in environments where
-#         a standalone DNS server is used, e.g.: OpenStack
-
-ansible_user: openshift
-ansible_become: True
