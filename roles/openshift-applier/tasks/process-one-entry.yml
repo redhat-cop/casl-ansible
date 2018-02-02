@@ -12,6 +12,13 @@
     params: "{{ item.params | default('') }}"
     process_local: ''
 
+- name: "Set file_action and template_action to delete when in deprovision mode"
+  set_fact:
+    file_action: "delete"
+    template_action: "delete"
+  when:
+  - not provision|bool
+
 - name: "Fail if template but no params is specified"
   fail:
     msg: "Template specified, but no params file supplied"
@@ -44,7 +51,7 @@
 - name: "Set 'file' values (if applicable)"
   set_fact:
     file: "{{ file_path }}"
-    file_f_option: "{{ option_f }}" 
+    file_f_option: "{{ option_f }}"
   when:
   - file|trim != ''
 
@@ -58,7 +65,7 @@
 - name: "Set 'template' values (if applicable)"
   set_fact:
     template: "{{ file_path }}"
-    template_f_option: "{{ option_f }}" 
+    template_f_option: "{{ option_f }}"
   when:
   - template|trim != ''
 
@@ -76,6 +83,7 @@
   failed_when:
   - command_result.rc != 0
   - "'AlreadyExists' not in command_result.stderr"
+  - "'NotFound' not in command_result.stderr"
   when:
   - file|trim != ''
 
@@ -91,6 +99,7 @@
   failed_when:
   - command_result.rc != 0
   - "'AlreadyExists' not in command_result.stderr"
+  - "'NotFound' not in command_result.stderr"
   when:
   - template|trim != ''
   - params|trim != ''

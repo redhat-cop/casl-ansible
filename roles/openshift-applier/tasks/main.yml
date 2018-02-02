@@ -12,4 +12,4 @@
   loop_control:
     loop_var: entry
   when:
-  - entry.content is defined or entry.content_dir is defined 
+  - entry.content is defined or entry.content_dir is defined

@@ -1,18 +1,36 @@
-openshift-applier
-=================
+# openshift-applier
 
 Role used to apply OpenShift objects to an existing OpenShift Cluster.
 
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-Requirements
-------------
+- [openshift-applier](#openshift-applier)
+	- [Requirements](#requirements)
+	- [Role Usage](#role-usage)
+		- [Sourcing OpenShift Object Definitions](#sourcing-openshift-object-definitions)
+		- [Sourcing a directory with files](#sourcing-a-directory-with-files)
+		- [Ordering of Objects in the inventory](#ordering-of-objects-in-the-inventory)
+		- [Privileged Objects](#privileged-objects)
+		- [Object Entries in the Inventory](#object-entries-in-the-inventory)
+		- [Override default actions with `file_action` and `template_action`](#override-default-actions-with-fileaction-and-templateaction)
+		- [Filtering content based on tags](#filtering-content-based-on-tags)
+		- [Deprovisioning](#deprovisioning)
+		- [Dependencies](#dependencies)
+	- [Example Playbook](#example-playbook)
+	- [License](#license)
+	- [Author Information](#author-information)
+
+<!-- /TOC -->
+
+
+## Requirements
+
 A working OpenShift cluster that can be used to populate things like namespaces, policies and PVs (all require cluster-admin), or application level content.
 
 
-Role Variables
---------------
+## Role Usage
 
-#### Sourcing OpenShift Object Definitions
+### Sourcing OpenShift Object Definitions
 
 The variable definitions come in the form of an object, `openshift_cluster_content`, which contains sub-objects containing file, template, and parameter definitions. At its simplest, this definition looks like this:
 
@@ -41,14 +59,20 @@ You have the choice of sourcing a `file` or a `template`. The `file` definition 
 
 The `tags` definition is a list of tags that will be processed if the `filter_tags` variable/fact is supplied. See [Filtering content based on tags](https://github.com/redhat-cop/casl-ansible/tree/filter/roles/openshift-applier#filtering-content-based-on-tags) below for more details.
 
-#### Sourcing a directory with files
+### Sourcing a directory with files
 
-You can source a directory composed of static files (without parameters) using `content_dir` instead of defining each file individually. That would look like this:
+You can source a directory composed of static files (without parameters) using `files` instead of defining each file individually.
+
+NOTE: Formerly, this was done using a separate `content_dir` structure. This has been deprecated.
+
+That would look like this:
 ```yaml
 - object: policy
-  content_dir: <dir_with_policy_files>
+  content:
+  - name: directory of files
+    file: <path-to>/directory/
 ```
-In this example above, all of the files in the `<dir_with_policy_files>` directory would get sourced and applied to the cluster (native OpenShift processing).
+In this example above, all of the files in the `<path-to>/directory/` directory would get sourced and applied to the cluster (native OpenShift processing).
 
 ### Ordering of Objects in the inventory
 
@@ -116,34 +140,36 @@ openshift_cluster_content:
     template_action: create       # Note the template_action set to override the default 'apply' action
 ```
 
+Valid `file_action` and `template_action` values are `apply`, `create`, and `delete`.
 
 ### Filtering content based on tags
 
-The `openshift-applier` supports the use of tags in the inventory (see example above) to allow for filtering which content should be processed and not. The `filter_tags` variable/fact takes a comma separated list of tags that will be processed and only content/content_dir with matching tags will be applied. 
+The `openshift-applier` supports the use of tags in the inventory (see example above) to allow for filtering which content should be processed and not. The `filter_tags` variable/fact takes a comma separated list of tags that will be processed and only content/content_dir with matching tags will be applied.
 
 **_NOTE:_** Entries in the inventory without tags will not be procssed when a valid list is supplied with the `filter_tags` option.
 
 ```
 filter_tags=tag1,tag2
 
-``` 
+```
 
+### Deprovisioning
 
-Dependencies
-------------
+The `openshift-applier` role also supports global deprovisioning of resources. This can be done either using `provision: false`. Setting `-e provision: false` on a run essentially acts like a big 'undo' button, re-running all files and templates through `oc delete -f <resources>`. This can be useful when you want to do a full cleanup to ensure the integrity of you IaC repo, or for simple cleanup while testing changes.
+
+### Dependencies
+
 - openshift-login: Ansible role used to login a user to the OpenShift cluster.
 
 
-Example Playbook
-----------------
+## Example Playbook
 
 TBD
 
-License
--------
+## License
 
 BSD
 
-Author Information
-------------------
+## Author Information
+
 Red Hat Community of Practice & staff of the Red Hat Open Innovation Labs.

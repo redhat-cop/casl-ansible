@@ -6,8 +6,12 @@
   - "{{ entry.content | default([]) }}"
 
 - name: "Apply OpenShift Cluster Content ('{{ entry.object }}') - based on directory"
-  command: >
-    oc apply -f {{ tmp_inv_dir }}{{ entry.content_dir }}
+  block:
+  - fail:
+      msg: "WARNING: This functionality is being deprecated. Please use the 'content.file' variable instead. See role docs for more info."
+      ignore_errors: True
+  - command: >
+      oc apply -f {{ tmp_inv_dir }}{{ entry.content_dir }}
   when:
-  - entry.content_dir is defined 
+  - entry.content_dir is defined
   - entry.content_dir|trim != ''
