@@ -1,6 +1,6 @@
-
 # This is the Ansible Galaxy requirements file to pull in the correct roles
 # to support the operation of CASL provisioning/runs.
+# and also support any role dependency while using the repository in Ansible Tower
 
 # From 'infra-ansible'
 - src: https://github.com/redhat-cop/infra-ansible
