@@ -1,0 +1,4 @@
+---
+
+- name: Deploy stack
+  import_tasks: generate-templates.yml
