@@ -1,0 +1,127 @@
+---
+
+# 'hosting_infrastructure' is used to drive the correct behavior based
+# on the hosting infrastructure, cloud provider, etc. Valid values are:
+# - 'openstack'
+# - 'aws'
+# - 'azure'
+hosting_infrastructure: azure
+
+# Cluster Environment ID to uniquely identify the environment
+env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
+
+## Azure Provisioning Variables
+# Azure image name to use for instances.
+# Note that each region may utilize a different AMI for the same image.
+azure_image_name: <REPLACE WITH VALID IMAGE NAME>
+
+# Instance flavors (i.e.: instance sizes)
+master_flavor: m4.xlarge
+infra_node_flavor: i3.xlarge
+app_node_flavor: m4.xlarge
+cns_node_flavor: i3.xlarge
+
+# Number of master instances to deploy.
+# This is a non-HA sample nventory so don't change this value
+number_of_masters: 1
+
+# Number of instances to be used as infra nodes.
+# This is a non-HA sample inventory so don't change this value
+number_of_infra_nodes: 1
+
+# Number of instances to be used as compute/app nodes
+number_of_app_nodes: 3
+
+# Number of instances to be used as CNS (Container Native Storage) nodes
+number_of_cns_nodes: 0
+
+
+# DNS configurations
+# the 'dns_domain' will be used as the base domain for the deployment
+# the 'dns_nameservers' is a list of DNS resolvers the cluster should use
+dns_domain: "<REPLACE WITH A VALID AZURE DNS DOMAIN>"
+dns_nameservers:
+- 8.8.8.8
+
+# master(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#master_root_volume: "/dev/sda1"
+#master_root_volume_size: 50
+
+# infra node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#infra_node_root_volume: "/dev/sda1"
+#infra_node_root_volume_size: 50
+
+# app node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#app_node_root_volume: "/dev/sda1"
+#app_node_root_volume_size: 50
+
+# cns node(s) root (/) volume size and device
+# - default values are "/dev/sda1" and "50"
+#cns_node_root_volume: "/dev/sda1"
+#cns_node_root_volume_size: 50
+
+# Docker Storage configuration variables - for all nodes
+# - default values are "/dev/xvdb" and "40"
+#docker_storage_block_device: "/dev/xvdb"
+#docker_volume_size: "40"
+
+# CNS (GlusterFS) Storage configuration variables
+# - default values are "/dev/xvdg" and "200"
+#cns_node_glusterfs_volume: "/dev/xvdg"
+#cns_node_glusterfs_volume_size: "200"
+
+azure_region: <REPLACE WITH VALID AZURE REGION>
+
+# use the "-e" option to set "ssh_key_name"
+#ssh_key_name: my-ssh-region-key
+
+# These are the Network Security Groups created.
+# Modify accordingly to your environment in case using existing NSGs
+azure_master_nsg: ['ocp-ssh', 'ocp-master', 'ocp-app-node']
+azure_infra_node_nsg: ['ocp-ssh', 'ocp-infra-node', 'ocp-app-node']
+azure_app_node_nsg: ['ocp-ssh', 'ocp-app-node']
+azure_cns_node_nsg: ['ocp-ssh', 'ocp-app-node', 'ocp-cns']
+
+# Tags and names used to identify the instances
+# Note: Be careful when changing these as the tools rely on some of these values
+# to be set correctly.
+master_name: master
+etcd_name: etcd
+infra_node_name: infra-node
+app_node_name: app-node
+cns_node_name: cns
+
+group_masters_tag: masters_azure
+group_infra_nodes_tag: infra_nodes_azure
+group_app_nodes_tag: app_nodes_azure
+group_cns_nodes_tag: cns_nodes_azure
+
+labels_masters_tag: '{"region": "default"}'
+labels_infra_nodes_tag: '{"region": "infra"}'
+labels_app_nodes_tag: '{"region": "primary"}'
+labels_cns_nodes_tag: '{"region": "primary"}'
+
+# Should the cluster be configured for HA
+# - currently not supported
+ha_mode: false
+
+# Subscription Management Details
+rhsm_register: True
+rhsm_repos:
+ - "rhel-7-server-rpms"
+ - "rhel-7-server-ose-3.7-rpms"
+ - "rhel-7-server-extras-rpms"
+ - "rhel-7-fast-datapath-rpms"
+ - "rhel-server-rhscl-7-rpms"
+
+
+# Use RHSM username, password and optionally pool:
+# NOTE: use the -e option to specify on CLI instead of statically set here
+rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
+rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+
+# leave commented out if you want to `--auto-attach` a pool
+#rhsm_pool: ''

@@ -10,3 +10,7 @@
 - import_playbook: delete-aws.yml
   when:
   - hosting_infrastructure == 'aws'
+
+- import_playbook: delete-azure.yml
+  when:
+  - hosting_infrastructure == 'azure'

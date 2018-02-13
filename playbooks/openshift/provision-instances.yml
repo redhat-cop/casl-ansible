@@ -3,6 +3,10 @@
 - import_playbook: provision-openstack.yml
   when: hosting_infrastructure == "openstack"
 
-# Provision Openstack Instances
+# Provision AWS Instances
 - import_playbook: provision-aws.yml
   when: hosting_infrastructure == "aws"
+
+# Provision Azure Instances
+- import_playbook: provision-azure.yml
+  when: hosting_infrastructure == "azure"

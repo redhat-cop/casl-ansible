@@ -1,0 +1,46 @@
+---
+
+- hosts: localhost
+  roles:
+  - role: manage-azure-infra
+    operation: deploy
+
+- name: Refresh Server inventory
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+  - meta: refresh_inventory
+
+- name: Refresh Server inventory
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  tasks:
+  - meta: refresh_inventory
+
+- hosts: cluster_hosts
+  gather_facts: false
+  tasks:
+  - name: Debug hostvar
+    debug:
+      msg: "{{ hostvars[inventory_hostname] }}"
+      verbosity: 2
+  - name: waiting for server to come back
+    local_action:
+      wait_for
+        host: "{{ hostvars[inventory_hostname]['ansible_host'] }}"
+        port: 22
+        delay: 30
+        timeout: 300
+    become: false
+
+# This may or may not be needed...
+# - need to replace the TBDs below with the proper Azure inventory var
+#
+#- hosts: cluster_hosts
+#  tasks:
+#  - name: Set Openshift Hostnames
+#    set_fact:
+#      openshift_hostname: "{{ TBD }}"
+#      openshift_public_hostname: "{{ TBD }}"
