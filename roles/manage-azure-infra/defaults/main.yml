@@ -1,2 +1,19 @@
 ---
 # defaults file for manage-azure-infra
+location: eastus
+
+masterVmSize: Standard_DS2_v2
+infraVmSize: Standard_DS2_v2
+nodeVmSize: Standard_DS2_v2
+storageKind: managed
+openshiftClusterPrefix: ocpcluster
+masterInstanceCount: 1
+infraInstanceCount: 1
+nodeInstanceCount: 1
+dataDiskSize: 128
+adminUsername: cloud-user
+
+# Optional if you want to use keyvault
+keyVaultResourceGroup: kvrg
+keyVaultName: keyvaultname
+keyVaultSecret: mysecret

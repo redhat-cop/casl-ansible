@@ -1,4 +1,4 @@
 ---
 
 - name: Deploy stack
-  import_tasks: generate-templates.yml
+  import_tasks: provision-resources.yml

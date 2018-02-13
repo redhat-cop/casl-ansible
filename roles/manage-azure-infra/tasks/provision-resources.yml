@@ -1,31 +1,9 @@
 ---
-# - name: Create temporary directory
-#   register: azure_template_pre
-#   tempfile:
-#     state: directory
-#     prefix: azure
-
-# Would be nice, but azure_rm_deployment wants either a url or module parameters (done in the next task)
-# It won't accept a local path.
-#- name: Set template paths
-#  set_fact:
-#    azure_template_path: "{{ azure_template_pre.path }}/azuredeploy.json"
-#    azure_parameters_path: "{{ azure_template_pre.path }}/azuredeploy.parameters.json"
-#
-#- name: Generate azure template from jinja2 template
-#  template:
-#    src: azuredeploy.json.j2
-#    dest: "{{ azure_template_path }}"
-#
-#- name: Generate azure parameters from jinja2 template
-#  template:
-#    src: azuredeploy.parameters.json.j2
-#    dest: "{{ azure_parameters_path }}"
-
 - name: Create Azure deploy
   azure_rm_deployment:
     state: present
-    resource_group_name: test-rg
+    resource_group_name: "{{ resource_group }}"
+    location: "{{ location }}"
     template:
       "$schema": http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json
       contentVersion: 1.0.0.0
@@ -361,53 +339,6 @@
           metadata:
             description: Administrator username on all VMs and first user created for OpenShift
               login
-        openshiftPassword:
-          type: securestring
-          minLength: 5
-          metadata:
-            description: Password for OpenShift user to login to OpenShift Console
-        enableMetrics:
-          type: string
-          defaultValue: 'false'
-          allowedValues:
-          - 'true'
-          - 'false'
-          metadata:
-            description: 'Enable OpenShift Metrics: true or false'
-        enableLogging:
-          type: string
-          defaultValue: 'false'
-          allowedValues:
-          - 'true'
-          - 'false'
-          metadata:
-            description: 'Enable OpenShift Logging: true or false'
-        enableCockpit:
-          type: string
-          defaultValue: 'false'
-          allowedValues:
-          - 'true'
-          - 'false'
-          metadata:
-            description: 'Enable Cockpit: true or false'
-        rhsmUsernameOrOrgId:
-          type: string
-          minLength: 1
-          metadata:
-            description: 'Red Hat Subscription Manager Username or Organization ID. To find
-              your Organization ID, run on registered server: subscription-manager identity'
-        rhsmPasswordOrActivationKey:
-          type: securestring
-          minLength: 1
-          metadata:
-            description: 'Red Hat Subscription Manager Password or Activation Key. To find
-              or create your Activation Key, go to: https://access.redhat.com/management/activation_keys'
-        rhsmPoolId:
-          type: string
-          minLength: 1
-          metadata:
-            description: 'Red Hat Subscription Manager Pool ID with OpenShift entitlements.
-              To find it, run on registered server: subscription-manager list'
         sshPublicKey:
           type: string
           metadata:
@@ -427,37 +358,6 @@
           minLength: 1
           metadata:
             description: Key Vault Secret Name that contains the Private Key
-        enableAzure:
-          type: string
-          defaultValue: 'false'
-          allowedValues:
-          - 'true'
-          - 'false'
-          metadata:
-            description: Enable Azure as Cloud Provider - true or false
-        aadClientId:
-          type: string
-          metadata:
-            description: Azure AD Client ID
-        aadClientSecret:
-          type: securestring
-          minLength: 1
-          metadata:
-            description: Azure AD Client Secret
-        defaultSubDomainType:
-          type: string
-          defaultValue: nipio
-          allowedValues:
-          - nipio
-          - custom
-          metadata:
-            description: Default Subdomain type - nip.io or custom (defined in next parameter)
-        defaultSubDomain:
-          type: string
-          defaultValue: contoso.com
-          metadata:
-            description: Default Subdomain for application routing (Wildcard DNS) - must
-              enter something even if you are using nip.io. Must be all lowercase
       variables:
         location: "[resourceGroup().location]"
         resourceGroupName: "[resourceGroup().id]"
@@ -465,14 +365,10 @@
         apiVersionNetwork: '2017-09-01'
         apiVersionStorage: '2017-06-01'
         apiVersionLinkTemplate: '2015-01-01'
-        defaultSubDomain: "[toLower(parameters('defaultSubDomain'))]"
         namingInfix: "[toLower(parameters('openshiftClusterPrefix'))]"
-        openshiftBastionHostname: "[concat(variables('namingInfix'), '-bastion')]"
         openshiftMasterHostname: "[concat(variables('namingInfix'), '-master')]"
         openshiftNodeHostname: "[concat(variables('namingInfix'), '-node')]"
         openshiftInfraHostname: "[concat(variables('namingInfix'), '-infra')]"
-        newStorageAccountBastion: "[concat('bastion', uniqueString(concat(resourceGroup().id,
-          'bsa')))]"
         newStorageAccountMaster: "[concat('master', uniqueString(concat(resourceGroup().id,
           'msa')))]"
         newStorageAccountInfra: "[concat('infra', uniqueString(concat(resourceGroup().id,
@@ -500,10 +396,6 @@
           tagName: RegistryStorageAccount
           skuName: "[variables('storageSkuObject').registry.skuName]"
           skuTier: "[variables('storageSkuObject').registry.skuTier]"
-        - name: "[variables('newStorageAccountBastion')]"
-          tagName: BastionStorageAccount
-          skuName: "[variables('storageSkuObject').bastion.skuName]"
-          skuTier: "[variables('storageSkuObject').bastion.skuTier]"
         - name: "[variables('newStorageAccountMaster')]"
           tagName: MasterStorageAccount
           skuName: "[variables('storageSkuObject').master.skuName]"
@@ -538,9 +430,6 @@
         managedPlatformFaultDomainCount: 2
         platformFaultDomainCount: "[concat(parameters('storageKind'), 'PlatformFaultDomainCount')]"
         storageSkuObject:
-          bastion:
-            skuName: "[variables('vmSizesMap')[variables('bastionVmSize')].storageAccountType]"
-            skuTier: "[variables('vmSizesMap')[variables('bastionVmSize')].storageAccountTier]"
           master:
             skuName: "[variables('vmSizesMap')[parameters('masterVmSize')].storageAccountType]"
             skuTier: "[variables('vmSizesMap')[parameters('masterVmSize')].storageAccountTier]"
@@ -562,8 +451,6 @@
         managedStorageCount: 3
         unmanagedStorageCount: "[length(variables('newStorageAccountArray'))]"
         storageLoopCount: "[concat(parameters('storageKind'), 'StorageCount')]"
-        unmanagedBastionUri: "[variables('newStorageAccountBastion')]"
-        managedBastionUri: "[variables('diagStorageAccount1')]"
         unmanagedMasterUri: "[variables('newStorageAccountMaster')]"
         managedMasterUri: "[variables('diagStorageAccount1')]"
         unmanagedInfraUri: "[variables('newStorageAccountInfra')]"
@@ -572,7 +459,6 @@
         managedNodeOsUri: "[variables('diagStorageAccount1')]"
         unmanagedNodeDataUri: "[variables('newStorageAccountNodeData')]"
         managedNodeDataUri: "[variables('diagStorageAccount1')]"
-        bastionUri: "[concat(parameters('storageKind'), 'BastionUri')]"
         masterUri: "[concat(parameters('storageKind'), 'MasterUri')]"
         infraUri: "[concat(parameters('storageKind'), 'InfraUri')]"
         nodeOsUri: "[concat(parameters('storageKind'), 'NodeOsUri')]"
@@ -583,29 +469,16 @@
         virtualNetworkName: openshiftvnet
         masterSubnetName: mastersubnet
         nodeSubnetName: nodesubnet
-        bastionPublicIp: bastionpublicip
-        bastionPublicIpDnsLabel: "[concat('bastiondns', uniqueString(resourceGroup().id))]"
-        infraLbPublicIpDnsLabel: "[concat('infradns', uniqueString(concat(resourceGroup().id,
+        infraPublicIpDnsLabel: "[concat('infradns', uniqueString(concat(resourceGroup().id,
           'infra')))]"
         openshiftMasterPublicIpDnsLabel: "[concat('masterdns', uniqueString(concat(resourceGroup().id,
           'master')))]"
+        nodePublicIpDnsLabel: "[concat('nodedns', uniqueString(concat(resourceGroup().id,
+          'node')))]"
         persistentVolume1Type: Standard_LRS
-        masterLoadBalancerName: "[concat(variables('openshiftMasterHostname'), 'lb')]"
         masterPublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('openshiftMasterPublicIpDnsLabel'))]"
-        masterLbId: "[resourceId('Microsoft.Network/loadBalancers', variables('masterLoadBalancerName'))]"
-        masterLbFrontEndConfigId: "[concat(variables('masterLbId'), '/frontendIPConfigurations/loadBalancerFrontEnd')]"
-        masterLbBackendPoolId: "[concat(variables('masterLbId'),'/backendAddressPools/loadBalancerBackend')]"
-        masterLbHttpProbeId: "[concat(variables('masterLbId'),'/probes/httpProbe')]"
-        masterLb8443ProbeId: "[concat(variables('masterLbId'),'/probes/8443Probe')]"
-        masterLbCockpitProbeId: "[concat(variables('masterLbId'),'/probes/cockpitProbe')]"
-        infraLoadBalancerName: "[concat(variables('openshiftInfraHostname'), 'lb')]"
-        infraPublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('infraLbPublicIpDnsLabel'))]"
-        infraLbId: "[resourceId('Microsoft.Network/loadBalancers', variables('infraLoadBalancerName'))]"
-        infraLbFrontEndConfigId: "[concat(variables('infraLbId'), '/frontendIPConfigurations/loadBalancerFrontEnd')]"
-        infraLbBackendPoolId: "[concat(variables('infraLbId'),'/backendAddressPools/loadBalancerBackend')]"
-        infraLbHttpProbeId: "[concat(variables('infraLbId'),'/probes/httpProbe')]"
-        infraLbHttpsProbeId: "[concat(variables('infraLbId'),'/probes/httpsProbe')]"
-        infraLbCockpitProbeId: "[concat(variables('infraLbId'),'/probes/cockpitProbe')]"
+        nodePublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('nodePublicIpDnsLabel'))]"
+        infraPublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('infraPublicIpDnsLabel'))]"
         imageReference:
           publisher: RedHat
           offer: RHEL
@@ -614,13 +487,11 @@
         redHatTags:
           app: OpenShift
           provider: 9d2c71fc-96ba-4b4a-93b3-14def5bc96fc
-        bastionVmSize: Standard_DS2_v2
         singlequote: "'"
         sshKeyPath: "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
         clusterNodeDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/galleryclusternode.json')]"
         basicDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/gallerybasic.json')]"
         openshiftDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/openshiftdeploy.json')]"
-        bastionPrepTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/bastionprep.json')]"
         vmSizesMap:
           Standard_A4:
             storageAccountType: Standard_LRS
@@ -1051,7 +922,7 @@
           name: "[variables('newStorageAccountArray')[copyIndex()].skuName]"
           tier: "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
       - type: Microsoft.Network/publicIPAddresses
-        name: "[variables('infraLbPublicIpDnsLabel')]"
+        name: "[variables('infraPublicIpDnsLabel')]"
         location: "[variables('location')]"
         apiVersion: "[variables('apiVersionNetwork')]"
         tags:
@@ -1061,7 +932,7 @@
         properties:
           publicIPAllocationMethod: Static
           dnsSettings:
-            domainNameLabel: "[variables('infraLbPublicIpDnsLabel')]"
+            domainNameLabel: "[variables('infraPublicIpDnsLabel')]"
       - type: Microsoft.Network/publicIPAddresses
         name: "[variables('openshiftMasterPublicIpDnsLabel')]"
         location: "[variables('location')]"
@@ -1074,6 +945,18 @@
           publicIPAllocationMethod: Static
           dnsSettings:
             domainNameLabel: "[variables('openshiftMasterPublicIpDnsLabel')]"
+      - type: Microsoft.Network/publicIPAddresses
+        name: "[variables('nodePublicIpDnsLabel')]"
+        location: "[variables('location')]"
+        apiVersion: "[variables('apiVersionNetwork')]"
+        tags:
+          displayName: NodePublicIP
+          provider: "[variables('redHatTags').provider]"
+          app: "[variables('redHatTags').app]"
+        properties:
+          publicIPAllocationMethod: Static
+          dnsSettings:
+            domainNameLabel: "[variables('nodePublicIpDnsLabel')]"
       - type: Microsoft.Compute/availabilitySets
         name: "[variables('availabilitySetArray')[copyIndex()].name]"
         location: "[variables('location')]"
@@ -1132,6 +1015,7 @@
         - "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
         - "[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftInfraHostname'),
           '-nsg')]"
+        - "[concat('Microsoft.Network/publicIPAddresses/', variables('infraPublicIpDnsLabel'))]"
         copy:
           name: infraNicLoop
           count: "[parameters('infraInstanceCount')]"
@@ -1144,6 +1028,8 @@
                 id: "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',
                   resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/',
                   variables('virtualNetworkName'), '/subnets/', variables('masterSubnetName'))]"
+              publicIPAddress:
+                id: "[variables('infraPublicIpAddressId')]"
           networkSecurityGroup:
             id: "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftInfraHostname'),
               '-nsg'))]"
@@ -1159,6 +1045,7 @@
         - "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
         - "[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftNodeHostname'),
           '-nsg')]"
+        - "[concat('Microsoft.Network/publicIPAddresses/', variables('nodePublicIpDnsLabel'))]"
         copy:
           name: nodeNicLoop
           count: "[parameters('nodeInstanceCount')]"
@@ -1171,6 +1058,8 @@
                 id: "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',
                   resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/',
                   variables('virtualNetworkName'), '/subnets/', variables('nodeSubnetName'))]"
+              publicIPAddress:
+                id: "[variables('nodePublicIpAddressId')]"
           networkSecurityGroup:
             id: "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftNodeHostname'),
               '-nsg'))]"
@@ -1349,61 +1238,36 @@
             redHatTags:
               value: "[variables('redHatTags')]"
       outputs:
-        Openshift Console Url:
-          type: string
-          value: "[concat('https://', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn,
-            ':8443/console')]"
         Openshift Master SSH:
           type: string
-          value: "[concat('ssh -p 2200', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
-        Openshift Infra Load Balancer FQDN:
-          type: string
-          value: "[reference(variables('infraLbPublicIpDnsLabel')).dnsSettings.fqdn]"
+          value: "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
 
     parameters:
       masterVmSize:
-        value: Standard_DS2_v2
+        value: "{{ masterVmSize }}"
       infraVmSize:
-        value: Standard_DS2_v2
+        value: "{{ infraVmSize }}"
       nodeVmSize:
-        value: Standard_DS2_v2
+        value: "{{ nodeVmSize }}"
       storageKind:
-        value: managed
+        value: "{{ storageKind }}"
       openshiftClusterPrefix:
-        value: ocpcluster
+        value: "{{ openshiftClusterPrefix }}"
       masterInstanceCount:
-        value: 1
+        value: "{{ masterInstanceCount }}"
       infraInstanceCount:
-        value: 1
+        value: "{{ infraInstanceCount }}"
       nodeInstanceCount:
-        value: 1
+        value: "{{ nodeInstanceCount }}"
       dataDiskSize:
-        value: 128
+        value: "{{ dataDiskSize }}"
       adminUsername:
-        value: clusteradmin
-      openshiftPassword:
-        value: changeme
-      enableMetrics:
-        value: 'false'
-      enableLogging:
-        value: 'false'
-      enableCockpit:
-        value: 'false'
-      sshPublicKey:
-        value: my-ssh-key
+        value: "{{ adminUsername }}"
       keyVaultResourceGroup:
-        value: kvrg
+        value: "{{ keyVaultResourceGroup }}"
       keyVaultName:
-        value: keyvaultname
+        value: "{{ keyVaultName }}"
       keyVaultSecret:
-        value: mysecret
-      enableAzure:
-        value: 'true'
-      aadClientId:
-        value: fake-key
-      aadClientSecret:
-        value: fake-secret
-      defaultSubDomainType:
-        value: nipio
-      defaultSubDomain:
-        value: domain.com
+        value: "{{ keyVaultSecret }}"
+      sshPublicKey:
+        value: "{{ ssh_key }}""
