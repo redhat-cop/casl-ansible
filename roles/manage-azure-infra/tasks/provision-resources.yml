@@ -476,9 +476,6 @@
         nodePublicIpDnsLabel: "[concat('nodedns', uniqueString(concat(resourceGroup().id,
           'node')))]"
         persistentVolume1Type: Standard_LRS
-        masterPublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('openshiftMasterPublicIpDnsLabel'))]"
-        nodePublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('nodePublicIpDnsLabel'))]"
-        infraPublicIpAddressId: "[resourceId('Microsoft.Network/publicIPAddresses', variables('infraPublicIpDnsLabel'))]"
         imageReference:
           publisher: RedHat
           offer: RHEL
@@ -922,41 +919,50 @@
           name: "[variables('newStorageAccountArray')[copyIndex()].skuName]"
           tier: "[variables('newStorageAccountArray')[copyIndex()].skuTier]"
       - type: Microsoft.Network/publicIPAddresses
-        name: "[variables('infraPublicIpDnsLabel')]"
+        name: "[concat(variables('infraPublicIpDnsLabel'),copyIndex())]"
         location: "[variables('location')]"
         apiVersion: "[variables('apiVersionNetwork')]"
         tags:
-          displayName: OpenShiftInfraLBPublicIP
+          displayName: OpenShiftInfraPublicIP
           provider: "[variables('redHatTags').provider]"
           app: "[variables('redHatTags').app]"
+        copy:
+          name: "infraPublicIpCopy"
+          count: "[parameters('infraInstanceCount')]"
         properties:
           publicIPAllocationMethod: Static
           dnsSettings:
-            domainNameLabel: "[variables('infraPublicIpDnsLabel')]"
+            domainNameLabel: "[concat(variables('infraPublicIpDnsLabel'),copyIndex())]"
       - type: Microsoft.Network/publicIPAddresses
-        name: "[variables('openshiftMasterPublicIpDnsLabel')]"
+        name: "[concat(variables('openshiftMasterPublicIpDnsLabel'),copyIndex())]"
         location: "[variables('location')]"
         apiVersion: "[variables('apiVersionNetwork')]"
         tags:
           displayName: OpenShiftMasterPublicIP
           provider: "[variables('redHatTags').provider]"
           app: "[variables('redHatTags').app]"
+        copy:
+          name: "masterPublicIpCopy"
+          count: "[parameters('masterInstanceCount')]"
         properties:
           publicIPAllocationMethod: Static
           dnsSettings:
-            domainNameLabel: "[variables('openshiftMasterPublicIpDnsLabel')]"
+            domainNameLabel: "[concat(variables('openshiftMasterPublicIpDnsLabel'),copyIndex())]"
       - type: Microsoft.Network/publicIPAddresses
-        name: "[variables('nodePublicIpDnsLabel')]"
+        name: "[concat(variables('nodePublicIpDnsLabel'),copyIndex())]"
         location: "[variables('location')]"
         apiVersion: "[variables('apiVersionNetwork')]"
         tags:
           displayName: NodePublicIP
           provider: "[variables('redHatTags').provider]"
           app: "[variables('redHatTags').app]"
+        copy:
+          name: "nodePublicIpCopy"
+          count: "[parameters('nodeInstanceCount')]"
         properties:
           publicIPAllocationMethod: Static
           dnsSettings:
-            domainNameLabel: "[variables('nodePublicIpDnsLabel')]"
+            domainNameLabel: "[concat(variables('nodePublicIpDnsLabel'),copyIndex())]"
       - type: Microsoft.Compute/availabilitySets
         name: "[variables('availabilitySetArray')[copyIndex()].name]"
         location: "[variables('location')]"
@@ -985,7 +991,7 @@
         - "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
         - "[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftMasterHostname'),
           '-nsg')]"
-        - "[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'))]"
+        - "[concat('Microsoft.Network/publicIPAddresses/', variables('openshiftMasterPublicIpDnsLabel'), copyIndex())]"
         copy:
           name: masterNicLoop
           count: "[parameters('masterInstanceCount')]"
@@ -999,7 +1005,7 @@
                   resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/',
                   variables('virtualNetworkName'), '/subnets/', variables('masterSubnetName'))]"
               publicIPAddress:
-                id: "[variables('masterPublicIpAddressId')]"
+                id: "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('openshiftMasterPublicIpDnsLabel'),copyIndex()))]"
           networkSecurityGroup:
             id: "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftMasterHostname'),
               '-nsg'))]"
@@ -1015,7 +1021,7 @@
         - "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
         - "[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftInfraHostname'),
           '-nsg')]"
-        - "[concat('Microsoft.Network/publicIPAddresses/', variables('infraPublicIpDnsLabel'))]"
+        - "[concat('Microsoft.Network/publicIPAddresses/', variables('infraPublicIpDnsLabel'), copyIndex())]"
         copy:
           name: infraNicLoop
           count: "[parameters('infraInstanceCount')]"
@@ -1029,7 +1035,7 @@
                   resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/',
                   variables('virtualNetworkName'), '/subnets/', variables('masterSubnetName'))]"
               publicIPAddress:
-                id: "[variables('infraPublicIpAddressId')]"
+                id: "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('infraPublicIpDnsLabel'),copyIndex()))]"
           networkSecurityGroup:
             id: "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftInfraHostname'),
               '-nsg'))]"
@@ -1045,7 +1051,7 @@
         - "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
         - "[concat('Microsoft.Network/networkSecurityGroups/', variables('openshiftNodeHostname'),
           '-nsg')]"
-        - "[concat('Microsoft.Network/publicIPAddresses/', variables('nodePublicIpDnsLabel'))]"
+        - "[concat('Microsoft.Network/publicIPAddresses/', variables('nodePublicIpDnsLabel'), copyIndex())]"
         copy:
           name: nodeNicLoop
           count: "[parameters('nodeInstanceCount')]"
@@ -1059,7 +1065,7 @@
                   resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/',
                   variables('virtualNetworkName'), '/subnets/', variables('nodeSubnetName'))]"
               publicIPAddress:
-                id: "[variables('nodePublicIpAddressId')]"
+                id: "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('nodePublicIpDnsLabel'),copyIndex()))]"
           networkSecurityGroup:
             id: "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('openshiftNodeHostname'),
               '-nsg'))]"
@@ -1237,10 +1243,6 @@
               value: "[variables('imageReference')]"
             redHatTags:
               value: "[variables('redHatTags')]"
-      outputs:
-        Openshift Master SSH:
-          type: string
-          value: "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('openshiftMasterPublicIpDnsLabel')).dnsSettings.fqdn)]"
 
     parameters:
       masterVmSize:
@@ -1270,4 +1272,4 @@
       keyVaultSecret:
         value: "{{ keyVaultSecret }}"
       sshPublicKey:
-        value: "{{ ssh_key }}""
+        value: "{{ ssh_key }}"
