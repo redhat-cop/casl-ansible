@@ -21,4 +21,4 @@
   - openshift_hosted_registry_storage_kind is defined
   - openshift_hosted_registry_storage_kind == "openstack"
   - openshift_hosted_registry_storage_openstack_volumeID is not defined
-
+  

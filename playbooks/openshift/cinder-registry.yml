@@ -1,20 +1,27 @@
---- 
+---
 # Create a volume for the registry
 - hosts: localhost
-  roles: 
+  vars:
+    osp_volumes:
+    - name: "{{ full_dns_domain }}-registry"
+      display_description: "Registry Vol"
+      display_name: "{{ full_dns_domain }}-registry"
+      size: "{{ openshift_hosted_registry_storage_volume_size | default(20) }}"
+      purpose: "ose_registry"
+  roles:
   - infra-ansible/roles/osp/admin-volume
 
 - hosts: OSEv3
   tasks:
-  - name: "set registry volumeID fact"
-    set_fact: 
+  - name: "set cinder registry storage facts"
+    set_fact:
       openshift_hosted_registry_storage_openstack_volumeID: "{{ disk.volume.id }}"
       openshift_hosted_registry_storage_volume_size: "{{ disk.volume.size }}Gi"
-    with_items: 
+      openshift_hosted_registry_storage_access_modes: "{{ openshift_hosted_registry_storage_access_modes | default(\"['ReadWriteOnce']\") }}"
+      openshift_hosted_registry_storage_openstack_filesystem: "{{ openshift_hosted_registry_storage_openstack_filesystem | default('ext4')}}"
+    with_items:
     -  "{{ hostvars['localhost'].os_volumes.results }}"
-    when: 
+    when:
     - disk.item.purpose  == "ose_registry"
     loop_control:
       loop_var: disk
-
-
