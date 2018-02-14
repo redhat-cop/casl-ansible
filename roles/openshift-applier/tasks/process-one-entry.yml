@@ -5,10 +5,10 @@
     target_namespace: ''
     file: "{{ content.file | default('') }}"
     file_f_option: ''
-    file_action: "{{ content.file_action | default(omit) }}"
+    file_action: "{{ content.file_action | default(default_file_action) }}"
     template: "{{ content.template | default('') }}"
     template_f_option: ''
-    template_action: "{{ content.template_action | default(omit) }}"
+    template_action: "{{ content.template_action | default(default_template_action) }}"
     params: "{{ content.params | default('') }}"
     process_local: ''
 

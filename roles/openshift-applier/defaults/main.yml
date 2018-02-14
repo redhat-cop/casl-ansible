@@ -4,7 +4,7 @@ tmp_inv_dir: ''
 
 filter_tags: ''
 
-file_action: apply
-template_action: apply
+default_file_action: apply
+default_template_action: apply
 
 provision: True
