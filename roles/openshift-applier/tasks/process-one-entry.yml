@@ -83,7 +83,7 @@
   loop_control:
     loop_var: step
 
-- name: "Create OpenShift objects based on static files for '{{ item.name | default(entry.object) }}'"
+- name: "Create OpenShift objects based on static files for '{{ entry.object}} : {{ content.name | default(file | basename) }}'"
   command: >
     oc {{ file_action }} {{ target_namespace }} -f {{ file }}
   register: command_result
@@ -94,7 +94,7 @@
   when:
   - file|trim != ''
 
-- name: "Create OpenShift objects based on template with params for '{{ item.name | default(entry.object) }}'"
+- name: "Create OpenShift objects based on template with params for '{{ entry.object}} : {{ content.name | default(template | basename) }}'"
   shell: >
     oc process \
       {{ process_local }} \
