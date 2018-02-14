@@ -5,6 +5,7 @@
 # OpenShift Cluster provisioning
 
 openshift_cluster_content:
+- galaxy_requirements: "{{ inventory_dir }}/../files/galaxy_requirements.yml"
 - object: projectrequest
   content:
   - name: "my-cakephp-spaces"
@@ -22,6 +23,12 @@ openshift_cluster_content:
   content:
   - name: "cakephp-development"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/development.yml"
+    post_steps:
+    - role: casl-ansible/roles/openshift-labels
+      vars:
+        target_object: "namespace"
+        target_name: "cakephp-dev"
+        label: "openshift-applier=true"
   - name: "cakephp-stage"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/stage.yml"
   - name: "cakephp-production"

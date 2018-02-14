@@ -1,0 +1,26 @@
+---
+
+# This is a bit of a "hack" to pass the variables in to the role below
+# It would be nice if we could something like `vars: {{ step.vars }}`,
+# but it unfortunately generates an error with Ansible.
+- name: "Set facts to make variables available to the role"
+  set_fact:
+    "{{ var.key }}": "{{ var.value }}"
+  with_dict: "{{ step.vars | default({}) }}"
+  loop_control:
+    loop_var: var
+
+- name: "Include the pre/post step role"
+  include_role:
+    name: "{{ tmp_dep_dir }}{{ step.role }}"
+  when:
+  - step is defined
+  - step.role is defined
+  - step.role|trim != ''
+
+- name: "Clear facts to ensure that they don't carry over"
+  set_fact:
+    "{{ var.key }}": ""
+  with_dict: "{{ step.vars | default({}) }}"
+  loop_control:
+    loop_var: var

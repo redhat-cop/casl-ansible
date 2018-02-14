@@ -3,13 +3,13 @@
 - name: "Set default values"
   set_fact:
     target_namespace: ''
-    file: "{{ item.file | default('') }}"
+    file: "{{ content.file | default('') }}"
     file_f_option: ''
-    file_action: "{{ item.file_action | default(omit) }}"
-    template: "{{ item.template | default('') }}"
+    file_action: "{{ content.file_action | default(omit) }}"
+    template: "{{ content.template | default('') }}"
     template_f_option: ''
-    template_action: "{{ item.template_action | default(omit) }}"
-    params: "{{ item.params | default('') }}"
+    template_action: "{{ content.template_action | default(omit) }}"
+    params: "{{ content.params | default('') }}"
     process_local: ''
 
 - name: "Set file_action and template_action to delete when in deprovision mode"
@@ -71,10 +71,17 @@
 
 - name: "Set the target namespace option if supplied"
   set_fact:
-    target_namespace: "-n {{ item.namespace }}"
+    target_namespace: "-n {{ content.namespace }}"
   when:
-  - item.namespace is defined
-  - item.namespace|trim != ''
+  - content.namespace is defined
+  - content.namespace|trim != ''
+
+- name: "Include any pre-processing role(s) before applying file and/or template"
+  include: pre-post-step.yml
+  with_items:
+  - "{{ content.pre_steps | default('') }}"
+  loop_control:
+    loop_var: step
 
 - name: "Create OpenShift objects based on static files for '{{ item.name | default(entry.object) }}'"
   command: >
@@ -87,13 +94,13 @@
   when:
   - file|trim != ''
 
-- name: "Create OpenShift objects based on templates with params for '{{ item.name | default(entry.object) }}'"
+- name: "Create OpenShift objects based on template with params for '{{ item.name | default(entry.object) }}'"
   shell: >
     oc process \
       {{ process_local }} \
       {{ template_f_option }} {{ template }} \
       {{ target_namespace }} \
-      --param-file={{ tmp_inv_dir }}{{ item.params }} | \
+      --param-file={{ tmp_inv_dir }}{{ content.params }} | \
     oc {{ template_action }} {{ target_namespace }} -f -
   register: command_result
   failed_when:
@@ -103,3 +110,10 @@
   when:
   - template|trim != ''
   - params|trim != ''
+
+- name: "Include any post-processing role(s) after applying file and/or template"
+  include: pre-post-step.yml
+  with_items:
+  - "{{ content.post_steps | default('') }}"
+  loop_control:
+    loop_var: step

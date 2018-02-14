@@ -1,5 +1,15 @@
 ---
 
+- name: "Pull in Galaxy requirements - if set"
+  include: install-dependencies.yml
+  with_items:
+  - "{{ openshift_cluster_content }}"
+  loop_control:
+    loop_var: dependencies
+  when:
+  - dependencies.galaxy_requirements is defined
+  delegate_to: localhost
+
 - name: "Copy inventory content to remote host(s) if not running 'locally'"
   import_tasks: copy-inventory-to-remote.yml
   when:

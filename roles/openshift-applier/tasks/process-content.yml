@@ -1,9 +1,18 @@
 ---
 
+- name: "Include any pre-processing role(s) before applying content"
+  include: pre-post-step.yml
+  with_items:
+  - "{{ entry.pre_steps | default('') }}"
+  loop_control:
+    loop_var: step
+
 - name: "Create/Apply OpenShift Cluster Content ('{{ entry.object }}') - based on individual files"
   include_tasks: process-one-entry.yml
   with_items:
   - "{{ entry.content | default([]) }}"
+  loop_control:
+    loop_var: content
 
 - name: "Apply OpenShift Cluster Content ('{{ entry.object }}') - based on directory"
   block:
@@ -15,3 +24,10 @@
   when:
   - entry.content_dir is defined
   - entry.content_dir|trim != ''
+
+- name: "Include any post-processing role(s) after applying content"
+  include: pre-post-step.yml
+  with_items:
+  - "{{ entry.post_steps | default('') }}"
+  loop_control:
+    loop_var: step

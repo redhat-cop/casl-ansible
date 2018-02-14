@@ -25,7 +25,7 @@ Role used to apply OpenShift objects to an existing OpenShift Cluster.
 
 ## Requirements
 
-A working OpenShift cluster that can be used to populate things like namespaces, policies and PVs (all require cluster-admin), or application level content.
+A working OpenShift cluster that can be used to populate things like namespaces, policies and PVs (all require cluster-admin), or application level content (cluster-admin not required).
 
 
 ## Role Usage
@@ -36,14 +36,26 @@ The variable definitions come in the form of an object, `openshift_cluster_conte
 
 ```yaml
 openshift_cluster_content:
+- galaxy_requirements: # Optional: only needed if pre/post steps are specified below
+    - "path/to/galaxy/requirements.yml" # Has to be a local file - e.g: with the inventory
 - object: <object_type>
+  pre_steps: # Optional: pre-steps at object level can be added if desired
+    - role: <path to an ansible role>
   content:
   - name: <definition_name>
+    pre_steps: # Optional: pre-steps at content level can be added if desired
+      - role: <path to an ansible role>
+        vars: # Optional: only needed if the role above needs values passed
+          <key1>: <value1>  
     file: <file source>
     file_action: <apply|create> # Optional: Defaults to 'apply'
-    tags: # Optional: Tags can be left out - and only needed if `filter_tags` is used
+    tags: # Optional: Tags are only needed if `filter_tags` is used
     - tag1
     - tag2
+    post_steps: # Optional: post-steps at content level can be added if desired
+      - role: <path to an ansible role>
+  post_steps: # Optional: post-steps at object level can be added if desired
+    - role: <path to an ansible role>
 - object: <object_type>
   content:
   - name: <definition_name>
@@ -58,6 +70,8 @@ You have the choice of sourcing a `file` or a `template`. The `file` definition 
 **_TIP:_** Both choices give you the option of defining target namespaces in the template manually, or adding the `namespace` variable alongside the template and params (where applicable)
 
 The `tags` definition is a list of tags that will be processed if the `filter_tags` variable/fact is supplied. See [Filtering content based on tags](https://github.com/redhat-cop/casl-ansible/tree/filter/roles/openshift-applier#filtering-content-based-on-tags) below for more details.
+
+The pre/post definitions are a set of pre and post roles to execute before/after a particular portion of the inventory is applied. This can be before/afterthe object levels - i.e.: before and after all of the content, or before/after certain files/templates at a content level.
 
 ### Sourcing a directory with files
 
@@ -146,12 +160,27 @@ Valid `file_action` and `template_action` values are `apply`, `create`, and `del
 
 The `openshift-applier` supports the use of tags in the inventory (see example above) to allow for filtering which content should be processed and not. The `filter_tags` variable/fact takes a comma separated list of tags that will be processed and only content/content_dir with matching tags will be applied.
 
-**_NOTE:_** Entries in the inventory without tags will not be procssed when a valid list is supplied with the `filter_tags` option.
+**_NOTE:_** Entries in the inventory without tags will not be processed when a valid list is supplied with the `filter_tags` option.
 
 ```
 filter_tags=tag1,tag2
 
 ```
+
+### Pre/Post steps
+
+The `openshift-applier` supports the use of pre and post steps to allow for tasks to be executed before / after content is loaded up in OpenShift. This can be useful for things like:
+ - waiting on a deployment to become ready before proceeding to the next
+ - seeding the application with content after deployment
+ - applying additional tweaks to the OpenShift objects post deployment (e.g.: labels, env variables, etc.)
+
+The pre/post steps can be added at both the `object` level as well as the `content level`. See example at the top for more details.
+
+In essence, the pre/post steps are ansible roles that gets executed in the order they are found in the inventory. These roles are sourced from the `galaxy_requirements` file part of the inventory. See the official [Ansible Galaxy docs for more details on the requirements yaml file](http://docs.ansible.com/ansible/latest/galaxy.html#installing-multiple-roles-from-a-file).
+
+**_NOTE:_** it is important that the repos used for pre/post roles have the `meta/main.yml` file setup correctly. See the [Ansible Galaxy docs](docs.ansible.com/ansible/latest/galaxy.html) for more details.
+
+For roles that requires input parameters, the implementation also supports supplying variables, as part of the inventory, to the pre/post steps. See example at the top for more details.
 
 ### Deprovisioning
 

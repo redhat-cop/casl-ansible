@@ -5,5 +5,5 @@
 3. Execute with ansible, i.e.:
 
 ```
-  > ansible-playbook -i inventory test.yml --connection=local
+  > ansible-playbook -i inventory test.yml
 ```
