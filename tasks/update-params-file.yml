@@ -1,0 +1,10 @@
+---
+- name: "Regexp replace on params files"
+  include_tasks: generic-regex-replace.yml
+  with_items:
+  - "{{ item.content }}"
+  loop_control:
+    loop_var: inventory_entry
+  when:
+  - inventory_entry.params is defined
+  - inventory_entry.params != ""
