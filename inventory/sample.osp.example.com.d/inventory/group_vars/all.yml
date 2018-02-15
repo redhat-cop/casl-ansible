@@ -73,6 +73,25 @@ external_nsupdate_keys:
 docker_volume_size: "5"
 docker_storage_block_device: "/dev/vdb"
 
+
+# Cinder Registry Storage - example 1
+# - Auto provisioned Cinder registry storage variables
+#   NOTE: the volume size must be specified in GiB, but WITHOUT the unit (i.e.: without "Gi")
+#   Do NOT specify the `openshift_hosted_registry_storage_openstack_volumeID` variable for this scenario.
+openshift_hosted_registry_storage_kind: openstack
+#openshift_hosted_registry_storage_volume_size: 20
+
+# Cinder Registry Storage - example 2
+# - User provided Cinder registry storage variables
+#   To leverage an existing Cinder volume already created 
+#   in OpenStack use the following variables.
+#openshift_hosted_registry_storage_kind: openstack
+#openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
+#openshift_hosted_registry_storage_openstack_filesystem: ext4
+#openshift_hosted_registry_storage_openstack_volumeID: 3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
+#openshift_hosted_registry_storage_volume_size: 20Gi
+
+
 # Subscription Management Details
 rhsm_register: True
 rhsm_repos:
@@ -93,16 +112,3 @@ rhsm_password: ''
 # leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
 
-## Cinder Registry Storage ##
-# -Auto provisioned Cinder registry storage variables
-openshift_hosted_registry_storage_kind: openstack
-#openshift_hosted_registry_storage_volume_size: 20
-
-# -User Provisioned Cinder registry storage variables
-# To leverage an existing Cinder volume already created 
-# in OpenStack use the following variables.
-#openshift_hosted_registry_storage_kind: openstack
-#openshift_hosted_registry_storage_access_modes: ['ReadWriteOnce']
-#openshift_hosted_registry_storage_openstack_filesystem: ext4
-#openshift_hosted_registry_storage_volume_size: 20 <volume size from OSP>
-#openshift_hosted_registry_storage_openstack_volumeID: <UUID from OSP>
