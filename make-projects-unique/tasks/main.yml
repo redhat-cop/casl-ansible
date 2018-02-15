@@ -1,0 +1,9 @@
+---
+- name: "Update the params file entries"
+  include_tasks: update-params-file.yml
+  with_items:
+  - "{{ openshift_cluster_content }}"
+
+- name: "Update 'namespace: ' entries with a custom filter"
+  set_fact:
+    openshift_cluster_content: "{{ openshift_cluster_content | update_namespace(project_name_postfix) }}"
