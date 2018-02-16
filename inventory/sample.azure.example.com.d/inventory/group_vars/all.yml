@@ -16,10 +16,16 @@ env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
 azure_image_name: <REPLACE WITH VALID IMAGE NAME>
 
 # Instance flavors (i.e.: instance sizes)
-master_flavor: m4.xlarge
-infra_node_flavor: i3.xlarge
-app_node_flavor: m4.xlarge
-cns_node_flavor: i3.xlarge
+master_flavor: Standard_D4_v3
+infra_node_flavor: Standard_E4_v3
+app_node_flavor: Standard_E4_v3
+cns_node_flavor: Standard_E4_v3
+
+# Azure resource group
+resource_group: <REPLACE WITH RESOURCE GROUP>
+
+# Temporary measure, need to investigate key pairs (or whatever the Azure version is)
+ssh_key: <REPLACE WITH SSH PUBLIC KEY>
 
 # Number of master instances to deploy.
 # This is a non-HA sample nventory so don't change this value
@@ -65,8 +71,8 @@ dns_nameservers:
 
 # Docker Storage configuration variables - for all nodes
 # - default values are "/dev/xvdb" and "40"
-#docker_storage_block_device: "/dev/xvdb"
-#docker_volume_size: "40"
+docker_storage_block_device: "/dev/sdc"
+docker_volume_size: "128"
 
 # CNS (GlusterFS) Storage configuration variables
 # - default values are "/dev/xvdg" and "200"

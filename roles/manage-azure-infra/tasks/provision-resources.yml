@@ -3,7 +3,7 @@
   azure_rm_deployment:
     state: present
     resource_group_name: "{{ resource_group }}"
-    location: "{{ location }}"
+    location: "{{ azure_region }}"
     template:
       "$schema": http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json
       contentVersion: 1.0.0.0
@@ -1246,21 +1246,21 @@
 
     parameters:
       masterVmSize:
-        value: "{{ masterVmSize }}"
+        value: "{{ master_flavor }}"
       infraVmSize:
-        value: "{{ infraVmSize }}"
+        value: "{{ infra_node_flavor }}"
       nodeVmSize:
-        value: "{{ nodeVmSize }}"
+        value: "{{ app_node_flavor }}"
       storageKind:
         value: "{{ storageKind }}"
       openshiftClusterPrefix:
         value: "{{ openshiftClusterPrefix }}"
       masterInstanceCount:
-        value: "{{ masterInstanceCount }}"
+        value: "{{ number_of_masters }}"
       infraInstanceCount:
-        value: "{{ infraInstanceCount }}"
+        value: "{{ number_of_infra_nodes }}"
       nodeInstanceCount:
-        value: "{{ nodeInstanceCount }}"
+        value: "{{ number_of_app_nodes }}"
       dataDiskSize:
         value: "{{ dataDiskSize }}"
       adminUsername:

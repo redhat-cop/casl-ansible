@@ -35,6 +35,13 @@
         timeout: 300
     become: false
 
+- hosts: cluster_hosts
+  tasks:
+  - replace:
+      path: /etc/yum.repos.d/rh-cloud.repo
+      regexp: 'enabled.*=.*1'
+      replace: 'enabled = 0'
+
 # This may or may not be needed...
 # - need to replace the TBDs below with the proper Azure inventory var
 #
