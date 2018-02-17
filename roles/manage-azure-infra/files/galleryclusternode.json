@@ -121,6 +121,12 @@
 			"metadata": {
 				"description": "Red Hat Tags"
 			}
+		},
+		"nodelabels": {
+			"type": "object",
+			"metadata": {
+				"description": "OpenShift Node Labels Tag"
+			}
 		}
 	},
 	"variables": {
