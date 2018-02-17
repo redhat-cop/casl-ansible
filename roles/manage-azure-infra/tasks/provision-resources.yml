@@ -258,19 +258,16 @@
             description: Use Managed or Unmanaged Disks
         labelsMasters:
           type: string
-          defaultValue: '{\"region\": \"default\"}'
           minLength: 1
           metadata:
             description: OpenShift Master Node Labels
         labelsInfraNodes:
           type: string
-          defaultValue: '{\"region\": \"infra\"}'
           minLength: 1
           metadata:
             description: OpenShift Infra Node Labels
         labelsAppNodes:
           type: string
-          defaultValue: '{\"region\": \"primary\"}'
           minLength: 1
           metadata:
             description: OpenShift App Node Labels
@@ -1270,15 +1267,15 @@
       masterVmSize:
         value: "{{ master_flavor }}"
       labelsMasters:
-        value: "{{ labels_masters_tag }}"
+        value: "{{ labels_masters_tag | string }}"
       infraVmSize:
         value: "{{ infra_node_flavor }}"
       labelsInfraNodes:
-        value: "{{ labels_infra_nodes_tag }}"
+        value: "{{ labels_infra_nodes_tag | string }}"
       nodeVmSize:
         value: "{{ app_node_flavor }}"
       labelsAppNodes:
-        value: "{{ labels_app_nodes_tag }}"
+        value: "{{ labels_app_nodes_tag | string }}"
       storageKind:
         value: "{{ storageKind }}"
       openshiftClusterPrefix:
