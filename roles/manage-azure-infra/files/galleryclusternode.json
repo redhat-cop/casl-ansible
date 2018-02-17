@@ -123,7 +123,7 @@
 			}
 		},
 		"nodelabels": {
-			"type": "object",
+			"type": "string",
 			"metadata": {
 				"description": "OpenShift Node Labels Tag"
 			}
