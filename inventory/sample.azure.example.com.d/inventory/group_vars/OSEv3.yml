@@ -7,7 +7,7 @@ ansible_user: cloud-user
 ansible_become: true
 
 # Node Labels to use with the CASL tools
-openshift_node_labels: "{{ azure_tag_node_labels }}"
+openshift_node_labels: "{{ tags.nodelabels }}"
 
 # CNS relative vars - Uncommented to automatically deploy CNS - 'cns_deploy' from all.yml must be 'true' in that case
 # openshift_storage_glusterfs_namespace: glusterfs

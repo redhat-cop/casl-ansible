@@ -13,7 +13,7 @@
           metadata:
             description: Base URL for Template Files
             artifactsBaseUrl: ''
-          defaultValue: https://raw.githubusercontent.com/Microsoft/openshift-container-platform/master
+          defaultValue: https://raw.githubusercontent.com/redhat-cop/casl-ansible/azure/roles/manage-azure-infra/files
         masterVmSize:
           type: string
           defaultValue: Standard_DS2_v2
@@ -256,6 +256,24 @@
           - unmanaged
           metadata:
             description: Use Managed or Unmanaged Disks
+        labelsMasters:
+          type: string
+          defaultValue: '{\"region\": \"default\"}'
+          minLength: 1
+          metadata:
+            description: OpenShift Master Node Labels
+        labelsInfraNodes:
+          type: string
+          defaultValue: '{\"region\": \"infra\"}'
+          minLength: 1
+          metadata:
+            description: OpenShift Infra Node Labels
+        labelsAppNodes:
+          type: string
+          defaultValue: '{\"region\": \"primary\"}'
+          minLength: 1
+          metadata:
+            description: OpenShift App Node Labels
         openshiftClusterPrefix:
           type: string
           defaultValue: mycluster
@@ -486,9 +504,7 @@
           provider: 9d2c71fc-96ba-4b4a-93b3-14def5bc96fc
         singlequote: "'"
         sshKeyPath: "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
-        clusterNodeDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/galleryclusternode.json')]"
-        basicDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/gallerybasic.json')]"
-        openshiftDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/nested/openshiftdeploy.json')]"
+        clusterNodeDeploymentTemplateUrl: "[concat(parameters('_artifactsLocation'), '/galleryclusternode.json')]"
         vmSizesMap:
           Standard_A4:
             storageAccountType: Standard_LRS
@@ -1127,6 +1143,8 @@
               value: "[variables('imageReference')]"
             redHatTags:
               value: "[variables('redHatTags')]"
+            nodelabels:
+              value: "[parameters('labelsMasters')]"
       - name: "[concat('infraVmDeployment', copyindex())]"
         type: Microsoft.Resources/deployments
         apiVersion: "[variables('apiVersionLinkTemplate')]"
@@ -1185,6 +1203,8 @@
               value: "[variables('imageReference')]"
             redHatTags:
               value: "[variables('redHatTags')]"
+            nodelabels:
+              value: "[parameters('labelsInfraNodes')]"
       - name: "[concat('nodeVmDeployment', copyindex())]"
         type: Microsoft.Resources/deployments
         apiVersion: "[variables('apiVersionLinkTemplate')]"
@@ -1243,14 +1263,22 @@
               value: "[variables('imageReference')]"
             redHatTags:
               value: "[variables('redHatTags')]"
+            nodelabels:
+              value: "[parameters('labelsAppNodes')]"
 
     parameters:
       masterVmSize:
         value: "{{ master_flavor }}"
+      labelsMasters:
+        value: "{{ labels_masters_tag }}"
       infraVmSize:
         value: "{{ infra_node_flavor }}"
+      labelsInfraNodes:
+        value: "{{ labels_infra_nodes_tag }}"
       nodeVmSize:
         value: "{{ app_node_flavor }}"
+      labelsAppNodes:
+        value: "{{ labels_app_nodes_tag }}"
       storageKind:
         value: "{{ storageKind }}"
       openshiftClusterPrefix:
