@@ -105,10 +105,10 @@ group_infra_nodes_tag: infra_nodes_azure
 group_app_nodes_tag: app_nodes_azure
 group_cns_nodes_tag: cns_nodes_azure
 
-labels_masters_tag: '{\"region\": \"default\"}'
-labels_infra_nodes_tag: '{\"region\": \"infra\"}'
-labels_app_nodes_tag: '{\"region\": \"primary\"}'
-labels_cns_nodes_tag: '{\"region\": \"primary\"}'
+labels_masters_tag: "{\"region\": \"default\"}"
+labels_infra_nodes_tag: "{\"region\": \"infra\"}"
+labels_app_nodes_tag: "{\"region\": \"primary\"}"
+labels_cns_nodes_tag: "{\"region\": \"primary\"}"
 
 # Should the cluster be configured for HA
 # - currently not supported
