@@ -5,7 +5,7 @@
     state: directory
   register: tmp_dir
   notify:
-  - Clean-up temporary dir
+  - Clean-up temporary inv dir
 
 - name: "Store away the temporary directory path"
   set_fact:

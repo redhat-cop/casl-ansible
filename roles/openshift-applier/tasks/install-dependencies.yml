@@ -5,7 +5,7 @@
     state: directory
   register: tmp_dir
   notify:
-  - Clean-up temporary dir
+  - Clean-up temporary dep dir
   when:
   - tmp_dep_dir is undefined
 

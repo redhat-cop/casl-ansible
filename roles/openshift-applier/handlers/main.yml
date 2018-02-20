@@ -1,10 +1,16 @@
 ---
 
-- name: "Clean-up temporary dir"
+- name: "Clean-up temporary inv dir"
   file:
     path: "{{ item }}"
     state: absent
   with_items:
   - "{{ tmp_inv_dir }}"
+
+- name: "Clean-up temporary dep dir"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
   - "{{ tmp_dep_dir }}"
 
