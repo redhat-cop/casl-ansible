@@ -1,7 +1,7 @@
 ---
 
 - name: "Pull in Galaxy requirements - if set"
-  include: install-dependencies.yml
+  include_tasks: install-dependencies.yml
   with_items:
   - "{{ openshift_cluster_content }}"
   loop_control:

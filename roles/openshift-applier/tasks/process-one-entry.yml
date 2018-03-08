@@ -77,7 +77,7 @@
   - content.namespace|trim != ''
 
 - name: "Include any pre-processing role(s) before applying file and/or template"
-  include: pre-post-step.yml
+  include_tasks: pre-post-step.yml
   with_items:
   - "{{ content.pre_steps | default('') }}"
   loop_control:
@@ -110,7 +110,7 @@
   - params|trim != ''
 
 - name: "Include any post-processing role(s) after applying file and/or template"
-  include: pre-post-step.yml
+  include_tasks: pre-post-step.yml
   with_items:
   - "{{ content.post_steps | default('') }}"
   loop_control:

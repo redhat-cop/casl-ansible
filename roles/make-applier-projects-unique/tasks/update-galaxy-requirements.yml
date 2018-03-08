@@ -1,0 +1,10 @@
+---
+- name: "Set regexp_replace_pairs for galaxy requirements"
+  replace:
+    path: "{{ item.galaxy_requirements }}"
+    regexp: "{{ pair.regexp }}"
+    replace: "{{ pair.replace }}"
+  with_items:
+  - "{{ galaxy_regexp_replace_pairs }} "
+  loop_control:
+    loop_var: pair 

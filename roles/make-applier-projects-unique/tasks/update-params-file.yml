@@ -1,6 +1,6 @@
 ---
 - name: "Regexp replace on params files"
-  include_tasks: generic-regex-replace.yml
+  include_tasks: param-file-regex-replace.yml
   with_items:
   - "{{ item.content }}"
   loop_control:
