@@ -53,20 +53,25 @@ dns_domain: "<REPLACE WITH A VALID DNS DOMAIN>"
 dns_nameservers:
 - <REPLACE WITH THE IP OF THE 'private' DNS SERVER BELOW>
 
-# Sample configuration for the use of external DNS servers for name resolution
-external_nsupdate_keys:
-  private:
-    key_secret: '<REPLACE WITH THE PRIVATE DNS SERVER KEY SECRET>'
-    key_algorithm: '<REPLACE WITH THE PRIVATE DNS SERVER KEY ALGORITHM>'
-    key_name: '<REPLACE WITH THE PRIVATE DNS SERVER KEY NAME>'
-    server: '<REPLACE WITH THE PRIVATE DNS SERVER IP>'
+# Sample configuration for the use of DNS servers for name resolution
+# NOTE: The view names of `private` and `public` are REQUIRED as it indicates 
+#       the role each of these entries have.
+#       Each view section can have multiple servers (i.e.: it's a list of servers)
+nsupdate_config:
+  - view: "private"
     zone: '<REPLACE WITH THE PRIVATE DNS SERVER ZONE NAME>'
-  public:
-    key_secret: '<REPLACE WITH THE PUBLIC DNS SERVER KEY SECRET>'
-    key_algorithm: '<REPLACE WITH THE PUBLIC DNS SERVER KEY ALGORITHM>'
-    key_name: '<REPLACE WITH THE PUBLIC DNS SERVER KEY NAME>'
-    server: '<REPLACE WITH THE PUBLIC DNS SERVER IP>'
+    server_list:
+      - key_secret: '<REPLACE WITH THE PRIVATE DNS SERVER KEY SECRET>'
+        key_algorithm: '<REPLACE WITH THE PRIVATE DNS SERVER KEY ALGORITHM>'
+        key_name: '<REPLACE WITH THE PRIVATE DNS SERVER KEY NAME>'
+        server: '<REPLACE WITH THE PRIVATE DNS SERVER IP>'
+  - view: "public"
     zone: '<REPLACE WITH THE PUBLIC DNS SERVER ZONE NAME>'
+    server_list:
+      - key_secret: '<REPLACE WITH THE PUBLIC DNS SERVER KEY SECRET>'
+        key_algorithm: '<REPLACE WITH THE PUBLIC DNS SERVER KEY ALGORITHM>'
+        key_name: '<REPLACE WITH THE PUBLIC DNS SERVER KEY NAME>'
+        server: '<REPLACE WITH THE PUBLIC DNS SERVER IP>'
 
 
 # Docker Storage configuration variables

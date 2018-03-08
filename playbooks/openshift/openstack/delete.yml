@@ -2,7 +2,7 @@
 
 - hosts: localhost
   pre_tasks:
-  - import_tasks: pre-tasks.yml
+  - import_tasks: ../prep-inventory.yml
   roles:
   - role: openshift-ansible-contrib/roles/openstack-stack
     stack_name: "{{ full_dns_domain }}"

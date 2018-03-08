@@ -1,7 +1,7 @@
 ---
 - hosts: localhost
   pre_tasks:
-  - import_tasks: pre-tasks.yml
+  - import_tasks: ../prep-inventory.yml
   roles:
   - role: openshift-ansible-contrib/roles/openstack-stack
     stack_name: "{{ env_id }}.{{ dns_domain }}"
@@ -51,4 +51,4 @@
     set_fact:
       public_v4: "{{ openstack.public_v4 }}"
 
-- import_playbook: post-provision-openstack.yml
+- import_playbook: post-provision.yml
