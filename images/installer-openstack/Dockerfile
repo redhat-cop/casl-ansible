@@ -6,7 +6,7 @@ USER root
 
 # Update System and install clients
 RUN yum install -y epel-release; \
-  yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/openstack/openstack-ocata/rdo-release-ocata-3.noarch.rpm; \
+  yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/openstack/openstack-pike/rdo-release-pike-1.noarch.rpm ;\
   yum install -y python-pip python-ceilometerclient \
                  python-cinderclient python-glanceclient \
                  python-heatclient python-neutronclient \
