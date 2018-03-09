@@ -5,5 +5,5 @@
   when: hosting_infrastructure == "openstack"
 
 # Provision Openstack Instances
-#- import_playbook: aws/provision.yml
-#  when: hosting_infrastructure == "aws"
+- import_playbook: aws/provision.yml
+  when: hosting_infrastructure == "aws"
