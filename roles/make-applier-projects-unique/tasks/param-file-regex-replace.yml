@@ -1,9 +1,0 @@
----
-- replace:
-    path: "{{ inventory_entry.params }}"
-    regexp: "{{ pair.regexp }}"
-    replace: "{{ pair.replace }}"
-  with_items:
-  - "{{ params_regexp_replace_pairs }} "
-  loop_control:
-    loop_var: pair 

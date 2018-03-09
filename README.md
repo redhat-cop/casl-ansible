@@ -15,7 +15,8 @@ The CASL Ansible tools provide everything needed to automatically provision an O
 
 ## Automation of OpenShift Cluster Content
 
-The [openshift-applier](roles/openshift-applier) is used to automate the seeding of OpenShift cluster content based on OpenShift templates and parameters files.
+(moved to a new repo - https://github.com/redhat-cop/openshift-applier)
+The [openshift-applier](https://github.com/redhat-cop/openshift-applier) is used to automate the seeding of OpenShift cluster content based on OpenShift templates and parameters files.
 
 
 ## Compatibility Matrix
