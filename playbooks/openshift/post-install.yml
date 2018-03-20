@@ -8,6 +8,6 @@
   roles:
   - { role: create_users }
 
-- import_playbook: ../openshift-cluster-seed.yml
+- import_playbook: ../../galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml
   when:
   - openshift_cluster_content is defined

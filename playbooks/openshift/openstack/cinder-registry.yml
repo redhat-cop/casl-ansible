@@ -9,7 +9,7 @@
       size: "{{ openshift_hosted_registry_storage_volume_size | default(20) }}"
       purpose: "ose_registry"
   roles:
-  - infra-ansible/roles/osp/admin-volume
+  - ../../../galaxy/infra-ansible/roles/osp/admin-volume
 
 - hosts: OSEv3
   tasks:

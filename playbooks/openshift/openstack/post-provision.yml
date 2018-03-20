@@ -5,7 +5,7 @@
   pre_tasks:
     - import_tasks: ../prep-inventory.yml
   roles:
-    - role: openshift-ansible-contrib/roles/hostnames
+    - role: ../../../galaxy/openshift-ansible-contrib/roles/hostnames
 
 # Build and process DNS Records
 - hosts: localhost
@@ -13,7 +13,7 @@
     - import_tasks: ../prep-inventory.yml
     - import_tasks: dns.yml
   roles:
-    - role: infra-ansible/roles/dns
+    - role: ../../../galaxy/infra-ansible/roles/dns
 
 # provision cinder volume
 - import_playbook: cinder-registry.yml

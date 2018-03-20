@@ -7,4 +7,4 @@
     include_vars: vars/views.yml
     delegate_to: localhost
   roles:
-    - role: infra-ansible/roles/dns-server
+    - role: ../../galaxy/infra-ansible/roles/dns-server

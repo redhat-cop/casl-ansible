@@ -15,9 +15,9 @@
 #
 - hosts: OSEv3
   roles:
-    - { role: openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - { role: openshift-ansible-contrib/roles/docker, tags: 'docker' }
-    - { role: openshift-ansible-contrib/roles/openshift-prep, tags: 'openshift-prep' }
+    - { role: ../../galaxy/openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
+    - { role: ../../galaxy/openshift-ansible-contrib/roles/docker, tags: 'docker' }
+    - { role: ../../galaxy/openshift-ansible-contrib/roles/openshift-prep, tags: 'openshift-prep' }
 
 # Ensure the CNS / glusterFS facts are correctly populated for all CNS nodes
 - hosts: glusterfs

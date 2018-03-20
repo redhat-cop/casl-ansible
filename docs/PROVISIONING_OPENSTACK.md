@@ -19,9 +19,11 @@ git clone https://github.com/redhat-cop/casl-ansible.git
 
 * Run `ansible-galaxy` to pull in the necessary requirements for the CASL provisioning of OpenShift on OpenStack:
 
+> **NOTE:** The target directory ( `galaxy` ) is **important** as the playbooks know to source roles and playbooks from that location.
+
 ```
 cd ~/src/casl-ansible
-ansible-galaxy install -r casl-requirements.yml -p roles
+ansible-galaxy install -r casl-requirements.yml -p galaxy
 ```
 
 ## OpenStack specific requirements
