@@ -1,0 +1,24 @@
+---
+
+- name: "Setting Docker Facts"
+  set_fact:
+    docker_storage_block_device: "{{ docker_storage_block_device | default(default_docker_storage_block_device) }}"
+    docker_storage_volume_group: "{{ docker_storage_volume_group | default(default_docker_storage_volume_group) }}"
+
+- name: "Install Docker"
+  yum:
+    name: "docker{{ (docker_version is defined) | ternary('-' + docker_version, '') }}"
+    state: "{{ (docker_version is defined) | ternary('installed', 'latest') }}"
+    update_cache: yes
+  notify:
+    - enable docker
+
+- name: create the docker-storage-setup config file
+  template:
+    src: docker-storage-setup-dm.j2
+    dest: /etc/sysconfig/docker-storage-setup
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart docker

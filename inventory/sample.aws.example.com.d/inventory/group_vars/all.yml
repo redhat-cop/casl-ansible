@@ -44,6 +44,9 @@ dns_domain: "<REPLACE WITH A VALID ROUTE53 DNS DOMAIN>"
 dns_nameservers:
 - 8.8.8.8
 
+# Specify the version of docker to use
+docker_version: "1.12.*"
+
 # master(s) root (/) volume size and device
 # - default values are "/dev/sda1" and "50"
 #master_root_volume: "/dev/sda1"

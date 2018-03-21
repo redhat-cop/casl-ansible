@@ -16,7 +16,14 @@
 - hosts: OSEv3
   roles:
     - { role: ../../galaxy/openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - { role: ../../galaxy/openshift-ansible-contrib/roles/docker, tags: 'docker' }
+    - { role: docker-fix-37, tags: 'docker' }
+    - { role: ../../galaxy/infra-ansible/roles/config-versionlock,
+              when: docker_version is defined,
+              versionlock_packages: '[ "docker-{{ docker_version }}",
+                                       "docker-rhel-push-plugin-{{ docker_version }}",
+                                       "docker-client-{{ docker_version }}",
+                                       "docker-common-{{ docker_version }}" ]'
+      }
     - { role: ../../galaxy/openshift-ansible-contrib/roles/openshift-prep, tags: 'openshift-prep' }
 
 # Ensure the CNS / glusterFS facts are correctly populated for all CNS nodes
