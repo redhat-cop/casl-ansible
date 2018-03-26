@@ -1,47 +1,55 @@
 ---
-- hosts: localhost
-  roles:
-  - role: manage-aws-infra
-    operation: inventory_gen_e2c
 
 - hosts: localhost
+  pre_tasks:
+    - import_tasks: ../prep-inventory.yml
   roles:
-  - role: manage-aws-infra
-    operation: deploy
+    - role: manage-aws-infra
+      operation: inventory_gen_e2c
+
+- hosts: localhost
+  pre_tasks:
+    - import_tasks: ../prep-inventory.yml
+  roles:
+    - role: manage-aws-infra
+      operation: deploy
 
 - name: Refresh Server inventory
   hosts: localhost
   connection: local
   gather_facts: False
   tasks:
-  - meta: refresh_inventory
+    - meta: refresh_inventory
 
 - hosts: localhost
+  pre_tasks:
+    - import_tasks: ../prep-inventory.yml
   roles:
-  - role: manage-aws-infra
-    operation: inventory_gen_hosts
+    - role: manage-aws-infra
+      operation: inventory_gen_hosts
 
 - name: Refresh Server inventory
   hosts: localhost
   connection: local
   gather_facts: False
   tasks:
-  - meta: refresh_inventory
+    - meta: refresh_inventory
 
 - hosts: cluster_hosts
   gather_facts: false
   tasks:
-  - name: Debug hostvar
-    debug:
-      msg: "{{ hostvars[inventory_hostname] }}"
-      verbosity: 2
-  - name: waiting for server to come back
-    local_action: wait_for host={{ hostvars[inventory_hostname]['ansible_host'] }} port=22 delay=30 timeout=300
-    become: false
+    - name: Debug hostvar
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+        verbosity: 2
+    - import_role:
+        name: ../../../galaxy/infra-ansible/roles/update-host
+        tasks_from: wait-for-host
 
 - hosts: cluster_hosts
   tasks:
-  - name: Set Openshift Hostnames
-    set_fact:
-      openshift_hostname: "{{ ec2_private_dns_name }}"
-      openshift_public_hostname: "{{ ec2_public_dns_name }}"
+    - name: Set Openshift Hostnames
+      set_fact:
+        openshift_hostname: "{{ ec2_private_dns_name }}"
+        openshift_public_hostname: "{{ ec2_public_dns_name }}"
+

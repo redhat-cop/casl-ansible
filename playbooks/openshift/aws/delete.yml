@@ -1,6 +1,8 @@
 ---
 
 - hosts: localhost
+  pre_tasks:
+    - import_tasks: ../prep-inventory.yml
   roles:
-  - role: manage-aws-infra
-    operation: absent
+    - role: manage-aws-infra
+      operation: absent

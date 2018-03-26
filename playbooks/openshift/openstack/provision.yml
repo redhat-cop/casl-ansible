@@ -1,54 +1,56 @@
 ---
 - hosts: localhost
   pre_tasks:
-  - import_tasks: ../prep-inventory.yml
+    - import_tasks: ../prep-inventory.yml
+    - import_tasks: prep-env.yml
   roles:
-  - role: ../../../galaxy/openshift-ansible-contrib/roles/openstack-stack
-    stack_name: "{{ env_id }}.{{ dns_domain }}"
-    subnet_prefix: "{{ openstack_subnet_prefix }}"
-    ssh_public_key: "{{ openstack_ssh_public_key }}"
-    openstack_image: "{{ openstack_default_image_name }}"
-    lb_flavor: "{{ openstack_lb_flavor | default('m1.small') }}"
-    etcd_flavor: "{{ openstack_etcd_flavor | default( openstack_default_flavor ) }}"
-    master_flavor: "{{ openstack_master_flavor | default( openstack_default_flavor ) }}"
-    node_flavor: "{{ openstack_node_flavor | default( openstack_default_flavor ) }}"
-    infra_flavor: "{{ openstack_infra_flavor | default( openstack_default_flavor ) }}"
-    dns_flavor: "{{ openstack_dns_flavor | default('m1.small') }}"
-    external_network: "{{ openstack_external_network_name }}"
-    num_etcd: "{{ openstack_num_etcd | default(0) }}"
-    num_masters: "{{ openstack_num_masters }}"
-    num_nodes: "{{ openstack_num_nodes }}"
-    num_infra: "{{ openstack_num_infra }}"
-    num_dns: "{{ openstack_num_dns | default(0) }}"
-    master_volume_size: "{{ docker_volume_size }}"
-    node_volume_size: "{{ docker_volume_size }}"
-    infra_volume_size: "{{ docker_volume_size }}"
+    - role: ../../../galaxy/openshift-ansible-contrib/roles/openstack-stack
+      stack_name: "{{ env_id }}.{{ dns_domain }}"
+      subnet_prefix: "{{ openstack_subnet_prefix }}"
+      ssh_public_key: "{{ openstack_ssh_public_key }}"
+      openstack_image: "{{ openstack_default_image_name }}"
+      lb_flavor: "{{ openstack_lb_flavor | default('m1.small') }}"
+      etcd_flavor: "{{ openstack_etcd_flavor | default( openstack_default_flavor ) }}"
+      master_flavor: "{{ openstack_master_flavor | default( openstack_default_flavor ) }}"
+      node_flavor: "{{ openstack_node_flavor | default( openstack_default_flavor ) }}"
+      infra_flavor: "{{ openstack_infra_flavor | default( openstack_default_flavor ) }}"
+      dns_flavor: "{{ openstack_dns_flavor | default('m1.small') }}"
+      external_network: "{{ openstack_external_network_name }}"
+      num_etcd: "{{ openstack_num_etcd | default(0) }}"
+      num_masters: "{{ openstack_num_masters }}"
+      num_nodes: "{{ openstack_num_nodes }}"
+      num_infra: "{{ openstack_num_infra }}"
+      num_dns: "{{ openstack_num_dns | default(0) }}"
+      master_volume_size: "{{ docker_volume_size }}"
+      node_volume_size: "{{ docker_volume_size }}"
+      infra_volume_size: "{{ docker_volume_size }}"
 
 - name: Refresh Server inventory
   hosts: localhost
   connection: local
   gather_facts: False
   tasks:
-  - meta: refresh_inventory
+    - meta: refresh_inventory
 
 - hosts: cluster_hosts
   gather_facts: false
   tasks:
-  - name: Debug hostvar
-    debug:
-      msg: "{{ hostvars[inventory_hostname] }}"
-      verbosity: 2
-  - name: waiting for server to come back
-    local_action: wait_for host={{ hostvars[inventory_hostname]['ansible_ssh_host'] }} port=22 delay=30 timeout=300
-    become: false
+    - name: Debug hostvar
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+        verbosity: 2
+    - import_role:
+        name: ../../../galaxy/infra-ansible/roles/update-host
+        tasks_from: wait-for-host
 
 - hosts: cluster_hosts
   tasks:
-  - name: Copy the 'private_v4' address out of the 'openstack' section to make it generic
-    set_fact:
-      private_v4: "{{ openstack.private_v4 }}"
-  - name: Copy the 'public_v4' address out of the 'openstack' section to make it generic
-    set_fact:
-      public_v4: "{{ openstack.public_v4 }}"
+    - name: Copy the 'private_v4' address out of the 'openstack' section to make it generic
+      set_fact:
+        private_v4: "{{ openstack.private_v4 }}"
+    - name: Copy the 'public_v4' address out of the 'openstack' section to make it generic
+      set_fact:
+        public_v4: "{{ openstack.public_v4 }}"
 
 - import_playbook: post-provision.yml
+

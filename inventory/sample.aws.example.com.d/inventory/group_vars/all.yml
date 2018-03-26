@@ -128,17 +128,33 @@ ha_mode: false
 # Subscription Management Details
 rhsm_register: True
 rhsm_repos:
- - "rhel-7-server-rpms"
- - "rhel-7-server-ose-3.7-rpms"
- - "rhel-7-server-extras-rpms"
- - "rhel-7-fast-datapath-rpms"
- - "rhel-server-rhscl-7-rpms"
+  - "rhel-7-server-rpms"
+  - "rhel-7-server-ose-3.5-rpms"
+  - "rhel-7-server-extras-rpms"
+  - "rhel-7-fast-datapath-rpms"
 
+# Keep this to use Red Hat Satellite:
+rhsm_server_hostname: 'sat-6.example.com'
+rhsm_org_id: 'CASL_ORG'
+rhsm_activationkey: 'casl-latest'
 
-# Use RHSM username, password and optionally pool:
-# NOTE: use the -e option to specify on CLI instead of statically set here
-rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
-rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
-
+# Uncomment the following to use RHSM username, password and optionally pool:
+#rhsm_username: ''
+#rhsm_password: ''
 # leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
+
+# WARNING: By default the tools will update RPMs during provisioning. If any packages are
+# updated, the host(s) will reboot to ensure the correct versions are in use. This may 
+# NOT be desirable during an consecutive runs to just apply minor changes. If you would 
+# like to avoid "surprise" reboots, make sure to uncomment the following variable. 
+# Do NOTE that a reboot should most likely happen on initial install, so it's important
+# that this variable is commented out or set to `True` for initial runs.
+#update_cluster_hosts: False
+
+# Uncomment the following `additional_list_of_packages_to_install` to list additional
+# packages/RPMs to install during install
+#additional_list_of_packages_to_install:
+#  - rpm-1
+#  - rpm-2
+

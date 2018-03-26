@@ -50,7 +50,6 @@ openshift_logging_es_pvc_size: 40G
 openshift_logging_curator_default_days: 1
 
 # Deploy Metrics with dynamic storage
-openshift_hosted_metrics_deploy: true
 openshift_metrics_install_metrics: true
 openshift_metrics_cassandra_storage_type: dynamic
 openshift_metrics_cassandra_pvc_size: 40G

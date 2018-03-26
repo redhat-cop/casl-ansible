@@ -17,9 +17,6 @@ openshift_master_identity_providers:
    'kind': 'HTPasswdPasswordIdentityProvider'
    'filename': '/etc/origin/master/htpasswd'
 
-openshift_hosted_logging_deploy: true
-
-openshift_hosted_metrics_deploy: true
 
 openshift_node_labels: "{{ openstack.metadata.node_labels}}"
 

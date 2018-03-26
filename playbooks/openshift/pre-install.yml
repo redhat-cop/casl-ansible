@@ -9,22 +9,54 @@
     - set_fact:
         docker_storage_block_device: "{{ hostvars['localhost'].docker_storage_block_device }}"
 
+#
 # - subscribe hosts
 # - prepare docker
 # - other prep (install additional packages, etc.)
 #
 - hosts: OSEv3
-  roles:
-    - { role: ../../galaxy/openshift-ansible-contrib/roles/subscription-manager, when: hostvars.localhost.rhsm_register, tags: 'subscription-manager', ansible_sudo: true }
-    - { role: docker-fix-37, tags: 'docker' }
-    - { role: ../../galaxy/infra-ansible/roles/config-versionlock,
-              when: docker_version is defined,
-              versionlock_packages: '[ "docker-{{ docker_version }}",
-                                       "docker-rhel-push-plugin-{{ docker_version }}",
-                                       "docker-client-{{ docker_version }}",
-                                       "docker-common-{{ docker_version }}" ]'
-      }
-    - { role: ../../galaxy/openshift-ansible-contrib/roles/openshift-prep, tags: 'openshift-prep' }
+  pre_tasks:
+    - import_tasks: prep-inventory.yml
+  tasks:
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/rhsm
+      vars:
+        ansible_become: True
+      when:
+        - rhsm_register
+    - import_role:
+        name: docker-fix-37
+      vars:
+        ansible_become: True
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/config-versionlock
+      vars:
+        ansible_become: True
+      when:
+        - versionlock_packages is defined
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/config-packages
+      vars:
+        ansible_become: True
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/config-selinux
+      vars:
+        ansible_become: True
+        target_state: enforcing
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/update-host
+        tasks_from: update-host
+      vars:
+        ansible_become: True
+        pkg_update: "{{ update_cluster_hosts | default('True') }}"
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/update-host
+        tasks_from: reboot-host
+      vars:
+        ansible_become: True
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/update-host
+        tasks_from: wait-for-host
 
 # Ensure the CNS / glusterFS facts are correctly populated for all CNS nodes
 - hosts: glusterfs

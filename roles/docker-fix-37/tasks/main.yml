@@ -5,10 +5,17 @@
     docker_storage_block_device: "{{ docker_storage_block_device | default(default_docker_storage_block_device) }}"
     docker_storage_volume_group: "{{ docker_storage_volume_group | default(default_docker_storage_volume_group) }}"
 
+- name: "Set local facts if docker_version is defined"
+  set_fact:
+    local_docker_version: "-{{ docker_version }}"
+    local_docker_install_state: "installed"
+  when:
+    - docker_version is defined
+
 - name: "Install Docker"
   yum:
-    name: "docker{{ (docker_version is defined) | ternary('-' + docker_version, '') }}"
-    state: "{{ (docker_version is defined) | ternary('installed', 'latest') }}"
+    name: "docker{{ local_docker_version }}"
+    state: "{{ local_docker_install_state }}"
     update_cache: yes
   notify:
     - enable docker

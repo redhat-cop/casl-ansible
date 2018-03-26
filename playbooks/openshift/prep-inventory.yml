@@ -1,4 +1,5 @@
 ---
+
 - name: Generate Environment ID
   set_fact:
     env_random_id: "{{ ansible_date_time.epoch }}"
@@ -15,11 +16,6 @@
     env_id: "{{ env_id | default(default_env_id) }}"
   delegate_to: localhost
 
-- name: Set Dynamic Inventory Filters
-  shell: >
-    export OS_INV_FILTER_KEY=clusterid && OS_INV_FILTER_VALUE={{ env_id }}
-  delegate_to: localhost
-
 - name: Updating DNS configurations
   set_fact:
     full_dns_domain: "{{ (env_id|trim == '') | ternary(dns_domain, env_id + '.' + dns_domain) }}"
@@ -33,3 +29,32 @@
   delegate_to: localhost
   when:
   - openshift_master_default_subdomain is undefined
+
+- name: Version Lock the docker packages
+  set_fact:
+    versionlock_packages:
+      - "docker-{{ docker_version }}"
+      - "docker-rhel-push-plugin-{{ docker_version }}"
+      - "docker-client-{{ docker_version }}"
+      - "docker-common-{{ docker_version }}"
+  when:
+    - docker_version is defined
+
+- name: Set the packages to install on the target systems
+  set_fact:
+    list_of_packages_to_install:
+      - wget
+      - git
+      - net-tools
+      - bind-utils
+      - iptables-services
+      - bridge-utils
+      - bash-completion
+      - kexec-tools
+      - sos
+      - psacct
+
+- name: Append any custom packages to install on the target systems
+  set_fact:
+    list_of_packages_to_install: "{{ list_of_packages_to_install }} +
+                                  {{ additional_list_of_packages_to_install | default([]) }}"
