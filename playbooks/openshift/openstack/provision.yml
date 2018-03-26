@@ -45,12 +45,12 @@
 
 - hosts: cluster_hosts
   tasks:
-    - name: Copy the 'private_v4' address out of the 'openstack' section to make it generic
+    - name: "Set required inventory variables based on the dynamic inventory"
       set_fact:
         private_v4: "{{ openstack.private_v4 }}"
-    - name: Copy the 'public_v4' address out of the 'openstack' section to make it generic
-      set_fact:
         public_v4: "{{ openstack.public_v4 }}"
+        openshift_hostname: "{{ inventory_hostname }}"
+        openshift_public_hostname: "{{ inventory_hostname }}"
 
 - import_playbook: post-provision.yml
 
