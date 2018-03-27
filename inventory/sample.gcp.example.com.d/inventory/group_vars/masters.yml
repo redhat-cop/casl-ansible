@@ -1,0 +1,5 @@
+---
+
+openshift_schedulable: false 
+openshift_node_labels: "{'region': 'primary'}" 
+

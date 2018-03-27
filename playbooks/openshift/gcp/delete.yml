@@ -1,0 +1,9 @@
+---
+
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: cleanup
+    include_role:
+      name:  manage-gcp-infra
+      tasks_from: cleanup.yml

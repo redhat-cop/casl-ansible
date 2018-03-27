@@ -1,0 +1,43 @@
+---
+
+- name: setup gcloud configuration
+  shell: gcloud config configurations create openshift-{{ gcloud_env }}
+  register: result
+  failed_when: not ((result.rc == 0) or ("it already exists" in result.stderr))
+  changed_when: not ("it already exists" in result.stderr)    
+  
+- name: setup gcloud authenticationn
+  shell: gcloud auth activate-service-account --key-file {{ credentials_file }} --project {{ gcloud_project_name }}
+
+- name: create a temp directory for google template
+  tempfile:
+    state: directory
+    suffix: gcp-registry
+  register: tempdir 
+
+- name: create the google template 
+  template:
+    src: openshift-gcloud.yaml.j2
+    dest: "{{ tempdir.path }}/openshift-gcloud.yaml"            
+  
+- name: check if google deployment exists
+  shell: gcloud deployment-manager deployments list 2>&1 | grep openshift-{{ gcloud_env }}
+  register: deployment
+  failed_when: deployment.rc|int > 1
+  changed_when: false  
+  
+- name: update deployment existing deployment if it exists
+  shell: gcloud deployment-manager deployments update openshift-{{ gcloud_env }} --config {{ tempdir.path }}/openshift-gcloud.yaml  
+  when: deployment.stdout 
+    
+- name: create deployment if it doesn't exist
+  shell: gcloud deployment-manager deployments create openshift-{{ gcloud_env }} --config {{ tempdir.path }}/openshift-gcloud.yaml
+  when: not deployment.stdout  
+  
+- name: add instances to instance groups (not supported by templates)
+  shell: gcloud compute instance-groups unmanaged add-instances {{ "master-"~gcloud_masters_zones[ (item|int % gcloud_masters_zones.__len__()) - 1 ]~"-ig-"~gcloud_env }} --instances {{ gcloud_masters_name_prefix ~ item|int ~ "-" ~ gcloud_env }} --zone {{ gcloud_masters_zones[ (item|int % gcloud_masters_zones.__len__()) - 1 ] }}
+  with_sequence: start=1 end="{{ gcloud_masters_num|int }}"
+  register: result
+  failed_when: not ((result.rc == 0) or ("is already a member of" in result.stderr))
+  changed_when: not ("is already a member of" in result.stderr)
+

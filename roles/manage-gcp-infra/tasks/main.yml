@@ -1,0 +1,10 @@
+---
+- name: create infrastructure
+  include_tasks: create-infrastructure.yml
+  
+- name: add dns entries
+  include_tasks: add-dns-entries.yml   
+
+- name: set post provisioning facts
+  include_tasks: set-post-provisioning-facts.yml  
+

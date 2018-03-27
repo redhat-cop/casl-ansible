@@ -1,0 +1,9 @@
+---
+
+- hosts: masters[0]
+  tasks:
+  - name: configure registry
+    include_role:
+      name:  manage-gcp-infra
+      tasks_from: configure-registry-object-storage.yml
+

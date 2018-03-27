@@ -1,0 +1,10 @@
+---
+- name: 'cleanup gcloud template temp'
+  file:
+    path: "{{ tempdir.path }}"
+    state: absent
+    
+- name: 'cleanup registry config temp'
+  file:
+    path: "{{ tempdir.path }}"
+    state: absent    

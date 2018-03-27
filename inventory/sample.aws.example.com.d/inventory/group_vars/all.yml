@@ -5,6 +5,7 @@
 # - 'openstack'
 # - 'aws'
 # - 'azure' (Coming Soon)
+# - 'gcp'
 hosting_infrastructure: aws
 
 # Cluster Environment ID to uniquely identify the environment

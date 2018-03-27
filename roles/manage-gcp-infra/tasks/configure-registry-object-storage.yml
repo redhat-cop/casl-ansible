@@ -1,0 +1,73 @@
+---
+
+- name: retrieve the name of one registry pod
+  shell: oc get pod -l deploymentconfig=docker-registry | grep -m 1 registry | awk '{print $1}'
+  register: pod  
+  
+- name: create a temp directory for the registry config
+  tempfile:
+    state: directory
+    suffix: gcp-registry
+  register: tempdir  
+  
+- name: retrieve the configuration file
+  shell: oc rsync {{ pod.stdout }}:/config.yml {{ tempdir.path }} -n default
+    
+- name: replace with google object storage configuration 1
+  lineinfile:
+    path: "{{ tempdir.path }}/config.yml"
+    regexp: "filesystem"
+    state: present
+    line: "  gcs:" 
+
+- name: replace with google object storage configuration 2
+  lineinfile:
+    path: "{{ tempdir.path }}/config.yml"
+    regexp: "rootdirectory"
+    state: present
+    line: "    bucket: {{ gcloud_registry_bucket_name }}"           
+  
+- name: check if configmap exists
+  shell: oc get configmap {{ gcloud_registry_configmap_name }} -n default | grep {{ gcloud_registry_configmap_name }}  
+  register: configmap
+  changed_when: false
+  failed_when: not (configmap.rc == 0 or configmap.rc == 1)
+  
+- name: delete configmap if it exists
+  shell: oc delete configmap {{ gcloud_registry_configmap_name }} -n default
+  when: configmap.stdout  
+  
+- name: create configmap with new config
+  shell: oc create configmap {{ gcloud_registry_configmap_name }} --from-file={{ tempdir.path }}/config.yml -n default
+  
+- name: save the current number of replicas
+  shell: oc get dc docker-registry -o jsonpath='{ .status.replicas }' -n default
+  register: replicas  
+  
+- name: scale down registry
+  shell: oc scale dc/docker-registry --replicas=0 -n default 
+  
+- name: check if current registry storage exists  
+  shell: oc set volume dc/docker-registry -n default | grep registry-storage
+  register: registry_storage
+  changed_when: false
+  failed_when: not (registry_storage.rc == 0 or registry_storage.rc == 1)
+  
+- name: remove current registry storage if present
+  shell: oc set volume dc/docker-registry --remove --name=registry-storage -n default
+  when: registry_storage.stdout
+  
+- name: check if configmap currently mounted
+  shell: oc set volume dc/docker-registry -n default | grep "/etc/docker/registry"
+  register: registry_config
+  changed_when: false
+  failed_when: not (registry_config.rc == 0 or registry_config.rc == 1)  
+  
+- name: add new config map
+  shell: oc set volume dc/docker-registry {% if registry_config.stdout %} --overwrite {% endif %} --add --type=configmap --configmap-name={{ gcloud_registry_configmap_name }} -m /etc/docker/registry/ -n default
+  
+- name: set new config file in registry deployment config
+  shell: oc set env dc/docker-registry REGISTRY_CONFIGURATION_PATH=/etc/docker/registry/config.yml -n default
+  
+- name: scale up registry
+  shell: oc scale dc/docker-registry --replicas={{ replicas.stdout }} -n default  

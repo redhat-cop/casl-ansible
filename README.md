@@ -11,6 +11,7 @@ The CASL Ansible tools provide everything needed to automatically provision an O
 
 * [Provisioning an OpenShift Cluster on OpenStack](./docs/PROVISIONING_OPENSTACK.md)
 * [Provisioning an OpenShift Cluster on AWS](./docs/PROVISIONING_AWS.md)
+* [Provisioning an OpenShift Cluster on GCP](./docs/PROVISIONING_GCP.md)
 
 
 ## Automation of OpenShift Cluster Content

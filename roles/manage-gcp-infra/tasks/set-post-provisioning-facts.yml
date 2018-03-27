@@ -1,0 +1,6 @@
+---
+
+- name: set docker disk fact
+  set_fact:
+    docker_storage_block_device: /dev/disk/by-id/google-{{ gcloud_docker_volume_name }}  
+

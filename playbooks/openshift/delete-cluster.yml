@@ -11,3 +11,7 @@
 - import_playbook: aws/delete.yml
   when:
   - hosting_infrastructure == 'aws'
+  
+- import_playbook: gcp/delete.yml
+  when:
+  - hosting_infrastructure == 'gcp'  

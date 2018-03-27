@@ -5,6 +5,7 @@
 # - 'openstack'
 # - 'aws'
 # - 'azure'
+# - 'gcp'
 hosting_infrastructure: openstack
 
 # OpenStack Provisioning Variables

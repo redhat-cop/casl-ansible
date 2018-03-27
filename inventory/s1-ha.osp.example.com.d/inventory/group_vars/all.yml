@@ -5,6 +5,7 @@
 # - 'openstack'
 # - 'aws' (Coming Soon)
 # - 'azure' (Coming Soon)
+# - 'gcp'
 hosting_infrastructure: openstack
 
 
