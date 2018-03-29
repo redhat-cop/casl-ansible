@@ -46,7 +46,7 @@ dns_nameservers:
 - 8.8.8.8
 
 # Specify the version of docker to use
-docker_version: "1.12.*"
+#docker_version: "1.12.*"
 
 # master(s) root (/) volume size and device
 # - default values are "/dev/sda1" and "50"
@@ -130,7 +130,7 @@ ha_mode: false
 rhsm_register: True
 rhsm_repos:
   - "rhel-7-server-rpms"
-  - "rhel-7-server-ose-3.5-rpms"
+  - "rhel-7-server-ose-3.9-rpms"
   - "rhel-7-server-extras-rpms"
   - "rhel-7-fast-datapath-rpms"
 

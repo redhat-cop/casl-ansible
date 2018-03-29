@@ -56,10 +56,9 @@ cloud_infrastructure:
 rhsm_register: True
 rhsm_repos:
  - "rhel-7-server-rpms"
- - "rhel-7-server-ose-3.7-rpms"
+ - "rhel-7-server-ose-3.9-rpms"
  - "rhel-7-server-extras-rpms"
  - "rhel-7-fast-datapath-rpms"
- - "rhel-server-rhscl-7-rpms"
 
 
 # Use RHSM username, password and optionally pool:
@@ -71,7 +70,7 @@ rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
 #rhsm_pool: ''
 
 # Specify the version of docker to use
-docker_version: "1.12.*"
+#docker_version: "1.12.*"
 
 #google specific properties
 service_account_email: <your google service account>

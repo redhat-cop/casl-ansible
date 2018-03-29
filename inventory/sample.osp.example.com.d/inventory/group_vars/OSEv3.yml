@@ -41,6 +41,7 @@ openshift_cloudprovider_openstack_domain_name: Default
 openshift_cloudprovider_openstack_tenant_id: "{{ lookup('env','OS_PROJECT_ID') }}"
 openshift_cloudprovider_openstack_tenant_name: "{{ lookup('env','OS_PROJECT_NAME') }}"
 openshift_cloudprovider_openstack_region: "{{ lookup('env','OS_REGION_NAME') }}"
+openshift_cloudprovider_openstack_blockstorage_version: v2
 
 # Deploy Logging with dynamic storage
 openshift_hosted_logging_deploy: true

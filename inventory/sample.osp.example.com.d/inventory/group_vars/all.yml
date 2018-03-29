@@ -75,7 +75,7 @@ nsupdate_config:
         server: '<REPLACE WITH THE PUBLIC DNS SERVER IP>'
 
 # Specify the version of docker to use
-docker_version: "1.12.*"
+#docker_version: "1.12.*"
 
 # Docker Storage configuration variables
 docker_volume_size: "5"
@@ -104,7 +104,7 @@ openshift_hosted_registry_storage_kind: openstack
 rhsm_register: True
 rhsm_repos:
   - "rhel-7-server-rpms"
-  - "rhel-7-server-ose-3.5-rpms"
+  - "rhel-7-server-ose-3.9-rpms"
   - "rhel-7-server-extras-rpms"
   - "rhel-7-fast-datapath-rpms"
 

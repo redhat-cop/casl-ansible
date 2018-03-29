@@ -33,7 +33,7 @@ docker_storage_block_device: "/dev/vdb"
 rhsm_register: True
 rhsm_repos:
   - "rhel-7-server-rpms"
-  - "rhel-7-server-ose-3.5-rpms"
+  - "rhel-7-server-ose-3.9-rpms"
   - "rhel-7-server-extras-rpms"
   - "rhel-7-fast-datapath-rpms"
 
