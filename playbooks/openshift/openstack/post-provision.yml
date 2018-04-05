@@ -4,6 +4,14 @@
 - hosts: cluster_hosts
   pre_tasks:
     - import_tasks: ../prep-inventory.yml
+    - import_tasks: prep-env.yml
+  tasks:
+    - name: "Set required inventory variables based on the dynamic inventory"
+      set_fact:
+        private_v4: "{{ openstack.private_v4 }}"
+        public_v4: "{{ openstack.public_v4 }}"
+        openshift_hostname: "{{ inventory_hostname }}"
+        openshift_public_hostname: "{{ inventory_hostname }}"
   roles:
     - role: ../../../galaxy/openshift-ansible-contrib/roles/hostnames
 

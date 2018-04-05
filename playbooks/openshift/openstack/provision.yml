@@ -43,14 +43,5 @@
         name: ../../../galaxy/infra-ansible/roles/update-host
         tasks_from: wait-for-host
 
-- hosts: cluster_hosts
-  tasks:
-    - name: "Set required inventory variables based on the dynamic inventory"
-      set_fact:
-        private_v4: "{{ openstack.private_v4 }}"
-        public_v4: "{{ openstack.public_v4 }}"
-        openshift_hostname: "{{ inventory_hostname }}"
-        openshift_public_hostname: "{{ inventory_hostname }}"
-
 - import_playbook: post-provision.yml
 
