@@ -10,7 +10,7 @@
   shell: gcloud auth activate-service-account --key-file {{ credentials_file }} --project {{ gcloud_project_name }}
   
 - name: retrieve master public ip
-  shell: gcloud compute addresses list --format json --filter name=master-external-{{ gcloud_env }}
+  shell: gcloud compute addresses list --format json --filter name={{ gcloud_env }}-master-external
   register: master_external
   changed_when: false     
 
@@ -28,7 +28,7 @@
   when: (master_external.stdout | from_json)      
     
 - name: retrieve master internal ip
-  shell: gcloud compute forwarding-rules list --format json --filter name=master-internal-fwr-{{ gcloud_env }}
+  shell: gcloud compute forwarding-rules list --format json --filter name={{ gcloud_env }}-master-internal-fwr
   register: master_internal
   changed_when: false        
     
@@ -46,7 +46,7 @@
   when: (master_internal.stdout | from_json)    
     
 - name: retrieve master public ip
-  shell: gcloud compute addresses list --format json --filter name=infranode-external-{{ gcloud_env }}
+  shell: gcloud compute addresses list --format json --filter name={{ gcloud_env }}-infranode-external
   register: infranode_external
   changed_when: false    
     

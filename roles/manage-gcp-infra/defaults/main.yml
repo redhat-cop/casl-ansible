@@ -1,41 +1,24 @@
 ---
 
-# default name prefix
 cloud_infrastructure:
+# default image name
+  image_name: rhel7
   masters:
+  # default name prefix
     name_prefix: master
-  appnodes:
-    name_prefix: node
-  infranodes:
-    name_prefix: infranode
-
-# default instance flavors
-cloud_infrastructure:
-  masters:
+  # default instance flavors  
     flavor: n1-standard-2
-  appnodes:
-    flavor: n1-standard-2
-  infranodes:
-    flavor: n1-standard-2
-
-# default preemptibility
-cloud_infrastructure:
-  masters:
+  # default preemptibility   
     preemptible: false
-  appnodes:
-    preemptible: false
-  infranodes:
-    preemptible: false 
-
-# default docker volume size
-cloud_infrastructure:
-  masters:
+  # default docker volume size  
     docker_volume_size: 10
   appnodes:
+    name_prefix: node
+    flavor: n1-standard-2
+    preemptible: false
     docker_volume_size: 50
   infranodes:
+    name_prefix: infranode
+    flavor: n1-standard-2
+    preemptible: false
     docker_volume_size: 20
-
-# default image name
-cloud_infrastructure:
-  image_name: rhel7

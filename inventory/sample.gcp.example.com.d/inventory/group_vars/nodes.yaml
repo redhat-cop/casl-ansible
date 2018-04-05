@@ -1,6 +1,7 @@
 ---
 
-openshift_node_labels: "{'region': 'primary'}"
+openshift_node_labels: 
+  region: primary
 
 openshift_node_kubelet_args:
   kube-reserved: 
@@ -25,5 +26,3 @@ openshift_node_kubelet_args:
   - '80'
   image-gc-low-threshold: 
   - '60'
-  feature-gates:
-  - PersistentLocalVolumes=true

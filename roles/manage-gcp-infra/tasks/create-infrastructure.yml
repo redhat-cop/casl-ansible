@@ -33,11 +33,4 @@
 - name: create deployment if it doesn't exist
   shell: gcloud deployment-manager deployments create openshift-{{ gcloud_env }} --config {{ tempdir.path }}/openshift-gcloud.yaml
   when: not deployment.stdout  
-  
-- name: add instances to instance groups (not supported by templates)
-  shell: gcloud compute instance-groups unmanaged add-instances {{ "master-"~gcloud_masters_zones[ (item|int % gcloud_masters_zones.__len__()) - 1 ]~"-ig-"~gcloud_env }} --instances {{ gcloud_masters_name_prefix ~ item|int ~ "-" ~ gcloud_env }} --zone {{ gcloud_masters_zones[ (item|int % gcloud_masters_zones.__len__()) - 1 ] }}
-  with_sequence: start=1 end="{{ gcloud_masters_num|int }}"
-  register: result
-  failed_when: not ((result.rc == 0) or ("is already a member of" in result.stderr))
-  changed_when: not ("is already a member of" in result.stderr)
 

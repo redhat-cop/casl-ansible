@@ -1,188 +1,286 @@
 resources:
-# masters
-{% for i in range(1,gcloud_masters_num|int+1) %}
-{% set zone = gcloud_masters_zones[ (i % gcloud_masters_zones.__len__()) - 1 ] %}
-{% set name = gcloud_masters_name_prefix ~ i|string %}
-- type: compute.v1.disk
-  name: {{ name }}-docker-{{ gcloud_env }} 
-  properties:
-    zone: {{ zone }}
-    sizeGb: {{ gcloud_masters_docker_volume_size }}   
-- type: compute.v1.instance
-  name: {{ name }}-{{ gcloud_env }}
-  properties:
-    machineType: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/zones/{{ zone }}/machineTypes/{{ gcloud_masters_flavor }}
-    scheduling:
-      preemptible: {{ gcloud_masters_preemptible }}
-      onHostMaintenance: TERMINATE
-    zone: {{ zone }}
-    disks:
-    - deviceName: boot
-      boot: true
-      autoDelete: true
-      initializeParams:
-        diskSizeGb: {{ gcloud_vm_disk_size }}
-        sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7        
-    - deviceName: {{ gcloud_docker_volume_name }}
-      boot: false
-      source: $(ref.{{ name }}-docker-{{ gcloud_env }}.selfLink) 
-    serviceAccounts: 
-    - email: default
-      scopes: 
-      - "https://www.googleapis.com/auth/devstorage.read_only"
-      - "https://www.googleapis.com/auth/logging.write"
-      - "https://www.googleapis.com/auth/monitoring.write"
-      - "https://www.googleapis.com/auth/servicecontrol"
-      - "https://www.googleapis.com/auth/service.management.readonly"
-      - "https://www.googleapis.com/auth/trace.append"
-      - "https://www.googleapis.com/auth/compute"
-      - "https://www.googleapis.com/auth/devstorage.read_write"   
-    tags:
-      items:
-      - master-{{ gcloud_env }}
-      - node-{{ gcloud_env }}
-    networkInterfaces:
-    - network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
-      accessConfigs:
-      - name: External NAT
-        type: ONE_TO_ONE_NAT
-{% endfor %}
-{% for i in gcloud_masters_zones %}        
-- type: compute.v1.instanceGroup
-  name: {{ "master-"~i~"-ig-"~gcloud_env }}
-  properties:
-    zone: {{ i }}
-    network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default                     
-{% endfor %}
 
-# nodes
+# instance templates
 
-{% for i in range(1,gcloud_appnodes_num|int+1) %}
-{% set zone = gcloud_appnodes_zones[ (i % gcloud_masters_zones.__len__()) - 1 ] %}
-{% set name = gcloud_appnodes_name_prefix ~ i|string %}
-- type: compute.v1.disk
-  name: {{ name }}-docker-{{ gcloud_env }} 
+- name: {{ gcloud_env }}-master-template
   properties:
-    zone: {{ zone }}
-    sizeGb: {{ gcloud_appnodes_docker_volume_size }}   
-- type: compute.v1.instance
-  name: {{ name }}-{{ gcloud_env }}
+    description: 'master-template'
+    properties:
+      canIpForward: false
+      disks:
+      - autoDelete: true
+        boot: true
+        index: 0
+        initializeParams:
+          diskSizeGb: {{ gcloud_vm_disk_size }}
+          sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7
+          diskType: pd-ssd
+      - autoDelete: true
+        boot: false
+        index: 1
+        deviceName: {{ gcloud_docker_volume_name }}
+        type: SCRATCH
+        initializeParams:
+#          sourceImage: global/images/empty-1g
+#          diskSizeGb: {{ gcloud_masters_docker_volume_size }}
+          diskType: local-ssd
+      machineType: {{ gcloud_masters_flavor }}
+      networkInterfaces:
+      - accessConfigs:
+        - name: external-nat
+          type: ONE_TO_ONE_NAT
+        network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
+      scheduling:
+        automaticRestart: true
+        onHostMaintenance: MIGRATE
+        preemptible: {{ gcloud_masters_preemptible }}
+      serviceAccounts:
+      - scopes:
+        - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+        - https://www.googleapis.com/auth/compute
+        - https://www.googleapis.com/auth/devstorage.read_only
+        - https://www.googleapis.com/auth/logging.write
+        - https://www.googleapis.com/auth/monitoring.write
+        - https://www.googleapis.com/auth/service.management.readonly
+        - https://www.googleapis.com/auth/servicecontrol
+      tags:
+        items:
+        - {{ gcloud_env }}
+        - {{ gcloud_env }}-master
+        - {{ gcloud_env }}-node
+  type: compute.v1.instanceTemplate
+- name: {{ gcloud_env }}-appnode-template
   properties:
-    machineType: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/zones/{{ zone }}/machineTypes/{{ gcloud_appnodes_flavor }}
-    scheduling:
-      preemptible: {{ gcloud_appnodes_preemptible }}
-      onHostMaintenance: TERMINATE
-    zone: {{ zone }}
-    disks:
-    - deviceName: boot
-      boot: true
-      autoDelete: true
-      initializeParams:
-        diskSizeGb: {{ gcloud_vm_disk_size }}
-        sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7        
-    - deviceName: {{ gcloud_docker_volume_name }}
-      boot: false
-      source: $(ref.{{ name }}-docker-{{ gcloud_env }}.selfLink)  
-    serviceAccounts: 
-    - email: default
-      scopes: 
-      - "https://www.googleapis.com/auth/devstorage.read_only"
-      - "https://www.googleapis.com/auth/logging.write"
-      - "https://www.googleapis.com/auth/monitoring.write"
-      - "https://www.googleapis.com/auth/servicecontrol"
-      - "https://www.googleapis.com/auth/service.management.readonly"
-      - "https://www.googleapis.com/auth/trace.append"
-      - "https://www.googleapis.com/auth/compute"
-      - "https://www.googleapis.com/auth/devstorage.read_write"   
-    tags:
-      items:
-      - appnode-{{ gcloud_env }}
-      - node-{{ gcloud_env }}
-    networkInterfaces:
-    - network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
-      accessConfigs:
-      - name: External NAT
-        type: ONE_TO_ONE_NAT           
-{% endfor %}
+    description: 'appnode-template'
+    properties:
+      canIpForward: false
+      disks:
+      - autoDelete: true
+        boot: true
+        index: 0
+        initializeParams:
+          diskSizeGb: {{ gcloud_vm_disk_size }}
+          sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7
+          diskType: pd-ssd
+      - autoDelete: true
+        boot: false
+        index: 1
+        deviceName: {{ gcloud_docker_volume_name }}
+        type: SCRATCH
+        initializeParams:
+#          sourceImage: global/images/empty-1g
+#          diskSizeGb: {{ gcloud_appnodes_docker_volume_size }}
+          diskType: local-ssd
+      machineType: {{ gcloud_appnodes_flavor }}
+      networkInterfaces:
+      - accessConfigs:
+        - name: external-nat
+          type: ONE_TO_ONE_NAT
+        network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
+      scheduling:
+        automaticRestart: true
+        onHostMaintenance: MIGRATE
+        preemptible: {{ gcloud_appnodes_preemptible }}
+      serviceAccounts:
+      - scopes:
+        - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+        - https://www.googleapis.com/auth/compute
+        - https://www.googleapis.com/auth/devstorage.read_only
+        - https://www.googleapis.com/auth/logging.write
+        - https://www.googleapis.com/auth/monitoring.write
+        - https://www.googleapis.com/auth/service.management.readonly
+        - https://www.googleapis.com/auth/servicecontrol
+      tags:
+        items:
+        - {{ gcloud_env }}
+        - {{ gcloud_env }}-appnode
+        - {{ gcloud_env }}-node
+  type: compute.v1.instanceTemplate
+- name: {{ gcloud_env }}-infranode-template
+  properties:
+    description: 'infranode-template'
+    properties:
+      canIpForward: false
+      disks:
+      - autoDelete: true
+        boot: true
+        index: 0
+        initializeParams:
+          diskSizeGb: {{ gcloud_vm_disk_size }}
+          sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7
+          diskType: pd-ssd
+      - autoDelete: true
+        boot: false
+        index: 1
+        deviceName: {{ gcloud_docker_volume_name }}
+        type: SCRATCH
+        initializeParams:
+#          sourceImage: global/images/empty-1g
+#          diskSizeGb: {{ gcloud_infranodes_docker_volume_size }}
+          diskType: local-ssd
+      machineType: {{ gcloud_infranodes_flavor }}
+      networkInterfaces:
+      - accessConfigs:
+        - name: external-nat
+          type: ONE_TO_ONE_NAT
+        network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
+      scheduling:
+        automaticRestart: true
+        onHostMaintenance: MIGRATE
+        preemptible: {{ gcloud_infranodes_preemptible }}
+      serviceAccounts:
+      - scopes:
+        - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+        - https://www.googleapis.com/auth/compute
+        - https://www.googleapis.com/auth/devstorage.read_only
+        - https://www.googleapis.com/auth/logging.write
+        - https://www.googleapis.com/auth/monitoring.write
+        - https://www.googleapis.com/auth/service.management.readonly
+        - https://www.googleapis.com/auth/servicecontrol
+      tags:
+        items:
+        - {{ gcloud_env }}
+        - {{ gcloud_env }}-infranode
+        - {{ gcloud_env }}-node
+  type: compute.v1.instanceTemplate    
+  
+# group managers
 
-# infranodes
-
-{% for i in range(1,gcloud_infranodes_num|int+1) %}
-{% set zone = gcloud_infranodes_zones[ (i % gcloud_masters_zones.__len__()) - 1 ] %}
-{% set name = gcloud_infranodes_name_prefix ~ i|string %}
-- type: compute.v1.disk
-  name: {{ name }}-docker-{{ gcloud_env }} 
+- name: {{ gcloud_env }}-master-igm
   properties:
-    zone: {{ zone }}
-    sizeGb: {{ gcloud_infranodes_docker_volume_size }}   
-- type: compute.v1.instance
-  name: {{ name }}-{{ gcloud_env }}
+    baseInstanceName: {{ gcloud_env }}-master
+    instanceTemplate: $(ref.{{ gcloud_env }}-master-template.selfLink)
+    namedPorts:
+    - name: {{ gcloud_env }}-web-console
+      port: 8443
+    targetPools:
+    - $(ref.{{ gcloud_env }}-master-pool.selfLink)
+#    - $(ref.{{ gcloud_env }}-master-internal-bes.selfLink)
+    targetSize: {{ gcloud_masters_num }}
+    region: {{ gcloud_region }}
+    distributionPolicy:
+      zones: 
+{% for i in gcloud_masters_zones %}       
+      - zone: "zones/{{ i }}"
+{% endfor %}  
+  type: compute.beta.regionInstanceGroupManager  
+- name: {{ gcloud_env }}-appnode-igm
   properties:
-    machineType: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/zones/{{ zone }}/machineTypes/{{ gcloud_infranodes_flavor }}
-    scheduling:
-      preemptible: {{ gcloud_infranodes_preemptible }}
-      onHostMaintenance: TERMINATE
-    zone: {{ zone }}
-    disks:
-    - deviceName: boot
-      boot: true
-      autoDelete: true
-      initializeParams:
-        diskSizeGb: {{ gcloud_vm_disk_size }}
-        sourceImage: https://www.googleapis.com/compute/v1/projects/rhel-cloud/global/images/family/rhel-7        
-    - deviceName: {{ gcloud_docker_volume_name }}
-      boot: false
-      source: $(ref.{{ name }}-docker-{{ gcloud_env }}.selfLink)   
-    serviceAccounts: 
-    - email: default
-      scopes: 
-      - "https://www.googleapis.com/auth/devstorage.read_only"
-      - "https://www.googleapis.com/auth/logging.write"
-      - "https://www.googleapis.com/auth/monitoring.write"
-      - "https://www.googleapis.com/auth/servicecontrol"
-      - "https://www.googleapis.com/auth/service.management.readonly"
-      - "https://www.googleapis.com/auth/trace.append"
-      - "https://www.googleapis.com/auth/compute"
-      - "https://www.googleapis.com/auth/devstorage.read_write"   
-    tags:
-      items:
-      - infranode-{{ gcloud_env }}
-      - node-{{ gcloud_env }}
-    networkInterfaces:
-    - network: https://www.googleapis.com/compute/v1/projects/{{ gcloud_project_name }}/global/networks/default
-      accessConfigs:
-      - name: External NAT
-        type: ONE_TO_ONE_NAT           
-{% endfor %}
+    baseInstanceName: {{ gcloud_env }}-node
+    instanceTemplate: $(ref.{{ gcloud_env }}-appnode-template.selfLink)
+    targetSize: {{ gcloud_appnodes_num }}
+    region: {{ gcloud_region }}
+    distributionPolicy:
+      zones: 
+{% for i in gcloud_appnodes_zones %}       
+      - zone: "zones/{{ i }}"
+{% endfor %}  
+  type: compute.beta.regionInstanceGroupManager  
+- name: {{ gcloud_env }}-infranode-igm
+  properties:
+    baseInstanceName: {{ gcloud_env }}-infranode
+    instanceTemplate: $(ref.{{ gcloud_env }}-infranode-template.selfLink)
+    targetPools:
+    - $(ref.{{ gcloud_env }}-infranode-pool.selfLink)
+    targetSize: {{ gcloud_infranodes_num }}
+    region: {{ gcloud_region }}
+    distributionPolicy:
+      zones: 
+{% for i in gcloud_infranodes_zones %}       
+      - zone: "zones/{{ i }}"
+{% endfor %}  
+  type: compute.beta.regionInstanceGroupManager 
 
+# master networking    
+    
+- type: compute.v1.address
+  name: {{ gcloud_env }}-master-external
+  properties:
+    region: {{ gcloud_region }}
+- name: {{ gcloud_env }}-master-https-health-check
+  type: compute.v1.httpsHealthCheck
+  properties:
+    port: 8443
+    requestPath: "/healthz"
+- name: {{ gcloud_env }}-master-internal-https-health-check
+  type: compute.v1.healthCheck
+  properties:
+    type: HTTPS
+    httpsHealthCheck:
+      port: 8443
+      requestPath: "/healthz"   
+- type: compute.v1.targetPool
+  name: {{ gcloud_env }}-master-pool
+  properties:
+    region: {{ gcloud_region }}
+#    instances: 
+#    - $(ref.{{ gcloud_env }}-master-igm.selfLink)
+#    healthChecks: 
+#    - $(ref.{{ gcloud_env }}-master-https-health-check.selfLink)
+- type: compute.v1.forwardingRule
+  name: {{ gcloud_env }}-master-external-fwr
+  properties: 
+    region: {{ gcloud_region }}
+    IPAddress: $(ref.{{ gcloud_env }}-master-external.selfLink)
+    target: $(ref.{{ gcloud_env }}-master-pool.selfLink)
+    IPProtocol: TCP    
+- name: {{ gcloud_env }}-master-enternal-fw
+  type: compute.v1.firewall
+  properties:
+    allowed:
+    - IPProtocol: tcp
+      ports:
+      - 8443
+    sourceRange: 0.0.0.0/0
+    targetTags:
+    - {{ gcloud_env }}-master
+- name: {{ gcloud_env }}-master-internal-bes
+  type: compute.v1.regionBackendService
+  properties: 
+    loadBalancingScheme: INTERNAL
+    protocol: TCP
+    region: {{ gcloud_region }}  
+    healthChecks:
+    - $(ref.{{ gcloud_env }}-master-internal-https-health-check.selfLink)
+    backends:
+    - group: $(ref.{{ gcloud_env }}-master-igm.instanceGroup)          
+- type: compute.v1.forwardingRule
+  name: {{ gcloud_env }}-master-internal-fwr
+  properties: 
+    region: {{ gcloud_region }}
+    ports: 
+    - 8443
+    IPProtocol: TCP
+    loadBalancingScheme: INTERNAL
+    backendService: $(ref.{{ gcloud_env }}-master-internal-bes.selfLink)  
+    
+    
 # infrande networking
 
 - type: compute.v1.address
-  name: infranode-external-{{ gcloud_env }}
+  name: {{ gcloud_env }}-infranode-external
   properties:
     region: {{ gcloud_region }}
-- name: infranode-http-health-check-{{ gcloud_env }}
+- name: {{ gcloud_env }}-infranode-http-health-check
   type: compute.v1.httpHealthCheck
   properties:
     port: 80
 - type: compute.v1.targetPool
-  name: infranode-pool-{{ gcloud_env }}
+  name: {{ gcloud_env }}-infranode-pool
   properties:
     region: {{ gcloud_region }}
-    instances:
-{% for i in range(1,gcloud_infranodes_num|int+1) %}
-    - $(ref.{{ gcloud_infranodes_name_prefix ~ i|string }}-{{ gcloud_env }}.selfLink)
-{% endfor %}    
+#    instances:
+#    - $(ref.{{ gcloud_env }}-infranode-igm.selfLink)  
     healthChecks: 
-    - $(ref.infranode-http-health-check-{{ gcloud_env }}.selfLink)
+    - $(ref.{{ gcloud_env }}-infranode-http-health-check.selfLink)
 - type: compute.v1.forwardingRule
-  name: infranode-external-fwr-{{ gcloud_env }}
+  name: {{ gcloud_env }}-infranode-external-fwr
   properties: 
     region: {{ gcloud_region }}
-    IPAddress: $(ref.infranode-external-{{ gcloud_env }}.selfLink)
-    target: $(ref.infranode-pool-{{ gcloud_env }}.selfLink)
+    IPAddress: $(ref.{{ gcloud_env }}-infranode-external.selfLink)
+    target: $(ref.{{ gcloud_env }}-infranode-pool.selfLink)
     IPProtocol: TCP
-- name: infranode-external-fw-{{ gcloud_env }}
+- name: {{ gcloud_env }}-infranode-external-fw
   type: compute.v1.firewall
   properties:
     allowed:
@@ -192,77 +290,12 @@ resources:
       - 443
     sourceRange: 0.0.0.0/0
     targetTags:
-    - infranode-{{ gcloud_env }}
+    - {{ gcloud_env }}-infranode   
     
-# master networking    
-    
-- type: compute.v1.address
-  name: master-external-{{ gcloud_env }}
-  properties:
-    region: {{ gcloud_region }}
-- name: master-https-health-check-{{ gcloud_env }}
-  type: compute.v1.httpsHealthCheck
-  properties:
-    port: 8443
-    requestPath: "/healthz"
-- name: master-internal-https-health-check-{{ gcloud_env }}
-  type: compute.v1.healthCheck
-  properties:
-    type: HTTPS
-    httpsHealthCheck:
-      port: 8443
-      requestPath: "/healthz"   
-- type: compute.v1.targetPool
-  name: master-pool-{{ gcloud_env }}
-  properties:
-    region: {{ gcloud_region }}
-    instances: 
-{% for i in range(1,gcloud_masters_num|int+1) %}
-    - $(ref.{{ gcloud_masters_name_prefix ~ i|string }}-{{ gcloud_env }}.selfLink)
-{% endfor %}
-#    healthChecks: 
-#    - $(ref.master-https-health-check-{{ gcloud_env }}.selfLink)
-- type: compute.v1.forwardingRule
-  name: master-external-fwr-{{ gcloud_env }}
-  properties: 
-    region: {{ gcloud_region }}
-    IPAddress: $(ref.master-external-{{ gcloud_env }}.selfLink)
-    target: $(ref.master-pool-{{ gcloud_env }}.selfLink)
-    IPProtocol: TCP    
-- name: master-enternal-fw-{{ gcloud_env }}
-  type: compute.v1.firewall
-  properties:
-    allowed:
-    - IPProtocol: tcp
-      ports:
-      - 8443
-    sourceRange: 0.0.0.0/0
-    targetTags:
-    - master-{{ gcloud_env }}
-- name: master-internal-bs-{{ gcloud_env }}
-  type: compute.v1.regionBackendService
-  properties: 
-    loadBalancingScheme: INTERNAL
-    protocol: TCP
-    region: {{ gcloud_region }}  
-    healthChecks:
-    - $(ref.master-internal-https-health-check-{{ gcloud_env }}.selfLink)
-    backends:
-{% for i in gcloud_masters_zones %} 
-    - group: $(ref.{{ "master-"~i~"-ig-"~gcloud_env }}.selfLink) 
-{% endfor %}         
-- type: compute.v1.forwardingRule
-  name: master-internal-fwr-{{ gcloud_env }}
-  properties: 
-    region: {{ gcloud_region }}
-    ports: 
-    - 8443
-    IPProtocol: TCP
-    loadBalancingScheme: INTERNAL
-    backendService: $(ref.master-internal-bs-{{ gcloud_env }}.selfLink)
-    
+#regsitry bucket
+
 - name: {{ gcloud_registry_bucket_name }} 
   properties:
     location: {{ gcloud_region }}
-  type: storage.v1.bucket    
-
+  type: storage.v1.bucket 
+         

@@ -8,7 +8,7 @@
     project_id: "{{ project_id }}"     
     
 - name: retrieve master public ip
-  shell: gcloud compute addresses list --format json --filter name=master-external-{{ gcloud_env }}
+  shell: gcloud compute addresses list --format json --filter name={{ gcloud_env }}-master-external
   register: master_external
   changed_when: false     
 
@@ -24,7 +24,7 @@
     project_id: "{{ project_id }}"    
     
 - name: retrieve master internal ip
-  shell: gcloud compute forwarding-rules list --format json --filter name=master-internal-fwr-{{ gcloud_env }}
+  shell: gcloud compute forwarding-rules list --format json --filter name={{ gcloud_env }}-master-internal-fwr
   register: master_internal
   changed_when: false        
     
@@ -40,7 +40,7 @@
     project_id: "{{ project_id }}"    
     
 - name: retrieve master public ip
-  shell: gcloud compute addresses list --format json --filter name=infranode-external-{{ gcloud_env }}
+  shell: gcloud compute addresses list --format json --filter name={{ gcloud_env }}-infranode-external
   register: infranode_external
   changed_when: false    
     
