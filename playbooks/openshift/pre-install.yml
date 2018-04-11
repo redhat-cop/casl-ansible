@@ -24,8 +24,12 @@
         ansible_become: True
       when:
         - rhsm_register
+    # NOTE: this "openstack" role is generic and can be used across all cloud
+    #       providers. We should work with the `openshift-ansible` team to get
+    #       this corrected - i.e.: made generic.
     - import_role:
-        name: docker-fix-37
+        name: ../../galaxy/openshift-ansible/roles/openshift_openstack
+        tasks_from: container-storage-setup.yml
       vars:
         ansible_become: True
     - import_role:
@@ -57,6 +61,10 @@
     - import_role:
         name: ../../galaxy/infra-ansible/roles/update-host
         tasks_from: wait-for-host
+    - service:
+        name: docker
+        state: started
+        enabled: yes
 
 # Ensure the CNS / glusterFS facts are correctly populated for all CNS nodes
 - hosts: glusterfs

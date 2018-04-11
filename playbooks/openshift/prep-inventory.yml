@@ -30,15 +30,28 @@
   when:
   - openshift_master_default_subdomain is undefined
 
-- name: Version Lock the docker packages
+- name: Set Docker Version and Version Lock the docker packages
   set_fact:
     versionlock_packages:
       - "docker-{{ docker_version }}"
       - "docker-rhel-push-plugin-{{ docker_version }}"
       - "docker-client-{{ docker_version }}"
       - "docker-common-{{ docker_version }}"
+    docker_version_to_install: "-{{ docker_version }}"
   when:
     - docker_version is defined
+
+- name: Set Container Storage Setup facts
+  set_fact:
+    openshift_openstack_container_storage_setup:
+      docker_dev: "{{ docker_storage_block_device | default('/dev/sdb') }}"
+      docker_vg: "docker_vg"
+      docker_data_size: "95%VG"
+      docker_dm_basesize: "3G"
+      container_root_lv_name: "docker_lv"
+      container_root_lv_mount_path: "/var/lib/docker"
+  when:
+    - openshift_openstack_container_storage_setup is undefined
 
 - name: Set the packages to install on the target systems
   set_fact:
@@ -53,6 +66,7 @@
       - kexec-tools
       - sos
       - psacct
+      - docker{{ docker_version_to_install | default('') }}
 
 - name: Append any custom packages to install on the target systems
   set_fact:
