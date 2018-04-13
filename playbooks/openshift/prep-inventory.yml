@@ -67,6 +67,7 @@
       - sos
       - psacct
       - docker{{ docker_version_to_install | default('') }}
+      - yum-utils
 
 - name: Append any custom packages to install on the target systems
   set_fact:

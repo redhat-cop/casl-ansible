@@ -29,5 +29,5 @@
   - name: install subscription manager
     package:
       name: subscription-manager
-      state: present    
+      state: present             
 

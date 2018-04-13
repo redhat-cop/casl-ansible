@@ -2,3 +2,7 @@
 
 openshift_node_labels: 
   region: infra
+  
+openshift_node_open_ports:
+  - service: "router stats port"
+    port: "1936/tcp"    

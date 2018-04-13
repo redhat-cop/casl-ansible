@@ -69,9 +69,6 @@ rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
 # leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
 
-# Specify the version of docker to use
-#docker_version: "1.12.*"
-
 #google specific properties
 service_account_email: <your google service account>
 credentials_file: <your account key file in json format>
@@ -92,3 +89,12 @@ openshift_master_cluster_hostname: master-internal.{{ env_id }}.{{ dns_domain }}
 # openshift_master_default_subdomain must be something like:
 #   <prefix>.{{ env_id }}.{{ dns_domain }}
 openshift_master_default_subdomain: apps.{{ env_id }}.{{ dns_domain }}
+
+#a unique prefix (unsure for what is used)
+openshift_gcp_prefix: "{{ env_id }}"
+
+#your openshift goocle project
+openshift_gcp_project: "{{ project_id }}"
+
+#whether your deployment is multizone.
+openshift_gcp_multizone: true

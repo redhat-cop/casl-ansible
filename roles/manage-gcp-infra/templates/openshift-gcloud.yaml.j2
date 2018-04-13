@@ -21,8 +21,6 @@ resources:
         deviceName: {{ gcloud_docker_volume_name }}
         type: SCRATCH
         initializeParams:
-#          sourceImage: global/images/empty-1g
-#          diskSizeGb: {{ gcloud_masters_docker_volume_size }}
           diskType: local-ssd
       machineType: {{ gcloud_masters_flavor }}
       networkInterfaces:
@@ -68,8 +66,6 @@ resources:
         deviceName: {{ gcloud_docker_volume_name }}
         type: SCRATCH
         initializeParams:
-#          sourceImage: global/images/empty-1g
-#          diskSizeGb: {{ gcloud_appnodes_docker_volume_size }}
           diskType: local-ssd
       machineType: {{ gcloud_appnodes_flavor }}
       networkInterfaces:
@@ -115,8 +111,6 @@ resources:
         deviceName: {{ gcloud_docker_volume_name }}
         type: SCRATCH
         initializeParams:
-#          sourceImage: global/images/empty-1g
-#          diskSizeGb: {{ gcloud_infranodes_docker_volume_size }}
           diskType: local-ssd
       machineType: {{ gcloud_infranodes_flavor }}
       networkInterfaces:
@@ -155,7 +149,6 @@ resources:
       port: 8443
     targetPools:
     - $(ref.{{ gcloud_env }}-master-pool.selfLink)
-#    - $(ref.{{ gcloud_env }}-master-internal-bes.selfLink)
     targetSize: {{ gcloud_masters_num }}
     region: {{ gcloud_region }}
     distributionPolicy:
@@ -213,10 +206,6 @@ resources:
   name: {{ gcloud_env }}-master-pool
   properties:
     region: {{ gcloud_region }}
-#    instances: 
-#    - $(ref.{{ gcloud_env }}-master-igm.selfLink)
-#    healthChecks: 
-#    - $(ref.{{ gcloud_env }}-master-https-health-check.selfLink)
 - type: compute.v1.forwardingRule
   name: {{ gcloud_env }}-master-external-fwr
   properties: 
@@ -264,7 +253,8 @@ resources:
 - name: {{ gcloud_env }}-infranode-http-health-check
   type: compute.v1.httpHealthCheck
   properties:
-    port: 80
+    port: 1936
+    requestPath: /healthz
 - type: compute.v1.targetPool
   name: {{ gcloud_env }}-infranode-pool
   properties:
