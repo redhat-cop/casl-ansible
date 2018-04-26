@@ -62,17 +62,21 @@ rhsm_repos:
 
 
 # Use RHSM username, password and optionally pool:
-# NOTE: use the -e option to specify on CLI instead of statically set here
-rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
-rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+# NOTE:
+# by default define the environment variables RHSM_USERNAME and RHSM_PASSWORD
+# use the -e option to specify on CLI instead of statically set here
+rhsm_username: "{{ lookup('env', 'RHSM_USERNAME' )}}"
+rhsm_password: "{{ lookup('env', 'RHSM_PASSWORD' )}}"
 
 # leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
 
 #google specific properties
-service_account_email: <your google service account>
-credentials_file: <your account key file in json format>
-project_id: <your project>
+# NOTE:
+# by default define the environment variables GCE_EMAIL, GCE_CREDENTIALS_FILE_PATH and GCE_PROJECT
+service_account_email: "{{ lookup('env', 'GCE_EMAIL' ) }}"
+credentials_file: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
+project_id: "{{ lookup('env', 'GCE_PROJECT' ) }}"
 
 # google object storage bucket name for the registry
 # suggested value: openshift-registry-{{ env_id }}-{{ project_id }}
