@@ -1,0 +1,36 @@
+---
+
+# Cluster Environment ID to uniquely identify the environment
+env_id: c1-ocp
+
+ansible_user: <your ssh key user>
+ansible_become: true
+
+dns_domain: "myorg.com"
+
+# docker_storage_block_device: "/dev/vdb"
+
+# Subscription Management Details
+rhsm_register: True
+rhsm_repos:
+ - "rhel-7-server-rpms"
+ - "rhel-7-server-ose-3.9-rpms"
+ - "rhel-7-server-extras-rpms"
+ - "rhel-7-fast-datapath-rpms"
+
+
+# Use RHSM username, password and optionally pool:
+# NOTE: use the -e option to specify on CLI instead of statically set here
+rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
+rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+
+# leave commented out if you want to `--auto-attach` a pool
+rhsm_pool: '<REPLACE WITH VALID RHSM PASSWORD>'
+
+# Uncomment this and comment out the above to use Red Hat Satellite:
+#rhsm_server_hostname: 'sat-6.example.com'
+#rhsm_org_id: 'CASL_ORG'
+#rhsm_activationkey: 'casl-latest'
+
+# Specify the version of docker to use
+#docker_version: "1.12.*"

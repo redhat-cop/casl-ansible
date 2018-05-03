@@ -1,0 +1,28 @@
+---
+
+openshift_node_labels: 
+  region: primary
+
+openshift_node_kubelet_args:
+  kube-reserved: 
+  - cpu={{ ansible_processor_vcpus * 50 }}m
+  - memory={{ ansible_processor_vcpus * 50 }}M
+  system-reserved: 
+  - cpu={{ ansible_processor_vcpus * 50 }}m
+  - memory={{ ansible_processor_vcpus * 100 }}M
+  eviction-hard: 
+  - memory.available<256Mi 
+  minimum-container-ttl-duration:
+  - "10s"
+  maximum-dead-containers-per-container:
+  - "2"
+  maximum-dead-containers:
+  - "50"
+  pods-per-core: 
+  - '10'
+  max-pods: 
+  - '250'
+  image-gc-high-threshold: 
+  - '80'
+  image-gc-low-threshold: 
+  - '60'

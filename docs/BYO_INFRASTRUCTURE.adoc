@@ -1,0 +1,66 @@
+= Using the CASL Tools with Static Infrastructure (Bring Your Own Infrastructure)
+
+This guide walks through the process of using the tools in this repository to automate the stand up of OpenShift clusters on Infrastructure where there is currently no automated provisioner. This process can easily be used in on-premise installs where the infrastructure is not currently API driven and has yet to be automated in a way that's compatible with CASL.
+
+== What Infrastructure do I need before I run CASL?
+
+If you read through the link:PROVISIONING_ARCH.md[CASL Provisioning Architecture documentation], you'll notice the following description of our _Provisioning Phase_:
+
+_Provision Infrastructure_ creates the servers/instances and any other supporting infrastructure required (network, DNS, load balancers, etc.). In general this phase
+  - Begins with having credentials with proper access to an Infrastructure provider.
+  - Ends with:
+    - Servers provisioned and running with an OS installed
+    - SSH keys (with root or sudo) pushed.
+    - Load Balancers (if used) are in place
+    - DNS is in place for the Master Console, API, and Routers (see link:http://v1.uncontained.io/playbooks/installation/#dns[DNS])
+
+In many on-premise installs, the infrastructure may not yet be ready to automate to the level that our provisioning architecture expects. That's fine, we can still use the CASL Tools to automate the other 3 phases of install automation:
+
+2. _Pre Install_
+3. _Install_
+4. _Post Install_
+
+The link:../inventory/sample.byo.example.com.d/[sample.byo.example.com] inventory in this repo represents an ansible inventory that can be used in such a scenario.
+
+We recommend giving the link:http://v1.uncontained.io/playbooks/installation/#building-the-infrastructure[Installing a Highly Available OpenShift Cluster] guide a read for details on what infrastructure to build out. Specifically, the link:http://v1.uncontained.io/playbooks/installation/#cluster-design-architecture[Cluster Design & Architecture Section] lays out all of the design decisions that need to be made when preparing a cluster, and the link:http://v1.uncontained.io/playbooks/installation/#building-the-infrastructure[Building the Infrastructure] section walks through the components that should be built as part of a manual _provisioning_ step.
+
+== Prepping the Inventory
+
+While the link:../inventory/sample.byo.example.com.d/[sample.byo.example.com] sample inventory provides most of the variables you need to get your cluster prepped and installed, there are a few variables in the `sample.byo.example.com.d/inventory/group_vars/all.yml` file that need to be filled in to match your environment.
+
+- The `ansible_user: <your ssh key user>` variable must match the user you will use to log into the cluster machines
+- You must fill in the `rhsm_` variables to match your Red Hat Subscription Manager account. You can do this one of two ways:
+  - Provide your Red Hat Account credentials and pool id:
++
+----
+# Use RHSM username, password and optionally pool:
+# NOTE: use the -e option to specify on CLI instead of statically set here
+rhsm_register: True
+rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
+rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+
+# leave commented out if you want to `--auto-attach` a pool
+rhsm_pool: '<REPLACE WITH VALID RHSM PASSWORD>'
+----
++
+  - Provide a Satellite server and Activation Key:
++
+----
+rhsm_register: True
+rhsm_server_hostname: 'sat-6.example.com'
+rhsm_org_id: 'CASL_ORG'
+rhsm_activationkey: 'casl-latest'
+----
+
+== Running the CASL Provisioning Tools on my BYO infrastructure
+
+Once the infrastructure has been manually provisioned and your inventory is prepped, you should be ready to run the CASL provisioning tools.
+
+The link:../playbooks/openshift/byo-infra.yml[byo-infra.yml] playbook can be run to complete the installation.
+
+[source,bash]
+----
+cd casl-ansible
+ansible-galaxy install -r casl-requirements.yml -p galaxy
+ansible-playbook -i inventory/sample.byo.example.com.d/ playbooks/openshift/byo-infra.yml
+----

@@ -1,0 +1,19 @@
+[cluster_hosts:children]
+OSEv3
+
+[OSEv3:children]
+masters
+nodes
+etcd
+
+[masters]
+openshift-master-[1:3].c1-ocp.myorg.com
+
+[etcd]
+openshift-master-[1:3].c1-ocp.myorg.com
+
+[nodes]
+openshift-master-[1:3].c1-ocp.myorg.com openshift_node_labels="{'region': 'master'}"
+openshift-infranode-[1:3].c1-ocp.myorg.com openshift_node_labels="{'region': 'infra'}"
+openshift-appnode-1.c1-ocp.myorg.com openshift_node_labels="{'region': 'primary'}"
+openshift-appnode-2.c1-ocp.myorg.com openshift_node_labels="{'region': 'primary'}"

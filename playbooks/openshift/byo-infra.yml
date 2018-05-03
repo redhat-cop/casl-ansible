@@ -1,0 +1,9 @@
+---
+# Pre-Install Steps
+- import_playbook: pre-install.yml
+
+# Install
+- import_playbook: install.yml
+
+# Post Install
+- import_playbook: post-install.yml

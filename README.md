@@ -3,24 +3,25 @@
 Automation of OpenShift and Container related tasks using [Ansible](http://www.ansible.com/).
 (This includes automation of OpenShift Cluster provisioning as well as other automation tasks post-provisioning.)
 
-# Automation Topics
+## What can I do with CASL tools?
 
-## Provisioning Architecture
+### Provision Architecture
 
 CASL Ansible aims to provide a common experience for provisioning infrastructure for OpenShift across a number of Infrastructure providers.
 
-* [CASL Architecture Overview](./docs/PROVISIONING_ARCH.md)
+The [CASL Architecture Overview](./docs/PROVISIONING_ARCH.md) documentation gives an overview of how we approach the end to end automation of standing up OpenShift Clusters.
 
-## Provisioning An OpenShift Cluster
-
-The CASL Ansible tools provide everything needed to automatically provision an OpenShift cluster from scratch. Visit the provisioning guide relevant to you to get started.
+Additionally, we have several fully automated provisioners through which you can stand up an OpenShift cluster.
 
 * [Provisioning an OpenShift Cluster on OpenStack](./docs/PROVISIONING_OPENSTACK.md)
 * [Provisioning an OpenShift Cluster on AWS](./docs/PROVISIONING_AWS.md)
 * [Provisioning an OpenShift Cluster on GCP](./docs/PROVISIONING_GCP.md)
 
+### Automation of Cluster Installation on Your Own (BYO) Infrastructure
 
-## Automation of OpenShift Cluster Content
+For those who are using infrastructure that is either not yet fully automated, or not yet supported through a CASL provider, we provide a [Bring Your Own Infrastructure](./docs/BYO_INFRASTRUCTURE.adoc) guide to using CASL.
+
+### Automation of OpenShift Cluster Content
 
 (moved to a new repo - https://github.com/redhat-cop/openshift-applier)
 The [openshift-applier](https://github.com/redhat-cop/openshift-applier) is used to automate the seeding of OpenShift cluster content based on OpenShift templates and parameters files.
