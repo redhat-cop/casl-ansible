@@ -7,12 +7,13 @@ This guide walks through the process of using the tools in this repository to au
 If you read through the link:PROVISIONING_ARCH.md[CASL Provisioning Architecture documentation], you'll notice the following description of our _Provisioning Phase_:
 
 _Provision Infrastructure_ creates the servers/instances and any other supporting infrastructure required (network, DNS, load balancers, etc.). In general this phase
-  - Begins with having credentials with proper access to an Infrastructure provider.
-  - Ends with:
-    - Servers provisioned and running with an OS installed
-    - SSH keys (with root or sudo) pushed.
-    - Load Balancers (if used) are in place
-    - DNS is in place for the Master Console, API, and Routers (see link:http://v1.uncontained.io/playbooks/installation/#dns[DNS])
+
+  * Begins with having credentials with proper access to an Infrastructure provider.
+  * Ends with:
+    ** Servers provisioned and running with an OS installed
+    ** SSH keys (with root or sudo) pushed.
+    ** Load Balancers (if used) are in place
+    ** DNS is in place for the Master Console, API, and Routers (see link:http://v1.uncontained.io/playbooks/installation/#dns[DNS])
 
 In many on-premise installs, the infrastructure may not yet be ready to automate to the level that our provisioning architecture expects. That's fine, we can still use the CASL Tools to automate the other 3 phases of install automation:
 
