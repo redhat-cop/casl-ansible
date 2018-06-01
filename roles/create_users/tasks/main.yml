@@ -1,21 +1,6 @@
 ---
 
- - name: 'Install required packages'
-   package:
-     name: '{{ item }}'
-     state: installed
-   with_items:
-   - python-passlib
-
- - name: "Initialize create_users facts"
-   set_fact:
-     users: ''
-
- - name: "Take create_users input when defined"
-   set_fact:
-     users: "{{ create_users }}"
-   when: create_users is defined
-
- - include_tasks: create_users.yml
-   static: no
-   when: create_users is defined
+- include_tasks: create_users.yml
+  static: no
+  when:
+  - create_users is defined

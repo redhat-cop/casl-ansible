@@ -1,12 +1,26 @@
 ---
 
- - name: "Create {{ users.num_users }} htpasswd users"
-   htpasswd:
-     path: "{{ users.passwd_file }}"
-     name: "{{ item }}"
-     password: "{{ users.password }}"
-     owner: root
-     group: root
-     mode: 0600
-   with_sequence: start=0 end="{{ users.num_users }}" format="{{ users.prefix }}%02d"
+- name: 'Install required packages'
+  package:
+    name: '{{ item }}'
+    state: installed
+  with_items:
+  - python-passlib
+
+- name: "Use the create_users inventory info"
+  set_fact:
+    users: "{{ create_users }}"
+
+- name: "Create {{ users.num_users }} htpasswd users"
+  htpasswd:
+    path: "{{ users.passwd_file }}"
+    name: "{{ item }}"
+    password: "{{ users.password }}"
+    owner: root
+    group: root
+    mode: 0600
+  with_sequence:
+    start: 0
+    end: "{{ users.num_users }}"
+    format: "{{ users.prefix }}%02d"
 

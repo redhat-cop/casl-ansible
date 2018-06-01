@@ -57,12 +57,12 @@
     a_records: "{{ a_records | default([]) +
                    [{
                       'type': 'A',
-                      'hostname': (openshift_master_cluster_public_hostname | replace(nsupdate_zone, ''))[:-1],
+                      'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(nsupdate_zone, ''))[:-1],
                       'ip': master_ip
                    }]
                 }}"
   when:
-    - openshift_master_cluster_public_hostname is defined
+    - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
 
 - name: "Generate the Add section for DNS for all nsupdate servers"
   set_fact:
