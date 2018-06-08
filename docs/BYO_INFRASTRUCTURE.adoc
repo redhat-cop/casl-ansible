@@ -63,5 +63,5 @@ The link:../playbooks/openshift/byo-infra.yml[byo-infra.yml] playbook can be run
 ----
 cd casl-ansible
 ansible-galaxy install -r casl-requirements.yml -p galaxy
-ansible-playbook -i inventory/sample.byo.example.com.d/ playbooks/openshift/byo-infra.yml
+ansible-playbook -i inventory/sample.byo.example.com.d/inventory/ playbooks/openshift/byo-infra.yml
 ----
