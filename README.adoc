@@ -1,0 +1,44 @@
+= CASL Ansible
+
+CASL Ansible provides a common experience for provisioning infrastructure for OpenShift across a number of infrastructure providers using link:http://www.ansible.com/[Ansible].
+
+This includes automation of OpenShift Cluster provisioning as well as other automation tasks post-provisioning.
+
+.What Can I Do with CASL Tools?
+* Automated provisioning of an OpenShift cluster with existing automation infrastructure.
+* Automated provisioning of an OpenShift cluster on a non-automated static (BYO) infrastructure.
+
+== Provisioning An OpenShift Cluster with Existing Automation Infrastructure
+The CASL Ansible tools provide everything needed to automatically provision an OpenShift cluster from scratch.
+
+=== Prerequisites
+* A basic understanding of the link:./docs/PROVISIONING_ARCH.md[CASL Architecture Overview], which outlines the end to end approach for automated provisioning OpenShift clusters.
+* Access to one of the following compatible infrastructures for deploying an OpenShift cluster:
+** An OpenStack environment.
+** An AWS environment.
+** A GCP environment.
+
+=== Provisioning Procedures
+* link:./docs/PROVISIONING_OPENSTACK.md[Provisioning an OpenShift Cluster on OpenStack]
+* link:./docs/PROVISIONING_AWS.md[Provisioning an OpenShift Cluster on AWS]
+* link:./docs/PROVISIONING_GCP.md[Provisioning an OpenShift Cluster on GCP]
+
+== Provisioning An OpenShift Cluster with BYO Infrastructure
+The CASL Ansible tools also enable you to provision an OpenShift cluster on static infrastructure where provisioning is not fully automated. More details are available in the link:./docs/BYO_INFRASTRUCTURE.adoc[Bring Your Own Infrastructure guide]. 
+
+== Additional Resources
+
+=== External Dependencies
+For some tasks, CASL Ansible has dependencies on external repositories:
+
+link:https://github.com/redhat-cop/infra-ansible[Infra Ansible]::
+  A repository of Ansible automation for generic infrastructure components.
+link:https://github.com/openshift/openshift-ansible[OpenShift Ansible]::
+  The core OpenShift Installation Playbooks including the supporting roles.
+link:https://github.com/openshift/openshift-ansible-contrib[OpenShift Ansible Contrib]::
+  A repository of extra, unsupported, and upstream Ansible roles and playbooks for OpenShift.
+
+NOTE: The dependencies are managed using `ansible-galaxy` and the specific instructions will call this out when there is a need to use galaxy to pull in the correct dependencies.
+
+=== Automation of OpenShift Cluster Content
+The link:https://github.com/redhat-cop/openshift-applier[openshift-applier] is used to automate the seeding of OpenShift cluster content based on OpenShift templates and parameters files.
