@@ -6,7 +6,7 @@ Here's what you need.
 
 Create a new directory called `/playbooks/openshift/my_provisioner`.
 
-Create a new playbook called `/playbooks/openshift/provision.yml`
+Create a new playbook called `/playbooks/openshift/my_provisioner/provision.yml`
 
 Build Roles for your provisioner. When it comes to building a provisioning role 
 
