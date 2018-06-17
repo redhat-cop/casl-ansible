@@ -54,15 +54,18 @@ Take note of the service account id (it will look like an email address). We wil
 Install the following software:
 
 ```
-yum install ansible
-pip install apache-libcloud
+yum install ansible python-libcloud
 ```
 
-follow these [instructions](https://cloud.google.com/sdk/downloads#yum) to install the gcp CLI (`gcloud`).
+>Note: Red Hat Enterprise Linux does not provide the `pip` command outside of Software Collection Libraries (SCL).
+>For other distributions, the command `pip install apache-libcloud` may be used. Packages installed using `pip`
+>within SCL may require additional configuration of Ansible to use the SCL environment.
+
+To install the GCP CLI (`gcloud`), follow these [instructions](https://cloud.google.com/sdk/downloads#yum).
 
 ### Configure the casl-environment
 
-clone the ansible repo (you may also want to use a specific verison) and install the necessary galaxy repo.
+Clone the ansible repo (you may also want to use a specific verison) and install the necessary galaxy repo.
 ```
 git clone https://github.com/redhat-cop/casl-ansible
 cd casl-ansible
