@@ -1,0 +1,20 @@
+---
+- name: Ensure the underlaying infrastructure is {{ action }}
+  cloudformation:
+    stack_name: "{{ env_id }}"
+    state: "{{ action }}"
+    region: "{{ cloud_infrastructure.region }}"
+    template_body: "{{ lookup('template', 'casl-aws-cformation.yml.j2') }}"
+    template_parameters:
+      VPCCIDR: "{{ VPCCIDR }}"
+      PrivateSubnet1CIDR: "{{ PrivateSubnet1CIDR }}"
+      PrivateSubnet2CIDR: "{{ PrivateSubnet2CIDR }}"
+      PrivateSubnet3CIDR: "{{ PrivateSubnet3CIDR }}"
+      Image: "{{ cloud_infrastructure.image_name }}"
+      KeyPairName: "{{ aws_key_name }}"
+      MasterInstanceType: "{{ master_flavor }}"
+      EtcdInstanceType: "{{ etcd_flavor }}"
+      NodesInstanceType: "{{ app_node_flavor }}"
+      InfraInstanceType: "{{ infra_node_flavor }}"
+      CNSInstanceType: "{{ cns_node_flavor }}"
+      MasterHealthTarget: "TCP:{{ openshift_master_api_port }}"

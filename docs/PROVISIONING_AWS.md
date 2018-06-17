@@ -70,11 +70,13 @@ Once provisioned, a cluster may be adjusted/reconfigured as needed by updating t
 
 ## Scaling Up and Down
 
-A cluster's Infra and App nodes may be scaled up and down by editing the following parameters in the `hosts` or `all.yml` file and then re-running the `end-to-end.yml` playbook as shown above.
+A cluster's Infra and App nodes may be scaled up and down by editing the following parameters in the `all.yml` file and then re-running the `end-to-end.yml` playbook as shown above.
 
 ```
-aws_num_nodes=X
-aws_num_infra=Y
+appnodes:
+  count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+infranodes:
+  count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
 ```
 
 ## Deleting a Cluster
@@ -87,8 +89,7 @@ docker run -u `id -u` \
       -v $HOME/src/:/tmp/src:Z \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.casl.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/delete-cluster.yml \
-      -e OPTS="-e delete_vpc=true"
       redhatcop/installer-aws
 ```
 
-> **Note:** While deleting an AWS Cluster, the `delete_vpc` variable must be set to `true` in order to remove the VPC used with the cluster. Check role [README](../roles/manage-aws-infra/README.md) for further information.
+**TODO:** Using an existing VPC or maintaining the created VPC is not supported yet.

@@ -1,0 +1,784 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Red Hat's Container & PaaS CoP - CASL repository AWS CloudFormation template for OCP - Environment: {{ env_id }}"
+Parameters:
+  VPCCIDR:
+    Default: "10.0.0.0/16"
+    Description: "CIDR block for the VPC"
+    Type: "String"
+  PrivateSubnet1CIDR:
+    Default: "10.0.1.0/16"
+    Description: "CIDR block for the Private Subnet on AZ1"
+    Type: "String"
+  PrivateSubnet2CIDR:
+    Default: "10.0.2.0/16"
+    Description: "CIDR block for the Private Subnet on AZ2"
+    Type: "String"
+  PrivateSubnet3CIDR:
+    Default: "10.0.3.0/16"
+    Description: "CIDR block for the Private Subnet on AZ3"
+    Type: "String"
+  Image:
+    Description: "EC2 ami to be used"
+    Type: "String"
+  KeyPairName:
+    Description: "SSH Key to asign to the EC2 instances"
+    Type: "String"
+  MasterInstanceType:
+    Default: "m4.xlarge"
+    Description: "The instance type to be used"
+    Type: "String"
+  EtcdInstanceType:
+    Default: "m4.xlarge"
+    Description: "The instance type to be used"
+    Type: "String"
+  NodesInstanceType:
+    Default: "m4.xlarge"
+    Description: "The instance type to be used"
+    Type: "String"
+  InfraInstanceType:
+    Default: "i3.xlarge"
+    Description: "The instance type to be used"
+    Type: "String"
+  CNSInstanceType:
+    Default: "i3.xlarge"
+    Description: "The instance type to be used"
+    Type: "String"
+  MasterApiPort:
+    Default: "443"
+    Description: "Exposed OpenShift API port number"
+    Type: "String"
+  MasterHealthTarget:
+    Description: "Master API exposed Port for the LB HealthCheck"
+    Default: "TCP:8443"
+    Type: "String"
+Resources:
+{# Figure out the node types with more zones to create all the required SubNets per AZ #}
+  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+    {% set numzones = aws_masters_zones.__len__() -%}
+    {% set zones = aws_masters_zones -%}
+  {% elif (aws_etcd_zones.__len__() >= aws_masters_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+    {% set numzones = aws_etcd_zones.__len__() -%}
+    {% set zones = aws_etcd_zones -%}
+  {% elif (aws_appnodes_zones.__len__() >= aws_masters_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+    {% set numzones = aws_appnodes_zones.__len__() -%}
+    {% set zones = aws_appnodes_zones -%}
+  {% else -%}
+    {% set numzones = aws_infranodes_zones.__len__() -%}
+    {% set zones = aws_infranodes_zones -%}
+  {% endif -%}
+  {% if aws_create_vpc -%}
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    Properties:
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  RouteInternetGW:
+    Type: "AWS::EC2::Route"
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+  {% for idx in range(1, numzones | int + 1) -%}
+  {% set zone = zones[ loop.index0 ] -%}
+  SubnetAZ{{ idx }}:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet{{ idx }}CIDR
+      MapPublicIpOnLaunch: True
+      AvailabilityZone: {{ zone }}
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+      - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+        Value: '{{ env_id }}'
+  SubnetAZ{{ idx }}RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetAZ{{ idx }}
+      RouteTableId: !Ref RouteTable
+  {% endfor -%}
+  {% endif -%}
+  apielbsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: apielbsg
+      GroupDescription: Master API LB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: !Ref MasterApiPort
+        ToPort: !Ref MasterApiPort
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  infraelbsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: infraelbsg
+      GroupDescription: Routers LB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  mastersg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-master
+      GroupDescription: Master Nodes Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: udp
+        FromPort: '8053'
+        ToPort: '8053'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '8053'
+        ToPort: '8053'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: !Ref MasterApiPort
+        ToPort: !Ref MasterApiPort
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: udp
+        FromPort: '53'
+        ToPort: '53'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '53'
+        ToPort: '53'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: udp
+        FromPort: '4789'
+        ToPort: '4789'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  infrasg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-infra-node
+      GroupDescription: Infrastructure Nodes Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  nodesg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-app-node
+      GroupDescription: Compute Nodes Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '10250'
+        ToPort: '10250'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: udp
+        FromPort: '4789'
+        ToPort: '4789'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: '-1'
+        FromPort: '-1'
+        ToPort: '-1'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  sshsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-ssh
+      GroupDescription: SSH Server Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  etcdsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-etcd
+      GroupDescription: ETCD Nodes Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '2379'
+        ToPort: '2379'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '2380'
+        ToPort: '2380'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+  cnssg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-cns
+      GroupDescription: Gluster Nodes Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '24007'
+        ToPort: '24007'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '24008'
+        ToPort: '24008'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '2222'
+        ToPort: '2222'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '49152'
+        ToPort: '49664'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '24010'
+        ToPort: '24010'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '3260'
+        ToPort: '3260'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '111'
+        ToPort: '111'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
+{% for idx in range(0, aws_num_masters | int) %}
+{% set zone = aws_masters_zones[ (idx % aws_masters_zones.__len__())] %}
+{% set zoneidx = (idx % aws_masters_zones.__len__()) + 1 %}
+  Master{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref MasterInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        {% if aws_num_etcd | int == 0 -%}
+        - !GetAtt etcdsg.GroupId
+        {% endif -%}
+        - !GetAtt nodesg.GroupId
+        - !GetAtt mastersg.GroupId
+        - !GetAtt sshsg.GroupId
+      Tags:
+        {% if aws_num_etcd | int == 0 -%}
+        - Key: 'group'
+          Value: '{{ group_masters_etcd_tag }}'
+        {% else -%}
+        - Key: 'group'
+          Value: '{{ group_masters_tag }}'
+        {% endif -%}
+        - Key: 'Name'
+          Value: '{{ aws_masters_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'master'
+        - Key: 'env_id'
+          Value: '{{ env_id }}'
+        - Key: 'node_labels'
+          Value: '{{ labels_masters_tag }}'
+        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+          Value: '{{ env_id }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ master_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ master_root_volume_size }}"
+        - DeviceName: "{{ docker_storage_block_device }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ master_docker_volume_size }}"
+{% endfor %}
+{% for idx in range(0, aws_num_etcd | int) %}
+{% set zone = aws_etcd_zones[ (idx % aws_etcd_zones.__len__())] %}
+{% set zoneidx = (idx % aws_etcd_zones.__len__()) + 1 %}
+  ETCD{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref EtcdInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        - !GetAtt etcdsg.GroupId
+        - !GetAtt nodesg.GroupId
+        - !GetAtt sshsg.GroupId
+      Tags:
+        - Key: 'Name'
+          Value: '{{ aws_etcd_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'etcd'
+        - Key: 'env_id'
+          Value: '{{ env_id }}'
+        - Key: 'group'
+          Value: '{{ group_etcd_nodes_tag }}'
+        - Key: 'node_labels'
+          Value: '{{ labels_etcd_nodes_tag }}'
+        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+          Value: '{{ env_id }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ etcd_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ etcd_root_volume_size }}"
+        - DeviceName: "{{ docker_storage_block_device }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ etcd_docker_volume_size }}"
+{% endfor %}
+{% for idx in range(0, aws_num_infra_nodes | int) %}
+{% set zone = aws_infranodes_zones[ (idx % aws_infranodes_zones.__len__())] %}
+{% set zoneidx = (idx % aws_infranodes_zones.__len__()) + 1 %}
+  Infra{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref InfraInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        - !GetAtt nodesg.GroupId
+        - !GetAtt infrasg.GroupId
+        - !GetAtt sshsg.GroupId
+      Tags:
+        - Key: 'Name'
+          Value: '{{ aws_infranodes_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'infranode'
+        - Key: 'env_id'
+          Value: '{{ env_id }}'
+        - Key: 'group'
+          Value: '{{ group_infra_nodes_tag }}'
+        - Key: 'node_labels'
+          Value: '{{ labels_infra_nodes_tag }}'
+        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+          Value: '{{ env_id }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ infra_node_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ infra_node_root_volume_size }}"
+        - DeviceName: "{{ docker_storage_block_device }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ infra_node_docker_volume_size }}"
+{% endfor %}
+{% for idx in range(0, aws_num_app_nodes | int) %}
+{% set zone = aws_appnodes_zones[ (idx % aws_appnodes_zones.__len__())] %}
+{% set zoneidx = (idx % aws_appnodes_zones.__len__()) + 1 %}
+  Node{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref NodesInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        - !GetAtt nodesg.GroupId
+        - !GetAtt sshsg.GroupId
+      Tags:
+        - Key: 'Name'
+          Value: '{{ aws_appnodes_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'computenode'
+        - Key: 'env_id'
+          Value: '{{ env_id }}'
+        - Key: 'group'
+          Value: '{{ group_app_nodes_tag }}'
+        - Key: 'node_labels'
+          Value: '{{ labels_app_nodes_tag }}'
+        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+          Value: '{{ env_id }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ app_node_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ app_node_root_volume_size }}"
+        - DeviceName: "{{ docker_storage_block_device }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ app_node_docker_volume_size }}"
+{% endfor %}
+{% for idx in range(0, aws_num_cns_nodes | int) %}
+{% set zone = aws_cnsnodes_zones[ (idx % aws_cnsnodes_zones.__len__())] %}
+{% set zoneidx = (idx % aws_cnsnodes_zones.__len__()) + 1 %}
+  CNS{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref CNSInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        - !GetAtt nodesg.GroupId
+        - !GetAtt sshsg.GroupId
+        - !GetAtt cnssg.GroupId
+      Tags:
+        - Key: 'Name'
+          Value: '{{ aws_cnsnodes_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'cnsnode'
+        - Key: 'env_id'
+          Value: '{{ env_id }}'
+        - Key: 'group'
+          Value: '{{ group_cns_nodes_tag }}'
+        - Key: 'node_labels'
+          Value: '{{ labels_cns_nodes_tag }}'
+        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
+          Value: '{{ env_id }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ cns_node_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ cns_node_root_volume_size }}"
+        - DeviceName: "{{ docker_storage_block_device }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ cns_node_docker_volume_size }}"
+        - DeviceName: "{{ cns_node_glusterfs_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ cns_node_glusterfs_volume_size }}"
+{% endfor %}
+  MasterExtElb:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      CrossZone: 'true'
+      ConnectionSettings:
+        IdleTimeout: 300
+      Tags:
+      - Key: Name
+        Value: ocp_master_elb
+      - Key: env
+        Value: '{{ env_id }}'
+      HealthCheck:
+        HealthyThreshold: '2'
+        Interval: '5'
+        Target: !Ref MasterHealthTarget
+        Timeout: '2'
+        UnhealthyThreshold: '2'
+      Instances:
+      {% for idx in range(0, aws_num_masters | int) -%}
+      - !Ref Master{{ '%02d' % idx }}
+      {% endfor -%}
+      Subnets:
+      {% for idx in range(1, numzones | int + 1) -%}
+      - !Ref SubnetAZ{{ idx }}
+      {% endfor -%}
+      Listeners:
+      - InstancePort: !Ref MasterApiPort
+        InstanceProtocol: TCP
+        LoadBalancerPort: !Ref MasterApiPort
+        Protocol: TCP
+      SecurityGroups:
+      - !Ref apielbsg
+  InfraElb:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      CrossZone: 'true'
+      Tags:
+      - Key: Name
+        Value: ocp_router_elb
+      - Key: env
+        Value: '{{ env_id }}'
+      HealthCheck:
+        HealthyThreshold: '2'
+        Interval: '5'
+        Target: TCP:443
+        Timeout: '2'
+        UnhealthyThreshold: '2'
+      Instances:
+      {% for idx in range(0, aws_num_infra_nodes | int) -%}
+      - !Ref Infra{{ '%02d' % idx }}
+      {% endfor -%}
+      Subnets:
+      {% for idx in range(1, numzones | int + 1) -%}
+      - !Ref SubnetAZ{{ idx }}
+      {% endfor -%}
+      Listeners:
+      - InstancePort: '443'
+        InstanceProtocol: TCP
+        LoadBalancerPort: '443'
+        Protocol: TCP
+      - InstancePort: '80'
+        InstanceProtocol: TCP
+        LoadBalancerPort: '80'
+        Protocol: TCP
+      SecurityGroups:
+      - !Ref infraelbsg
+  Route53Records:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn:
+    - InfraElb
+    - MasterExtElb
+    {% for idx in range(0, aws_num_infra_nodes | int) -%}
+    - Infra{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_masters | int) -%}
+    - Master{{ '%02d' % idx }}
+    {% endfor -%}
+    Properties:
+      HostedZoneName: "{{ dns_domain }}."
+      RecordSets:
+      - Name: "{{ openshift_master_cluster_public_hostname }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt MasterExtElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt MasterExtElb.CanonicalHostedZoneName
+      - Name: "{{ openshift_master_cluster_hostname }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt MasterExtElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt MasterExtElb.CanonicalHostedZoneName
+      - Name: "*.{{ openshift_master_default_subdomain }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt InfraElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt InfraElb.CanonicalHostedZoneName
+  PrivateDNSZone:
+    Type: "AWS::Route53::HostedZone"
+    Properties:
+      HostedZoneConfig:
+        Comment: "Private DNS Zone for {{ env_id }}.{{ dns_domain }}"
+      Name: "{{ env_id }}.{{ dns_domain }}"
+      VPCs:
+        -
+          VPCId: !Ref VPC
+          VPCRegion: "{{ cloud_infrastructure.region }}"
+  PrivateRecords:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn:
+    - PrivateDNSZone
+    {% for idx in range(0, aws_num_infra_nodes | int) -%}
+    - Infra{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_masters | int) -%}
+    - Master{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_cns_nodes | int) -%}
+    - CNS{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_app_nodes | int) -%}
+    - Node{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_etcd | int) -%}
+    - ETCD{{ '%02d' % idx }}
+    {% endfor -%}
+    Properties:
+      HostedZoneName: "{{ env_id }}.{{ dns_domain }}."
+      RecordSets:
+      {% for idx in range(0, aws_num_infra_nodes | int) -%}
+      - Name: "infra-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt Infra{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_masters | int) -%}
+      - Name: "master-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt Master{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_cns_nodes | int) -%}
+      - Name: "cns-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt CNS{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_app_nodes | int) -%}
+      - Name: "node-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt Node{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_etcd | int) -%}
+      - Name: "etcd-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt ETCD{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
+      - Name: "{{ openshift_master_cluster_public_hostname }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt MasterExtElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt MasterExtElb.CanonicalHostedZoneName
+      - Name: "{{ openshift_master_cluster_hostname }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt MasterExtElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt MasterExtElb.CanonicalHostedZoneName
+      - Name: "*.{{ openshift_master_default_subdomain }}."
+        Type: A
+        AliasTarget:
+          HostedZoneId: !GetAtt InfraElb.CanonicalHostedZoneNameID
+          DNSName: !GetAtt InfraElb.CanonicalHostedZoneName
+  PublicRecords:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn:
+    {% for idx in range(0, aws_num_infra_nodes | int) -%}
+    - Infra{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_masters | int) -%}
+    - Master{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_cns_nodes | int) -%}
+    - CNS{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_app_nodes | int) -%}
+    - Node{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_etcd | int) -%}
+    - ETCD{{ '%02d' % idx }}
+    {% endfor -%}
+    Properties:
+      HostedZoneName: "{{ dns_domain }}."
+      RecordSets:
+      {% for idx in range(0, aws_num_infra_nodes | int) -%}
+      - Name: "infra-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt Infra{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_masters | int) -%}
+      - Name: "master-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt Master{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_cns_nodes | int) -%}
+      - Name: "cns-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt CNS{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_app_nodes | int) -%}
+      - Name: "node-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt Node{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_etcd | int) -%}
+      - Name: "etcd-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt ETCD{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}

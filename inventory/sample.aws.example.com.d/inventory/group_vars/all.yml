@@ -11,31 +11,77 @@ hosting_infrastructure: aws
 # Cluster Environment ID to uniquely identify the environment
 env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
 
-## AWS Provisioning Variables
-# Amazon image name to use for instances.
-# Note that each AWS region may utilize a different AMI for the same image.
-aws_image_name: <REPLACE WITH VALID AMI>
+# Define custom Master(s) API and Console Port
+# Comment out these entries to use a different port for both the Web Console and OpenShift API - Default port is 8443
+#openshift_master_api_port: 443
+#openshift_master_console_port: 443
 
-# AWS instance flavors (i.e.: instance sizes)
-master_flavor: m4.xlarge
-infra_node_flavor: i3.xlarge
-app_node_flavor: m4.xlarge
-cns_node_flavor: i3.xlarge
+# Define custom console and apps public DNS Name
+# NOTE: These values need to be a subset of {{ dns_domain }}
+openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
+openshift_master_cluster_hostname: "console.internal.{{ env_id }}.{{ dns_domain }}"
+openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
-# Number of master instances to deploy.
-# This is a non-HA sample nventory so don't change this value
-aws_num_masters: 1
+# Define infrastructure skeleton
+cloud_infrastructure:
+   region: <REPLACE WITH VALID REGION>
+   image_name: <REPLACE WITH VALID AMI>
+   masters:
+     count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+     flavor: <REPLACE WITH DESIRED FLAVOR FOR THE INSTANCE>
+     zones:
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     name_prefix: <REPLACE WITH DESIRED NAME PREFIX FOR THE INSTANCE>
+     root_volume_size: <REPLACE WITH THE SIZE (Gi) FOR ROOT POOL DEVICE>
+     docker_volume_size: <REPLACE WITH THE SIZE (Gi) FOR DOCKER POOL DEVICE>
+   etcdnodes:
+     count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+     flavor: <REPLACE WITH DESIRED FLAVOR FOR THE INSTANCE>
+     zones:
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     name_prefix: <REPLACE WITH DESIRED NAME PREFIX FOR THE INSTANCE>
+     root_volume_size: <REPLACE WITH THE SIZE (Gi) FOR ROOT POOL DEVICE>
+     docker_volume_size: <REPLACE WITH THE SIZE (Gi) FOR DOCKER POOL DEVICE>
+   appnodes:
+     count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+     flavor: <REPLACE WITH DESIRED FLAVOR FOR THE INSTANCE>
+     zones:
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     name_prefix: <REPLACE WITH DESIRED NAME PREFIX FOR THE INSTANCE>
+     root_volume_size: <REPLACE WITH THE SIZE (Gi) FOR ROOT POOL DEVICE>
+     docker_volume_size: <REPLACE WITH THE SIZE (Gi) FOR DOCKER POOL DEVICE>
+   infranodes:
+     count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+     flavor: <REPLACE WITH DESIRED FLAVOR FOR THE INSTANCE>
+     zones:
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     name_prefix: <REPLACE WITH DESIRED NAME PREFIX FOR THE INSTANCE>
+     root_volume_size: <REPLACE WITH THE SIZE (Gi) FOR ROOT POOL DEVICE>
+     docker_volume_size: <REPLACE WITH THE SIZE (Gi) FOR DOCKER POOL DEVICE>
+   cnsnodes:
+     count: <REPLACE WITH NUMBER OF INSTANCES TO CREATE>
+     flavor: <REPLACE WITH DESIRED FLAVOR FOR THE INSTANCE>
+     zones:
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     - <REPLACE WITH THE AZ(s) LIST TO PLACE THE INSTANCES IN>
+     name_prefix: <REPLACE WITH DESIRED NAME PREFIX FOR THE INSTANCE>
+     root_volume_size: <REPLACE WITH THE SIZE (Gi) FOR ROOT POOL DEVICE>
+     docker_volume_size: <REPLACE WITH THE SIZE (Gi) FOR DOCKER POOL DEVICE>
+     gluster_volume_size: <REPLACE WITH THE SIZE (Gi) FOR GLUSTER POOL DEVICE>
 
-# Number of instances to be used as infra nodes.
-# This is a non-HA sample inventory so don't change this value
-aws_num_infra_nodes: 1
 
-# Number of instances to be used as compute/app nodes
-aws_num_app_nodes: 3
-
-# Number of instances to be used as CNS (Container Native Storage) nodes
-aws_num_cns_nodes: 0
-
+## Temporary set for Docker and Gluster Storage block device names
+## NOTE: do not modify this info. Will be handle on a handle on a different way in the future
+docker_storage_block_device: '/dev/xvdb'
+cns_node_glusterfs_volume: '/dev/xvdg'
 
 # DNS configurations
 # the 'dns_domain' will be used as the base domain for the deployment and has
@@ -48,83 +94,50 @@ dns_nameservers:
 # Specify the version of docker to use
 #docker_version: "1.12.*"
 
-# master(s) root (/) volume size and device
-# - default values are "/dev/sda1" and "50"
-#master_root_volume: "/dev/sda1"
-#master_root_volume_size: 50
-
-# infra node(s) root (/) volume size and device
-# - default values are "/dev/sda1" and "50"
-#infra_node_root_volume: "/dev/sda1"
-#infra_node_root_volume_size: 50
-
-# app node(s) root (/) volume size and device
-# - default values are "/dev/sda1" and "50"
-#app_node_root_volume: "/dev/sda1"
-#app_node_root_volume_size: 50
-
-# cns node(s) root (/) volume size and device
-# - default values are "/dev/sda1" and "50"
-#cns_node_root_volume: "/dev/sda1"
-#cns_node_root_volume_size: 50
-
-# Docker Storage configuration variables - for all nodes
-# - default values are "/dev/xvdb" and "40"
-#docker_storage_block_device: "/dev/xvdb"
-#docker_volume_size: "40"
-
-# CNS (GlusterFS) Storage configuration variables
-# - default values are "/dev/xvdg" and "200"
-#cns_node_glusterfs_volume: "/dev/xvdg"
-#cns_node_glusterfs_volume_size: "200"
-
 # AWS access keys used by the tools to interact with ec2
 # This example uses ENV variables (recommended), but the values
 # can also be specified here
 aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
 aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
-aws_region: <REPLACE WITH VALID AWS REGION>
-
 # If aws_create_vpc is 'true', aws_vpc_id and aws_subnet_id variables will be ignored
+# Custom VPCs support is still WIP, so this variable MUST be true right now
 aws_create_vpc: true
-aws_vpc_id: <REPLACE WITH VALID VPC ID>
-aws_subnet_id: <REPLACE WITH VALID SUBNET ID>
+
+# Custom Subnet CIDR configuration. When selecting aws_create_vpc 'true' (this is the default right now), a default CIDR will be creted for both VPC and subnets on each AZ
+# Use the following variables if you want to configure custom CIDR
+#vpc_cidr: <REPLACE WITH VALID CIDR VALUE>
+#subnet_az1_cidr: <REPLACE WITH VALID CIDR VALUE>
+#subnet_az2_cidr: <REPLACE WITH VALID CIDR VALUE>
+#subnet_az3_cdir:  <REPLACE WITH VALID CIDR VALUE>
 
 # use the "-e" option to set "aws_key_name"
 #aws_key_name: my-ssh-region-key
 
 # These are the security groups created when aws_create_vpc is 'true'. Modify accordingly to your environment in case using existing VPC and SGs
+# NOTE: The use of custom VPC is not supported yet
 aws_master_sgroups: ['ocp-ssh', 'ocp-master', 'ocp-app-node']
+aws_etcd_sgroups: ['ocp-ssh', 'ocp-etcd', 'ocp-app-node']
 aws_infra_node_sgroups: ['ocp-ssh', 'ocp-infra-node', 'ocp-app-node']
 aws_app_node_sgroups: ['ocp-ssh', 'ocp-app-node']
 aws_cns_node_sgroups: ['ocp-ssh', 'ocp-app-node', 'ocp-cns']
 
-# Tags and names used to identify the instances
-# Note: Be careful when changing these as the tools rely on some of these values
-# to be set correctly.
-master_name: master
-etcd_name: etcd
-infra_node_name: infra-node
-app_node_name: app-node
-cns_node_name: cns
-
+## These are the tag used to create different dynamic groups based on these names
+## NOTE: modifying these default values will affect on how the different type of nodes are discovered and configured on the required groups. You will need to update `hosts` inventory file accordingly if these values are modified 
 group_masters_tag: masters_aws
+group_masters_etcd_tag: masters_etcd_aws
+group_etcd_nodes_tag: etcd_nodes_aws
 group_infra_nodes_tag: infra_nodes_aws
 group_app_nodes_tag: app_nodes_aws
 group_cns_nodes_tag: cns_nodes_aws
 
+## These tags will define the labels your OCP Nodes will be assigned with as part of the OCP deployment process
 labels_masters_tag: '{"region": "default"}'
+labels_etcd_nodes_tag: '{"region": "primary"}'
 labels_infra_nodes_tag: '{"region": "infra"}'
 labels_app_nodes_tag: '{"region": "primary"}'
 labels_cns_nodes_tag: '{"region": "primary"}'
 
-# Should the Instance Termination Protection be set yes/no
-aws_termination_protection: yes
-
-# Should the cluster be configured for HA
-# - currently not supported
-ha_mode: false
 
 # Subscription Management Details
 rhsm_register: True
@@ -134,15 +147,20 @@ rhsm_repos:
   - "rhel-7-server-extras-rpms"
   - "rhel-7-fast-datapath-rpms"
   - "rhel-7-server-ansible-2.4-rpms"
-  
-# Keep this to use Red Hat Satellite:
-rhsm_server_hostname: 'sat-6.example.com'
-rhsm_org_id: 'CASL_ORG'
-rhsm_activationkey: 'casl-latest'
 
-# Uncomment the following to use RHSM username, password and optionally pool:
-#rhsm_username: ''
-#rhsm_password: ''
+# Uncomment the following to use Red Hat Satellite:
+#rhsm_server_hostname: 'sat-6.example.com'
+#rhsm_org_id: 'CASL_ORG'
+#rhsm_activationkey: 'casl-latest'
+
+# Use RHSM username, password - and optionally pool:
+# NOTE: use the -e option to specify on CLI instead of statically set here
+#rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
+#rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
+# ... or, alternatively, get RHSM required values from system environment variables
+#rhsm_username: "{{ lookup('env','RHN_USER') }}"
+#rhsm_password: "{{ lookup('env','RHN_PASSWD') }}"
+
 # leave commented out if you want to `--auto-attach` a pool
 #rhsm_pool: ''
 

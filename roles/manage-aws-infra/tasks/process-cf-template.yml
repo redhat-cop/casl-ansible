@@ -1,0 +1,18 @@
+---
+- debug:
+    msg: "{{ cloud_infrastructure }}"
+    
+- name: create temporary directory to store the processed template
+  tempfile:
+    state: directory
+    suffix: formation
+  register: tmpdir
+
+- name: "Process CloudFormation Template"
+  template:
+    src: "{{ role_path}}/templates/casl-aws-cformation.yml.j2"
+    dest: "{{ tmpdir.path }}/casl-aws-cformation.yml"
+  register: cftemplate
+
+- debug:
+    msg: "CloudFormation template path to process: {{ cftemplate.dest }}"

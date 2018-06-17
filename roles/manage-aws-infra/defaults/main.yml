@@ -1,98 +1,148 @@
 ---
-
-delete_vpc: false
-
-default_root_volume: '/dev/sda1'
-default_docker_volume: '/dev/xvdb'
-default_cns_volume: '/dev/xvdg'
-
+## Default volume device sizes
 default_root_volume_size: '50'
 default_docker_volume_size: '40'
 default_cns_volume_size: '200'
 
+# Default port for OpenShift API and Web Console
+openshift_master_api_port: 8443
+openshift_master_console_port: 8443
 
-default_ocp_ssh_sg_rules:
-  - proto: tcp
-    from_port: 22
-    to_port: 22
-    cidr_ip: 0.0.0.0/0
 
-default_ocp_master_sg_rules:
-  - proto: udp
-    from_port: 8053
-    to_port: 8053
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 8053
-    to_port: 8053
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 8443
-    to_port: 8443
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 443
-    to_port: 443
-    cidr_ip: 0.0.0.0/0
-  - proto: udp
-    from_port: 53
-    to_port: 53
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 53
-    to_port: 53
-    cidr_ip: 0.0.0.0/0
-  - proto: udp
-    from_port: 4789
-    to_port: 4789
-    cidr_ip: 0.0.0.0/0
+## Default infra skeleton variables
+default_cloud_infrastructure:
+   masters:
+     count: 1
+     flavor: "m4.xlarge"
+     zones: []
+     name_prefix: "master"
+     root_volume_size: "{{ default_root_volume_size }}"
+     docker_volume_size: "{{ default_docker_volume_size }}"
+   etcdnodes:
+     count: 0
+     flavor: "i3.xlarge"
+     zones: []
+     name_prefix: "etcd"
+     root_volume_size: "{{ default_root_volume_size }}"
+     docker_volume_size: "{{ default_docker_volume_size }}"
+   appnodes:
+     count: 3
+     flavor: "m4.xlarge"
+     zones: []
+     name_prefix: "node"
+     root_volume_size: "{{ default_root_volume_size }}"
+     docker_volume_size: "{{ default_docker_volume_size }}"
+   infranodes:
+     count: 1
+     flavor: "m4.xlarge"
+     zones: []
+     name_prefix: "infra"
+     root_volume_size: "{{ default_root_volume_size }}"
+     docker_volume_size: "{{ default_docker_volume_size }}"
+   cnsnodes:
+     count: 0
+     flavor: "i3.xlarge"
+     zones: []
+     name_prefix: "cns"
+     root_volume_size: "{{ default_root_volume_size }}"
+     docker_volume_size: "{{ default_docker_volume_size }}"
+     gluster_volume_size: "{{ default_cns_volume_size }}"
 
-default_ocp_app_node_sg_rules:
-  - proto: udp
-    from_port: 4789
-    to_port: 4789
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 10250
-    to_port: 10250
-    cidr_ip: 0.0.0.0/0
+## Default volume device names
+default_root_volume: '/dev/sda1'
 
-default_ocp_infra_node_sg_rules:
-  - proto: tcp
-    from_port: 80
-    to_port: 80
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 443
-    to_port: 443
-    cidr_ip: 0.0.0.0/0
+## NOTE: These devices names are fixed now. Will be customizable in the future
+## Keeping the values here for future references
+#default_docker_volume: '/dev/xvdb'
+#default_cns_volume: '/dev/xvdg'
 
-default_ocp_cns_node_sg_rules:
-  - proto: tcp
-    from_port: 24007
-    to_port: 24007
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 24008
-    to_port: 24008
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 2222
-    to_port: 2222
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 49152
-    to_port: 49664
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 24010
-    to_port: 24010
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 3260
-    to_port: 3260
-    cidr_ip: 0.0.0.0/0
-  - proto: tcp
-    from_port: 111
-    to_port: 111
-    cidr_ip: 0.0.0.0/0
+## Default VPC creation boolean
+aws_create_vpc: true
+
+
+## Default VPC Network values
+default_vpc_cidr: '10.20.0.0/16'
+default_subnet_az1_cidr: '10.20.1.0/24'
+default_subnet_az2_cidr: '10.20.2.0/24'
+default_subnet_az3_cidr: '10.20.3.0/24'
+
+## Default instance numbers
+#default_aws_num_masters: 1
+#default_aws_num_etcd: 0
+#default_aws_num_app_nodes: 3
+#default_aws_num_infra_nodes: 1
+#default_aws_num_cns_nodes: 0
+
+## Default instance flavors
+#default_master_flavor: "m4.xlarge"
+#default_etcd_flavor: "i3.xlarge"
+#default_app_node_flavor: "m4.xlarge"
+#default_infra_node_flavor: "m4.xlarge"
+#default_cns_node_flavor: "i3.xlarge"
+
+## Default instance prefix names
+#default_aws_masters_name_prefix: "master"
+#default_aws_etcd_name_prefix: "etcd"
+#default_aws_appnodes_name_prefix: "node"
+#default_aws_infranodes_name_prefix: "infra"
+#default_aws_cnsnodes_name_prefix: "cns"
+
+## Feed AZs for each instance from `cloud_infrastructure` list on the inventory
+aws_masters_zones: "{{ cloud_infrastructure.masters.zones }}"
+aws_etcd_zones: "{{ cloud_infrastructure.etcdnodes.zones }}"
+aws_appnodes_zones: "{{ cloud_infrastructure.appnodes.zones }}"
+aws_infranodes_zones: "{{ cloud_infrastructure.infranodes.zones }}"
+aws_cnsnodes_zones: "{{ cloud_infrastructure.cnsnodes.zones }}"
+
+## Feed name prefix for each instance from `cloud_infrastructure` list on the inventory
+aws_masters_name_prefix: "{{ cloud_infrastructure.masters.name_prefix }}"
+aws_etcd_name_prefix: "{{ cloud_infrastructure.etcdnodes.name_prefix }}"
+aws_appnodes_name_prefix: "{{ cloud_infrastructure.appnodes.name_prefix }}"
+aws_infranodes_name_prefix: "{{ cloud_infrastructure.infranodes.name_prefix }}"
+aws_cnsnodes_name_prefix: "{{ cloud_infrastructure.cnsnodes.name_prefix }}"
+
+## Feed instance numbers for each instance from `cloud_infrastructure` list on the inventory
+aws_num_masters: "{{ cloud_infrastructure.masters.count }}"
+aws_num_etcd: "{{ cloud_infrastructure.etcdnodes.count }}"
+aws_num_app_nodes: "{{ cloud_infrastructure.appnodes.count }}"
+aws_num_infra_nodes: "{{ cloud_infrastructure.infranodes.count }}"
+aws_num_cns_nodes: "{{ cloud_infrastructure.cnsnodes.count }}"
+
+## Feed instance flavors for each instance from `cloud_infrastructure` list on the inventory
+master_flavor: "{{ cloud_infrastructure.masters.flavor }}"
+etcd_flavor: "{{ cloud_infrastructure.etcdnodes.flavor }}"
+app_node_flavor: "{{ cloud_infrastructure.appnodes.flavor }}"
+infra_node_flavor: "{{ cloud_infrastructure.infranodes.flavor }}"
+cns_node_flavor: "{{ cloud_infrastructure.cnsnodes.flavor }}"
+
+## Feed volume device names for each instance from `cloud_infrastructure` list on the inventory
+master_root_volume: "{{ default_root_volume }}"
+etcd_root_volume: "{{ default_root_volume }}"
+infra_node_root_volume: "{{ default_root_volume }}"
+app_node_root_volume: "{{ default_root_volume }}"
+cns_node_root_volume: "{{ default_root_volume }}"
+#cns_node_glusterfs_volume: "{{ default_cns_volume }}"
+#docker_storage_block_device: "{{ default_docker_volume }}"
+
+## Feed root volume device sizes for each instance from `cloud_infrastructure` list on the inventory
+master_root_volume_size: "{{ cloud_infrastructure.masters.root_volume_size }}"
+etcd_root_volume_size: "{{ cloud_infrastructure.etcdnodes.root_volume_size  }}"
+infra_node_root_volume_size: "{{ cloud_infrastructure.infranodes.root_volume_size }}"
+app_node_root_volume_size: "{{ cloud_infrastructure.appnodes.root_volume_size }}"
+cns_node_root_volume_size: "{{ cloud_infrastructure.cnsnodes.root_volume_size }}"
+
+## Feed root volume device sizes for each instance from `cloud_infrastructure` list on the inventory
+master_docker_volume_size: "{{ cloud_infrastructure.masters.docker_volume_size }}"
+etcd_docker_volume_size: "{{ cloud_infrastructure.etcdnodes.docker_volume_size  }}"
+infra_node_docker_volume_size: "{{ cloud_infrastructure.infranodes.docker_volume_size }}"
+app_node_docker_volume_size: "{{ cloud_infrastructure.appnodes.docker_volume_size }}"
+cns_nodedocker_volume_size: "{{ cloud_infrastructure.cnsnodes.docker_volume_size }}"
+
+## Feed gluster volume device sizes for CNS instances from `cloud_infrastructure` list on the inventory
+cns_node_glusterfs_volume_size: "{{ cloud_infrastructure.cnsnodes.gluster_volume_size }}"
+
+## Feed VPC Network values from the inventory
+VPCCIDR: "{{ vpc_cidr | default(default_vpc_cidr) }}"
+PrivateSubnet1CIDR: "{{ subnet_az1_cidr | default(default_subnet_az1_cidr) }}"
+PrivateSubnet2CIDR: "{{ subnet_az2_cidr | default(default_subnet_az2_cidr) }}"
+PrivateSubnet3CIDR: "{{ subnet_az2_cidr | default(default_subnet_az3_cidr) }}"
