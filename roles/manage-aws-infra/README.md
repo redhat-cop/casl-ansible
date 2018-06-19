@@ -20,6 +20,7 @@ Many of these required variables have default values. These are the **mandatory*
 Infrastructure skeleton variables
 ---------------------------------
 
+```yaml
 cloud_infrastructure: **mandatory**
    region: **mandatory**
    image_name: **mandatory**
@@ -64,6 +65,7 @@ cloud_infrastructure: **mandatory**
      root_volume_size: **defaulted**
      docker_volume_size: **defaulted**
      gluster_volume_size: **defaulted**
+```
 
 Other variables
 ---------------
