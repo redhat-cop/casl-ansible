@@ -121,6 +121,8 @@ etcd_root_volume: "{{ default_root_volume }}"
 infra_node_root_volume: "{{ default_root_volume }}"
 app_node_root_volume: "{{ default_root_volume }}"
 cns_node_root_volume: "{{ default_root_volume }}"
+## Temporary set for Docker and Gluster Storage block device names
+## Leaving here as a reference. Will be handle on a handle on a different way in the future
 #cns_node_glusterfs_volume: "{{ default_cns_volume }}"
 #docker_storage_block_device: "{{ default_docker_volume }}"
 
@@ -136,7 +138,7 @@ master_docker_volume_size: "{{ cloud_infrastructure.masters.docker_volume_size }
 etcd_docker_volume_size: "{{ cloud_infrastructure.etcdnodes.docker_volume_size  }}"
 infra_node_docker_volume_size: "{{ cloud_infrastructure.infranodes.docker_volume_size }}"
 app_node_docker_volume_size: "{{ cloud_infrastructure.appnodes.docker_volume_size }}"
-cns_nodedocker_volume_size: "{{ cloud_infrastructure.cnsnodes.docker_volume_size }}"
+cns_node_docker_volume_size: "{{ cloud_infrastructure.cnsnodes.docker_volume_size }}"
 
 ## Feed gluster volume device sizes for CNS instances from `cloud_infrastructure` list on the inventory
 cns_node_glusterfs_volume_size: "{{ cloud_infrastructure.cnsnodes.gluster_volume_size }}"

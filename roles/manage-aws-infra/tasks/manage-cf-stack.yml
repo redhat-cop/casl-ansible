@@ -18,3 +18,4 @@
       InfraInstanceType: "{{ infra_node_flavor }}"
       CNSInstanceType: "{{ cns_node_flavor }}"
       MasterHealthTarget: "TCP:{{ openshift_master_api_port }}"
+      MasterApiPort: "{{ openshift_master_api_port }}"

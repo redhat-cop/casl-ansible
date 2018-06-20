@@ -1,0 +1,1 @@
+glusterfs_devices: '[ "{{ cns_node_glusterfs_volume }}" ]'

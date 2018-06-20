@@ -3,3 +3,4 @@
 galaxy/
 *.pyc
 /.project
+.vscode

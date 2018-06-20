@@ -53,18 +53,21 @@ Parameters:
     Type: "String"
 Resources:
 {# Figure out the node types with more zones to create all the required SubNets per AZ #}
-  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_masters_zones.__len__() -%}
     {% set zones = aws_masters_zones -%}
-  {% elif (aws_etcd_zones.__len__() >= aws_masters_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+  {% elif (aws_etcd_zones.__len__() >= aws_masters_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_etcd_zones.__len__() -%}
     {% set zones = aws_etcd_zones -%}
-  {% elif (aws_appnodes_zones.__len__() >= aws_masters_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_infranodes_zones.__len__()) -%}
+  {% elif (aws_appnodes_zones.__len__() >= aws_masters_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_appnodes_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_appnodes_zones.__len__() -%}
     {% set zones = aws_appnodes_zones -%}
-  {% else -%}
+  {% elif (aws_infranodes_zones.__len__() >= aws_masters_zones.__len__()) and (aws_infranodes_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_infranodes_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_infranodes_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_infranodes_zones.__len__() -%}
     {% set zones = aws_infranodes_zones -%}
+  {% else -%}
+    {% set numzones = aws_cnsnodes_zones.__len__() -%}
+    {% set zones = aws_cnsnodes_zones -%}
   {% endif -%}
   {% if aws_create_vpc -%}
   VPC:

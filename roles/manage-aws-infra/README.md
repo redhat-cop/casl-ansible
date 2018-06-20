@@ -57,7 +57,7 @@ cloud_infrastructure: **mandatory**
      root_volume_size: **defaulted**
      docker_volume_size: **defaulted**
    cnsnodes: **not mandatory when CNS is not required**
-     count: **mandatory and with a fixed value of 3 when using CNS**
+     count: **mandatory when using CNS and with a fixed value of 3. If not using CNS this is defaulted to 0**
      flavor: **defaulted**
      zones:
      - **at least 1 zone specification is mandatory when using CNS**
