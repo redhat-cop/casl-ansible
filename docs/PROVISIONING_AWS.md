@@ -46,7 +46,7 @@ The following is just an example on how the `sample.aws.example.com` inventory c
 
 2) Edit `~/src/casl-ansible/inventory/sample.aws.example.com.d/inventory/group_vars/OSEv3.yml` for your AWS specific configuration. See comments in the file for more detailed information on how to fill these in.
 
-3) Run the `end-to-end` provisioning playbook via our [AWS installer container image](../images/installer-aws/). ** COMING SOON **
+3) Run the `end-to-end` provisioning playbook via our [AWS installer container image](../images/installer-aws/).
 
 ```
 docker run -u `id -u` \
