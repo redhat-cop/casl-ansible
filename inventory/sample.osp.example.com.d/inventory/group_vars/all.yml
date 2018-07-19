@@ -45,6 +45,10 @@ openstack_num_infra: 1
 # Cluster Environment ID to uniquely identify the environment
 env_id: "<REPLACE WITH VALID ENV ID - i.e: env1>"
 
+# Change default ports to use standard 443
+openshift_master_api_port: 443
+openshift_master_console_port: 443
+
 # DNS configurations
 # The 'dns_domain' will be used as the base domain for the deployment
 # The 'dns_nameservers' is a list of DNS resolvers the cluster should use

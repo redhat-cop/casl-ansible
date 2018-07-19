@@ -28,10 +28,6 @@ openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_hostname: "master-0.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
-# Change default ports to use standard 443
-openshift_master_api_port: 443
-openshift_master_console_port: 443
-
 # Enable the OpenStack cloud provider for i.e.: dynamic storage with Cinder
 openshift_cloudprovider_kind: openstack
 openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OCP_OSP_AUTH_URL') }}"
