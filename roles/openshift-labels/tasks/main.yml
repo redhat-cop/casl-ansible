@@ -1,0 +1,16 @@
+---
+
+- name: "Set defaults"
+  set_fact:
+    target_namespace: "{{ target_namespace | default('') }}"
+
+- name: "Apply label {{ label }} to object {{ target_object }}"
+  command: >
+    oc label --overwrite {{ target_object }} {{ target_name }} {{ label }} {{ target_namespace }}
+  when:
+  - target_object is defined
+  - target_object|trim != ''
+  - target_name is defined
+  - target_name|trim != ''
+  - label is defined
+  - label| trim != ''

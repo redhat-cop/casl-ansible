@@ -1,0 +1,31 @@
+---
+
+- name: "Lookup route url for {{ route }}"
+  shell: "oc get route {{ route }} -o jsonpath='{ .spec.host }'"
+  register: url
+  when:
+  - route is defined
+  - route|trim != ''
+
+- name: "Set default delay time"
+  set_fact:
+    delay: "{{ delay | default(5) }}"
+
+- name: "Set default number of retries"
+  set_fact:
+    retries: "{{ retries | default(3) }}"
+
+- name: "Wait for {{ protocol }}://{{ url.stdout }} to respond with status: {{ status }}"
+  uri:
+    url: "{{ protocol }}://{{ url.stdout }}"
+  register: rc
+  until: rc.status|trim|int == status|trim|int
+  retries: "{{ retries|int }}"
+  delay: "{{ delay|int }}"
+  when:
+  - url.stdout is defined
+  - url.stdout|trim != ''
+  - protocol is defined
+  - protocol|trim != ''
+  - status is defined
+  - status|trim != ''

@@ -1,0 +1,5 @@
+---
+
+target_namespace: ''
+delay: 10
+retries: 30

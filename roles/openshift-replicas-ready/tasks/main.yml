@@ -1,0 +1,22 @@
+---
+
+- name: Verify Required Parameters
+  fail:
+    msg: "'resource' and 'type' Parameters Must be Provided!"
+  when: type is not defined or type|trim == '' or resource is not defined or resource|trim == ''
+
+- name: "Set the target namespace option if supplied"
+  set_fact:
+    target_namespace: "-n {{ namespace }}"
+  when:
+  - namespace is defined
+  - namespace|trim != ''
+
+- name: Query Replica Status
+  command: >
+    oc get {{ type }}/{{ resource }} {{ target_namespace }} -o json
+  register: query_result
+  delay: "{{ delay }}"
+  retries: "{{ retries }}"
+  until: (query_result.stdout | from_json)['spec']['replicas'] | default("0") | int == (query_result.stdout | from_json)['status']['readyReplicas'] | default("0") | int
+  failed_when: (query_result.stdout | from_json)['spec']['replicas'] is not defined
