@@ -5,4 +5,6 @@ openshift_node_labels:
   
 openshift_node_open_ports:
   - service: "router stats port"
-    port: "1936/tcp"    
+    port: "1936/tcp"
+  - service: "prometheus node exporter"
+    port: "9100/tcp"    

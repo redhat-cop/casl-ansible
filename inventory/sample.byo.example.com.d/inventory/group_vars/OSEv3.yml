@@ -44,3 +44,10 @@ osm_cluster_network_cidr: 10.1.0.0/16
 
 openshift_hosted_prometheus_deploy: false
 openshift_cfme_install_app: false
+
+# Open required ports on IPTables for Prometheus Node Exporters & Router Statistics
+openshift_node_open_ports:
+  - service: "router stats port"
+    port: "1936/tcp"
+  - service: "prometheus node exporter"
+    port: "9100/tcp"
