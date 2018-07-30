@@ -1,0 +1,12 @@
+---
+
+- name: Setting target_namespace 
+  set_fact: 
+    target_namespace: "{{ target_namespace | default('') }}"
+
+- name:  Tagging as {{ img_tag }} on a namespace {{ target_namespace }}
+  command: >
+    oc tag {{ source_img }} {{ target_namespace }} {{ img_tag }}
+  when:
+  - img_tag is defined
+  - source_img is defined
