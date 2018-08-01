@@ -43,11 +43,11 @@ rhsm_server_hostname: 'sat-6.example.com'
 rhsm_org_id: 'CASL_ORG'
 rhsm_activationkey: 'casl-latest'
 
-# Uncomment the following to use RHSM username, password and optionally pool:
-#rhsm_username: ''
-#rhsm_password: ''
+# Uncomment the following to use RHSM username, password and optionally pool from environment variable:
+#rhsm_username: "{{ lookup('env', 'RHSM_USER' )}}"
+#rhsm_password: "{{ lookup('env', 'RHSM_PASSWD' )}}"
 # leave commented out if you want to `--auto-attach` a pool
-#rhsm_pool: ''
+#rhsm_pool: "{{ lookup('env', 'RHSM_POOL' )}}"
 
 # WARNING: By default the tools will update RPMs during provisioning. If any packages are
 # updated, the host(s) will reboot to ensure the correct versions are in use. This may

@@ -153,16 +153,12 @@ rhsm_repos:
 #rhsm_org_id: 'CASL_ORG'
 #rhsm_activationkey: 'casl-latest'
 
-# Use RHSM username, password - and optionally pool:
-# NOTE: use the -e option to specify on CLI instead of statically set here
-#rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
-#rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
-# ... or, alternatively, get RHSM required values from system environment variables
-#rhsm_username: "{{ lookup('env','RHN_USER') }}"
-#rhsm_password: "{{ lookup('env','RHN_PASSWD') }}"
+# Uncomment the following to use RHSM username, password from environment variable:
+#rhsm_username: "{{ lookup('env', 'RHSM_USER' )}}"
+#rhsm_password: "{{ lookup('env', 'RHSM_PASSWD' )}}"
 
 # leave commented out if you want to `--auto-attach` a pool
-#rhsm_pool: ''
+#rhsm_pool: "{{ lookup('env', 'RHSM_POOL' )}}"
 
 # WARNING: By default the tools will update RPMs during provisioning. If any packages are
 # updated, the host(s) will reboot to ensure the correct versions are in use. This may

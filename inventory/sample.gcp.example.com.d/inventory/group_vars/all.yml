@@ -65,11 +65,11 @@ rhsm_repos:
 # NOTE:
 # by default define the environment variables RHSM_USERNAME and RHSM_PASSWORD
 # use the -e option to specify on CLI instead of statically set here
-rhsm_username: "{{ lookup('env', 'RHSM_USERNAME' )}}"
-rhsm_password: "{{ lookup('env', 'RHSM_PASSWORD' )}}"
+rhsm_username: "{{ lookup('env', 'RHSM_USER' )}}"
+rhsm_password: "{{ lookup('env', 'RHSM_PASSWD' )}}"
 
 # leave commented out if you want to `--auto-attach` a pool
-#rhsm_pool: ''
+#rhsm_pool: "{{ lookup('env', 'RHSM_POOL' )}}"
 
 #google specific properties
 # NOTE:

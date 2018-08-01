@@ -20,12 +20,10 @@ rhsm_repos:
 
 
 # Use RHSM username, password and optionally pool:
-# NOTE: use the -e option to specify on CLI instead of statically set here
-rhsm_username: '<REPLACE WITH VALID RHSM USERNAME>'
-rhsm_password: '<REPLACE WITH VALID RHSM PASSWORD>'
-
+rhsm_username: "{{ lookup('env', 'RHSM_USER' )}}"
+rhsm_password: "{{ lookup('env', 'RHSM_PASSWD' )}}"
 # leave commented out if you want to `--auto-attach` a pool
-rhsm_pool: '<REPLACE WITH VALID RHSM PASSWORD>'
+rhsm_pool: "{{ lookup('env', 'RHSM_POOL' )}}"
 
 # Uncomment this and comment out the above to use Red Hat Satellite:
 #rhsm_server_hostname: 'sat-6.example.com'
