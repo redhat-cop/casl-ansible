@@ -3,7 +3,7 @@
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_master_cluster_method: native
-openshift_release: v3.9
+openshift_release: v3.10
 
 
 # HTPASSWD Identity Provider
@@ -12,21 +12,15 @@ openshift_master_identity_providers:
    'login': 'true'
    'challenge': 'true'
    'kind': 'HTPasswdPasswordIdentityProvider'
-   'filename': '/etc/origin/master/htpasswd'
+
 
 #this will create an admin/admin user   
 openshift_master_htpasswd_users:
   admin: $apr1$7aiANAYb$TOUYVUqnBqBlD5AQEIMYw1   
 
-openshift_hosted_router_selector: 'region=infra'
 openshift_hosted_manage_router: true
 
-openshift_hosted_registry_selector: 'region=infra'
 openshift_hosted_manage_registry: true
-
-
-osm_default_node_selector: 'region=primary'
-
 
 openshift_docker_options: "--log-driver=json-file --log-opt max-size=50m --log-opt max-file=100"
 

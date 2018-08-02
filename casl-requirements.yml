@@ -15,5 +15,5 @@
 
 # From 'openshift-ansible'
 - src: https://github.com/openshift/openshift-ansible
-  version: release-3.9
+  version: release-3.10
 

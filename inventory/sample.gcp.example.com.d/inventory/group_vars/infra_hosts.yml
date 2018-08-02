@@ -1,10 +1,10 @@
 ---
-
-openshift_node_labels: 
-  region: infra
   
 openshift_node_open_ports:
   - service: "router stats port"
     port: "1936/tcp"
   - service: "prometheus node exporter"
     port: "9100/tcp"    
+    
+    
+openshift_node_group_name: 'node-config-infra'     

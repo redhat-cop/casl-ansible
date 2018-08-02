@@ -1,5 +1,4 @@
 ---
 
-openshift_node_labels: 
-  region: master 
+openshift_node_group_name: 'node-config-master'
 
