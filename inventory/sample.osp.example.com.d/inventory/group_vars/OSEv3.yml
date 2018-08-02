@@ -55,11 +55,10 @@ openshift_metrics_duration: 2
 # HTPASSWD Identity Provider
 # - update to other types of auth providers if necessary (i.e: LDAP, OAuth, ...)
 openshift_master_identity_providers:
- - 'name': 'htpasswd_auth'
-   'login': 'true'
-   'challenge': 'true'
-   'kind': 'HTPasswdPasswordIdentityProvider'
-   'filename': '/etc/origin/master/htpasswd'
+- 'name': 'htpasswd_auth'
+  'login': 'true'
+  'challenge': 'true'
+  'kind': 'HTPasswdPasswordIdentityProvider'
 
 # Uncommented to automatically create a set of test users with the above
 # HTPASSWD Identity Provider
@@ -85,10 +84,3 @@ openshift_node_kubelet_args:
   - '80'
   image-gc-low-threshold:
   - '60'
-
-# Open required ports on IPTables for Prometheus Node Exporters & Router Statistics
-openshift_node_open_ports:
-  - service: "router stats port"
-    port: "1936/tcp"
-  - service: "prometheus node exporter"
-    port: "9100/tcp"

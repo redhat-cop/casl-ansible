@@ -1,8 +1,5 @@
 ---
 
-openshift_node_labels: 
-  region: primary
-
 openshift_node_kubelet_args:
   kube-reserved: 
   - cpu={{ ansible_processor_vcpus * 50 }}m

@@ -30,11 +30,14 @@ masters.s1-ha.osp.example.com
 
 [nodes:children]
 masters
-infra.s1-ha.osp.example.com
-nodes.s1-ha.osp.example.com
+infra_hosts
+app_hosts
 
 [infra_hosts:children]
 infra.s1-ha.osp.example.com
+
+[app_hosts:children]
+nodes.s1-ha.osp.example.com
 
 [lb.s1-ha.osp.example.com]
 [masters.s1-ha.osp.example.com]

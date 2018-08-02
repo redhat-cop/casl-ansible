@@ -27,11 +27,14 @@ etcd.sample.osp.example.com
 
 [nodes:children]
 masters
-infra.sample.osp.example.com
-nodes.sample.osp.example.com
+infra_hosts
+app_hosts
 
 [infra_hosts:children]
 infra.sample.osp.example.com
+
+[app_hosts:children]
+nodes.sample.osp.example.com
 
 [masters.sample.osp.example.com]
 [etcd.sample.osp.example.com]

@@ -15,10 +15,6 @@ openshift_master_identity_providers:
    'login': 'true'
    'challenge': 'true'
    'kind': 'HTPasswdPasswordIdentityProvider'
-   'filename': '/etc/origin/master/htpasswd'
-
-
-openshift_node_labels: "{{ openstack.metadata.node_labels}}"
 
 openshift_node_kubelet_args:
   minimum-container-ttl-duration:
