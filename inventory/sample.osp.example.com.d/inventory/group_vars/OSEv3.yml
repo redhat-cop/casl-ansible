@@ -13,7 +13,7 @@ openshift_node_labels: "{{ openstack.metadata.node_labels}}"
 # - Check the official OpenShift documentation for more details
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
-openshift_release: v3.6
+openshift_release: v3.10
 
 osm_default_node_selector: 'region=primary'
 osm_use_cockpit: true

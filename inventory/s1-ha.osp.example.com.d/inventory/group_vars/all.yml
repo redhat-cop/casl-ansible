@@ -12,7 +12,7 @@ hosting_infrastructure: openstack
 # OpenStack Provisioning Variables
 # use the "-e" option to set "openstack_ssh_public_key"
 #openstack_ssh_public_key:
-openstack_default_image_name: "rhel-guest-image-7.3-35.x86_64"
+openstack_default_image_name: "rhel-guest-image-7.5-1.x86_64"
 openstack_default_flavor: "m1.medium"
 openstack_external_network_name: "external"
 openstack_subnet_prefix: 192.168.99
@@ -33,7 +33,7 @@ docker_storage_block_device: "/dev/vdb"
 rhsm_register: True
 rhsm_repos:
   - "rhel-7-server-rpms"
-  - "rhel-7-server-ose-3.9-rpms"
+  - "rhel-7-server-ose-3.10-rpms"
   - "rhel-7-server-extras-rpms"
   - "rhel-7-fast-datapath-rpms"
   - "rhel-7-server-ansible-2.4-rpms"
