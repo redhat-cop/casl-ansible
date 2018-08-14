@@ -75,21 +75,31 @@ openshift_master_identity_providers:
 
 
 # OpenShift Node specific parameters
-openshift_node_kubelet_args:
-  minimum-container-ttl-duration:
-  - "10s"
-  maximum-dead-containers-per-container:
-  - "2"
-  maximum-dead-containers:
-  - "50"
-  pods-per-core:
-  - '10'
-  max-pods:
-  - '250'
-  image-gc-high-threshold:
-  - '80'
-  image-gc-low-threshold:
-  - '60'
+openshift_node_groups:
+  - name: node-config-master 
+    labels:
+      - 'node-role.kubernetes.io/master=true' 
+    edits: 
+    - key: kubeletArguments.kube-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+    - key: kubeletArguments.system-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]      
+  - name: node-config-infra
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+    edits:
+    - key: kubeletArguments.kube-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+    - key: kubeletArguments.system-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+    edits: 
+    - key: kubeletArguments.kube-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+    - key: kubeletArguments.system-reserved
+      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
 
 # Open required ports on IPTables for Prometheus Node Exporters & Router Statistics
 openshift_node_open_ports:

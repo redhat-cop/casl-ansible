@@ -1,8 +1,5 @@
 ---
 
-openshift_node_open_ports:
-  - service: "prometheus node exporter"
-    port: "9100/tcp"
+
 
 openshift_node_problem_detector_install: true
-openshift_node_group_name: 'node-config-compute' 

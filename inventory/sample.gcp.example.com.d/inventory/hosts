@@ -14,8 +14,11 @@ tag_env1-master
 
 [nodes:children]
 masters
-tag_env1-appnode
+app-host
 infra_hosts
+
+[app_hosts:children]
+tag_env1-appnode
 
 [infra_hosts:children]
 tag_env1-infranode
