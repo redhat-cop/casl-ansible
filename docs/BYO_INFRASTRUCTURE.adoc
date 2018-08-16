@@ -32,6 +32,7 @@ While the link:../inventory/sample.byo.example.com.d/[sample.byo.example.com] sa
 - The `ansible_user: <your ssh key user>` variable must match the user you will use to log into the cluster machines
 - You must fill in the `rhsm_` variables to match your Red Hat Subscription Manager account. You can do this one of two ways:
   - Provide your Red Hat Account credentials and pool id:
+- Each host will require a `ansible_host` varible to be set manually equal to the host's FQDN or ip address.
 +
 ----
 # Use RHSM username, password and optionally pool:

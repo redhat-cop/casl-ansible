@@ -7,10 +7,14 @@ nodes
 etcd
 
 [masters]
-openshift-master-[1:3].c1-ocp.myorg.com
+openshift-master-1.c1-ocp.myorg.com ansible_host=openshift-master-1.c1-ocp.myorg.com
+openshift-master-2.c1-ocp.myorg.com ansible_host=openshift-master-2.c1-ocp.myorg.com
+openshift-master-3.c1-ocp.myorg.com ansible_host=openshift-master-3.c1-ocp.myorg.com
 
 [etcd]
-openshift-master-[1:3].c1-ocp.myorg.com
+openshift-master-1.c1-ocp.myorg.com ansible_host=openshift-master-1.c1-ocp.myorg.com
+openshift-master-2.c1-ocp.myorg.com ansible_host=openshift-master-2.c1-ocp.myorg.com
+openshift-master-3.c1-ocp.myorg.com ansible_host=openshift-master-3.c1-ocp.myorg.com
 
 [nodes:children]
 masters
@@ -18,8 +22,11 @@ infra_hosts
 app_hosts
 
 [infra_hosts:children]
-openshift-infranode-[1:3].c1-ocp.myorg.com
+openshift-infranode-1.c1-ocp.myorg.com ansible_host=openshift-infranode-1.c1-ocp.myorg.com
+openshift-infranode-2.c1-ocp.myorg.com ansible_host=openshift-infranode-2.c1-ocp.myorg.com
+openshift-infranode-3.c1-ocp.myorg.com ansible_host=openshift-infranode-3.c1-ocp.myorg.com
+
 
 [app_hosts:children]
-openshift-appnode-1.c1-ocp.myorg.com
-openshift-appnode-2.c1-ocp.myorg.com
+openshift-appnode-1.c1-ocp.myorg.com ansible_host=openshift-appnode-1.c1-ocp.myorg.com
+openshift-appnode-2.c1-ocp.myorg.com ansible_host=openshift-appnode-2.c1-ocp.myorg.com
