@@ -6,9 +6,6 @@ ansible_user: ec2-user
 # Should Ansible use "become" to gain elevated privileges (i.e.: root)
 ansible_become: true
 
-# Node Labels to use with the CASL tools
-openshift_node_labels: "{{ ec2_tag_node_labels }}"
-
 # CNS relative vars - Uncommented to automatically deploy CNS - 'cns_deploy' from all.yml must be 'true' in that case
 # openshift_storage_glusterfs_namespace: glusterfs
 # openshift_storage_glusterfs_name: cns
@@ -27,7 +24,7 @@ openshift_deployment_type: openshift-enterprise
 containerized: false
 
 ### OCP version to install
-openshift_release: v3.9
+openshift_release: v3.10
 
 osm_default_node_selector: 'region=primary'
 osm_use_cockpit: true
@@ -63,7 +60,6 @@ openshift_master_identity_providers:
    'login': 'true'
    'challenge': 'true'
    'kind': 'HTPasswdPasswordIdentityProvider'
-   'filename': '/etc/origin/master/htpasswd'
 
 # Uncommented to automatically create a set of test users with the above
 # HTPASSWD Identity Provider
@@ -72,7 +68,6 @@ openshift_master_identity_providers:
 #  prefix: 'rdu-user'
 #  passwd_file: '/etc/origin/master/htpasswd'
 #  password: 'rdu-sample'
-
 
 # OpenShift Node specific parameters
 openshift_node_groups:
@@ -100,10 +95,3 @@ openshift_node_groups:
       value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
     - key: kubeletArguments.system-reserved
       value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
-
-# Open required ports on IPTables for Prometheus Node Exporters & Router Statistics
-openshift_node_open_ports:
-  - service: "router stats port"
-    port: "1936/tcp"
-  - service: "prometheus node exporter"
-    port: "9100/tcp"

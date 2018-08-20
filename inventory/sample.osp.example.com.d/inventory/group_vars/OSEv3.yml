@@ -6,9 +6,6 @@ ansible_user: openshift
 # Should Ansible use "become" to gain elevated privileges (i.e.: root)
 ansible_become: True
 
-# Node Labels to use with the CASL tools
-openshift_node_labels: "{{ openstack.metadata.node_labels}}"
-
 # OpenShift Specific Configuration Options
 # - Check the official OpenShift documentation for more details
 deployment_type: openshift-enterprise
