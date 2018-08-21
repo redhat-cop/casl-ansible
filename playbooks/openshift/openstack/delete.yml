@@ -9,6 +9,6 @@
       stack_state: 'absent'
   post_tasks:
     - name: Delete auto provisioned registry
-      os_volume: 
+      os_volume:
         display_name: "{{ full_dns_domain }}-registry"
         state: 'absent'
