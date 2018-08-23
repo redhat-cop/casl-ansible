@@ -12,3 +12,6 @@
 - import_playbook: gcp/provision.yml
   when: hosting_infrastructure == "gcp"
 
+# Provision Libvirt Instances
+- import_playbook: libvirt/provision.yml
+  when: hosting_infrastructure == "libvirt"
