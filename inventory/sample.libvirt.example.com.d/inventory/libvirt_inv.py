@@ -1,0 +1,1 @@
+../../scripts/libvirt_inv.py
