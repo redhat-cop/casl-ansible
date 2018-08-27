@@ -14,9 +14,9 @@ openshift_master_identity_providers:
    'kind': 'HTPasswdPasswordIdentityProvider'
 
 
-#this will create an admin/admin user   
+#this will create an admin/admin user
 openshift_master_htpasswd_users:
-  admin: $apr1$7aiANAYb$TOUYVUqnBqBlD5AQEIMYw1   
+  admin: $apr1$7aiANAYb$TOUYVUqnBqBlD5AQEIMYw1
 
 openshift_hosted_manage_router: true
 
@@ -30,40 +30,33 @@ os_sdn_network_plugin_name: 'redhat/openshift-ovs-networkpolicy'
 #os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
 os_firewall_use_firewalld: true
 osm_cluster_network_cidr: 10.1.0.0/16
-  
+
 openshift_enable_service_catalog: false
 openshift_hosted_prometheus_deploy: false
 openshift_cfme_install_app: false
 
 openshift_node_groups:
-  - name: node-config-master 
-    labels:
-    - 'node-role.kubernetes.io/master=true' 
-    edits: 
-    - key: kubeletArguments.kube-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
-    - key: kubeletArguments.system-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]      
-  - name: node-config-infra
-    labels:
-    - 'node-role.kubernetes.io/infra=true'
-    edits:
-    - key: kubeletArguments.kube-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
-    - key: kubeletArguments.system-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
-  - name: node-config-compute
-    labels:
-    - 'node-role.kubernetes.io/compute=true'
-    edits: 
-    - key: kubeletArguments.kube-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
-    - key: kubeletArguments.system-reserved
-      value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
-
-
-
-
-
-
-
+- name: node-config-master
+  labels:
+  - 'node-role.kubernetes.io/master=true'
+  edits:
+  - key: kubeletArguments.kube-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+  - key: kubeletArguments.system-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
+- name: node-config-infra
+  labels:
+  - 'node-role.kubernetes.io/infra=true'
+  edits:
+  - key: kubeletArguments.kube-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+  - key: kubeletArguments.system-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
+- name: node-config-compute
+  labels:
+  - 'node-role.kubernetes.io/compute=true'
+  edits:
+  - key: kubeletArguments.kube-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 50 }}M' ]
+  - key: kubeletArguments.system-reserved
+    value: [ 'cpu={{ ansible_processor_vcpus * 50 }}m', 'memory={{ ansible_processor_vcpus * 100 }}M' ]
