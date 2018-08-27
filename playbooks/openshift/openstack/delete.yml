@@ -2,13 +2,16 @@
 
 - hosts: localhost
   pre_tasks:
-    - import_tasks: ../prep-inventory.yml
-  roles:
-    - role: ../../../galaxy/openshift-ansible-contrib/roles/openstack-stack
-      stack_name: "{{ full_dns_domain }}"
-      stack_state: 'absent'
+  - import_tasks: ../prep-inventory.yml
+  tasks:
+  - import_role:
+      name: ../../../galaxy/openshift-ansible/roles/openshift_openstack
+      tasks_from: provision.yml
+    vars:
+      openshift_openstack_stack_name: "{{ env_id }}.{{ dns_domain }}"
+      openshift_openstack_stack_state: 'absent'
   post_tasks:
-    - name: Delete auto provisioned registry
-      os_volume:
-        display_name: "{{ full_dns_domain }}-registry"
-        state: 'absent'
+  - name: Delete auto provisioned registry
+    os_volume:
+      display_name: "{{ full_dns_domain }}-registry"
+      state: 'absent'

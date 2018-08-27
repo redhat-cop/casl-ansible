@@ -1,0 +1,28 @@
+---
+
+- name: Check if 'oc' command exists
+  shell: which oc &>/dev/null
+  register: oc_exists
+  ignore_errors: true
+
+- block:
+  - name: Get all projects
+    command: >
+      oc get projects -o jsonpath='{ .items[*].metadata.name }'
+    register: projects
+ 
+  - name: Delete all persistent volume claims in cluster
+    command: >
+      oc delete pvc --all -n {{ item }}
+    ignore_errors: yes
+    with_items:
+    - "{{ projects.stdout.split(' ') }}"
+
+  - name: Delete all persistent volumes in cluster
+    command: >
+      oc delete pvc --all
+    ignore_errors: yes
+
+  # when-check for 'block' section
+  when:
+  - oc_exists.rc == 0 

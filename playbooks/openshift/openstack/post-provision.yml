@@ -3,30 +3,31 @@
 # Assign hostnames
 - hosts: cluster_hosts
   pre_tasks:
-    - import_tasks: ../prep-inventory.yml
-    - import_tasks: prep-env.yml
+  - import_tasks: ../prep-inventory.yml
+  - import_tasks: prep-env.yml
   tasks:
-    - name: "Set required inventory variables based on the dynamic inventory"
-      set_fact:
-        private_v4: "{{ openstack.private_v4 }}"
-        public_v4: "{{ openstack.public_v4 }}"
-        openshift_hostname: "{{ inventory_hostname }}"
-        openshift_public_hostname: "{{ inventory_hostname }}"
+  - name: "Set required inventory variables based on the dynamic inventory"
+    set_fact:
+      private_v4: "{{ openstack.private_v4 }}"
+      public_v4: "{{ openstack.public_v4 }}"
+      openshift_hostname: "{{ inventory_hostname }}"
+      openshift_public_hostname: "{{ inventory_hostname }}"
   roles:
-    - role: ../../../galaxy/openshift-ansible-contrib/roles/hostnames
+  - role: ../../../galaxy/infra-ansible/roles/config-hostname
+    dns_domain: "{{ full_dns_domain }}"
 
 # Build and process DNS Records
 - hosts: localhost
   pre_tasks:
-    - import_tasks: ../prep-inventory.yml
-    - import_tasks: dns.yml
+  - import_tasks: ../prep-inventory.yml
+  - import_tasks: dns.yml
   roles:
-    - role: ../../../galaxy/infra-ansible/roles/dns
+  - role: ../../../galaxy/infra-ansible/roles/dns
 
 # provision cinder volume
 - import_playbook: cinder-registry.yml
   when:
-    - openshift_hosted_registry_storage_kind is defined
-    - openshift_hosted_registry_storage_kind == "openstack"
-    - openshift_hosted_registry_storage_openstack_volumeID is not defined
+  - openshift_hosted_registry_storage_kind is defined
+  - openshift_hosted_registry_storage_kind == "openstack"
+  - openshift_hosted_registry_storage_openstack_volumeID is not defined
   

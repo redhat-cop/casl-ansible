@@ -1,9 +1,5 @@
 ---
 
-#- hosts: seed-hosts
-#  roles:
-#  - ../../galaxy/openshift-ansible-contrib/roles/openshift-pv-cleanup
-
 - hosts: localhost
   gather_facts: no
   tasks:
@@ -14,7 +10,11 @@
     fail:
       msg: "Abort task: delete '{{ env_id }}' cluster"
     when:
-      - not delete_cluster.user_input | default('no') | bool
+    - not delete_cluster.user_input | default('no') | bool
+
+- hosts: seed-hosts
+  roles:
+  - openshift-pv-cleanup
 
 - import_playbook: openstack/delete.yml
   when:
