@@ -24,7 +24,6 @@ openshift_master_identity_providers:
    'login': 'true'
    'challenge': 'true'
    'kind': 'HTPasswdPasswordIdentityProvider'
-   'filename': '/etc/origin/master/htpasswd'
 
 #this will create an admin/admin user
 openshift_master_htpasswd_users:
