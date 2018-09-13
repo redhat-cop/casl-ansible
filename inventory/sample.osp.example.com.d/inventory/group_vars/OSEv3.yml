@@ -12,7 +12,7 @@ deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_release: v3.10
 
-osm_default_node_selector: 'region=primary'
+osm_default_node_selector: 'node-role.kubernetes.io/compute=true'
 osm_use_cockpit: true
 osm_cockpit_plugins:
 - 'cockpit-kubernetes'
