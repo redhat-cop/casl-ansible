@@ -81,6 +81,7 @@ cloud_infrastructure:
 ## Temporary set for Docker and Gluster Storage block device names
 ## NOTE: do not modify this info. Will be handle on a handle on a different way in the future
 docker_storage_block_device: '/dev/xvdb'
+docker_storage_mount_point: '/var/lib/containers/docker'
 cns_node_glusterfs_volume: '/dev/xvdg'
 
 # DNS configurations

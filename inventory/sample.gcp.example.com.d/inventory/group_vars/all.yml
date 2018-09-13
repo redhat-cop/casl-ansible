@@ -51,6 +51,7 @@ cloud_infrastructure:
      docker_volume_size: 20
 
 # docker_storage_block_device: "/dev/vdb"
+# docker_storage_mount_point: "/var/lib/containers/docker"
 
 # Subscription Management Details
 rhsm_register: True

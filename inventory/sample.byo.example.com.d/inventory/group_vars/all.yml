@@ -9,6 +9,7 @@ ansible_become: true
 dns_domain: "myorg.com"
 
 # docker_storage_block_device: "/dev/vdb"
+# docker_storage_mount_point: "/var/lib/containers/docker"
 
 # Subscription Management Details
 rhsm_register: True

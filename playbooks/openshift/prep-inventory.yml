@@ -49,7 +49,7 @@
       docker_data_size: "95%VG"
       docker_dm_basesize: "3G"
       container_root_lv_name: "docker_lv"
-      container_root_lv_mount_path: "/var/lib/docker"
+      container_root_lv_mount_path: "{{ docker_storage_mount_point | default('/var/lib/containers/docker') }}" 
   when:
     - openshift_openstack_container_storage_setup is undefined
 

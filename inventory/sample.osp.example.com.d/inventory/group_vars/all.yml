@@ -84,6 +84,7 @@ nsupdate_config:
 # Docker Storage configuration variables
 docker_volume_size: "5"
 docker_storage_block_device: "/dev/vdb"
+docker_storage_mount_point: "/var/lib/containers/docker"
 
 
 # Cinder Registry Storage - example 1
