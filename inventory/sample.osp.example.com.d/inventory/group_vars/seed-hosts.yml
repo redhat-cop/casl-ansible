@@ -1,44 +1,23 @@
 ---
 
+#
 # This is an example inventory for OpenShift cluster content that will be
 # automatically loaded up by the 'openshift-applier' at the end of the
 # OpenShift Cluster provisioning
+#
+# Please check out the OpenShift Applier repo for more details:
+#   https://github.com/redhat-cop/openshift-applier
+# 
 
 openshift_cluster_content:
-- galaxy_requirements: "{{ inventory_dir }}/../files/galaxy_requirements.yml"
-- object: projectrequest
-  content:
-  - name: "my-cakephp-spaces"
-    file: "{{ inventory_dir }}/../files/cakephp/ProjectRequest/my-cakephp-spaces.yml"
-    file_action: create
-  - name: "projectrequest-test1"
-    template: "{{ inventory_dir }}/../files/ProjectRequest/template.yml"
-    params: "{{ inventory_dir }}/../files/ProjectRequest/test1.param"
-    template_action: create
-  - name: "projectrequest-test2"
-    template: "{{ inventory_dir }}/../files/ProjectRequest/template.yml"
-    params: "{{ inventory_dir }}/../files/ProjectRequest/test2.param"
-    template_action: create
 - object: namespace
   content:
   - name: "cakephp-development"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/development.yml"
-    post_steps:
-    - role: casl-ansible/roles/openshift-labels
-      vars:
-        target_object: "namespace"
-        target_name: "cakephp-dev"
-        label: "openshift-applier=true"
   - name: "cakephp-stage"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/stage.yml"
   - name: "cakephp-production"
     file: "{{ inventory_dir }}/../files/cakephp/namespace/production.yml"
-  - name: "MyApp-development"
-    file: "https://raw.githubusercontent.com/redhat-cop/cluster-lifecycle/inception-poc/namespaces/myapp-dev.yml"
-- object: policy
-  content:
-  - name: policy directory
-    file: "{{ inventory_dir }}/../files/policy/"
 - object: builds
   content:
   - name: "cakephp"

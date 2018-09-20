@@ -1,9 +1,0 @@
-kind: List
-apiVersion: v1
-items:
-- apiVersion: storage.k8s.io/v1beta1
-  kind: StorageClass
-  metadata:
-    name: local-pod
-  provisioner: local-pod/nfs
-
