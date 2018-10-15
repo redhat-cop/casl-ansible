@@ -72,4 +72,4 @@
     - set_fact:
        glusterfs_devices:
          - "{{ hostvars['localhost'].cns_node_glusterfs_volume }}"
-
+      when: glusterfs_devices is not defined or (glusterfs_devices | default([]) | length == 0)
