@@ -27,6 +27,10 @@ Parameters:
     Default: "m4.xlarge"
     Description: "The instance type to be used"
     Type: "String"
+  BastionInstanceType:
+	  Default: "t2.medium"
+		Description: "The instance type to be used"
+		Type: "String"
   EtcdInstanceType:
     Default: "m4.xlarge"
     Description: "The instance type to be used"
@@ -232,6 +236,25 @@ Resources:
       Tags:
       - Key: 'Name'
         Value: '{{ env_id }}'
+  bastionsg:
+	  Type: AWS::EC2::SecurityGroup
+		Properties:
+		  GroupName: ocp-bastion-node
+			GroupDescription: Bastion Node Security Group
+			VpcId: !Ref VPC
+			SecurityGroupIngress:
+			- IpProtocol: tcp
+			  FromPort: '80'
+				ToPort: '80'
+				CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+			  FromPort: '443'
+				ToPort: '443'
+				CidrIp: 0.0.0.0/0
+		  SecurityGroupEgress:
+			- IpProtocol: tcp
+			  FromPort: '0'
+				ToPort: '65535'
   nodesg:
     Type: AWS::EC2::SecurityGroup
     Properties:
