@@ -20,11 +20,11 @@ The CASL Ansible tools provide everything needed to automatically provision an O
 
 === Provisioning Procedures
 * link:./docs/PROVISIONING_OPENSTACK.md[Provisioning an OpenShift Cluster on OpenStack]
-* link:./docs/PROVISIONING_AWS.md[Provisioning an OpenShift Cluster on AWS]
+* link:./docs/PROVISIONING_AWS.adoc[Provisioning an OpenShift Cluster on AWS]
 * link:./docs/PROVISIONING_GCP.md[Provisioning an OpenShift Cluster on GCP]
 
 == Provisioning An OpenShift Cluster with BYO Infrastructure
-The CASL Ansible tools also enable you to provision an OpenShift cluster on static infrastructure where provisioning is not fully automated. More details are available in the link:./docs/BYO_INFRASTRUCTURE.adoc[Bring Your Own Infrastructure guide]. 
+The CASL Ansible tools also enable you to provision an OpenShift cluster on static infrastructure where provisioning is not fully automated. More details are available in the link:./docs/BYO_INFRASTRUCTURE.adoc[Bring Your Own Infrastructure guide].
 
 == Additional Resources
 
