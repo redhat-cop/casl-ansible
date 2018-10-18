@@ -1,0 +1,30 @@
+= AWS Policy Assignment
+
+AWS Policy assignment can be pain. While perhaps not a minimalist  solution, here is an example set of policies that will allow provisioning to function.
+
+* link:https://console.aws.amazon.com/iam/home?#policies/arn:aws:iam::aws:policy/AmazonEC2FullAccess[EC2FullAccess]
+* link:https://console.aws.amazon.com/iam/home?#policies/arn:aws:iam::aws:policy/AmazonVPCFullAccess[VPCFullAccess]
+* link:https://console.aws.amazon.com/iam/home?#policies/arn:aws:iam::aws:policy/AmazonRoute53FullAccess[Route53FullAccess]
+
+Additionally, the following custom policy must be created for provisioning of CloudFormation stacks.
+
+[source,json]
+----
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1535729505000",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:*"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:us-east-2:[Insert ARN]:stack/*"
+      ]
+    }
+  ]
+}
+----
+
+NOTE: Make sure the region matches your target region above and that you insert an ARN that matches your account.
