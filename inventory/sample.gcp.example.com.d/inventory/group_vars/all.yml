@@ -97,8 +97,12 @@ openshift_master_default_subdomain: apps.{{ env_id }}.{{ dns_domain }}
 #a unique prefix (unsure for what is used)
 openshift_gcp_prefix: "{{ env_id }}"
 
-#your openshift goocle project
+#your openshift google project
 openshift_gcp_project: "{{ project_id }}"
 
 #whether your deployment is multizone.
 openshift_gcp_multizone: true
+
+#gcp network name in which OCP will be deployed
+openshift_gcp_network_name: default
+

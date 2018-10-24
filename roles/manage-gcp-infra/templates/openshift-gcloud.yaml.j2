@@ -43,7 +43,7 @@ resources:
         - https://www.googleapis.com/auth/servicecontrol
       tags:
         items:
-        - {{ gcloud_env }}
+        - {{ gcloud_env }}ocp
         - {{ gcloud_env }}-master
         - {{ gcloud_env }}-node
   type: compute.v1.instanceTemplate
@@ -88,7 +88,7 @@ resources:
         - https://www.googleapis.com/auth/servicecontrol
       tags:
         items:
-        - {{ gcloud_env }}
+        - {{ gcloud_env }}ocp
         - {{ gcloud_env }}-appnode
         - {{ gcloud_env }}-node
   type: compute.v1.instanceTemplate
@@ -133,7 +133,7 @@ resources:
         - https://www.googleapis.com/auth/servicecontrol
       tags:
         items:
-        - {{ gcloud_env }}
+        - {{ gcloud_env }}ocp
         - {{ gcloud_env }}-infranode
         - {{ gcloud_env }}-node
   type: compute.v1.instanceTemplate    
