@@ -3,7 +3,7 @@
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_master_cluster_method: native
-openshift_release: v3.10
+openshift_release: v3.11
 
 # openshift_master_cluster_public_hostname must be something like:
 #   <prefix>.{{ env_id }}.{{ dns_domain }}

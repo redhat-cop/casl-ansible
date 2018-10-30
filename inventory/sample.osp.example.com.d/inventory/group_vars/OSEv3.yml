@@ -10,7 +10,7 @@ ansible_become: True
 # - Check the official OpenShift documentation for more details
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
-openshift_release: v3.10
+openshift_release: v3.11
 
 osm_default_node_selector: 'node-role.kubernetes.io/compute=true'
 osm_use_cockpit: true

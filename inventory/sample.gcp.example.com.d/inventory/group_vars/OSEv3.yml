@@ -3,7 +3,7 @@
 deployment_type: openshift-enterprise
 openshift_deployment_type: openshift-enterprise
 openshift_master_cluster_method: native
-openshift_release: v3.10
+openshift_release: v3.11
 
 
 # HTPASSWD Identity Provider

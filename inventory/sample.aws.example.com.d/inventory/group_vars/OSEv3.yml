@@ -24,7 +24,7 @@ openshift_deployment_type: openshift-enterprise
 containerized: false
 
 ### OCP version to install
-openshift_release: v3.10
+openshift_release: v3.11
 
 osm_default_node_selector: 'node-role.kubernetes.io/compute=true'
 osm_use_cockpit: true
