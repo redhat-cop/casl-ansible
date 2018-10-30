@@ -1,5 +1,4 @@
 FROM openshift/origin-ansible
-MAINTAINER Andrew Block “andrew.block@redhat.com”
 
 USER root
 
@@ -16,6 +15,7 @@ RUN \
       python-swiftclient python-troveclient \
       python-openstackclient python-dns \
       python2-pyOpenSSL python-shade; \
+      python-boto3; \
       yum clean all; \
       rm -rf /var/cache/yum; \
     rpm -e --nodeps python-ipaddress PyYAML; \
@@ -24,7 +24,7 @@ RUN \
       "eventlet!=0.18.3,!=0.20.1,<0.21.0,>=0.18.2" \
       openstacksdk
 
-COPY images/installer-openstack/root /
+COPY images/casl-ansible/root /
 
 RUN /usr/local/bin/user_setup_casl
 

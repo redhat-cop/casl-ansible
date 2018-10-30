@@ -1,5 +1,0 @@
-#!/bin/bash
-
-source /usr/local/bin/aws-keys
-
-source /usr/local/bin/entrypoint
