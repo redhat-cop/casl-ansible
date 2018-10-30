@@ -25,6 +25,12 @@ openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_hostname: "master-0.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
+# Registry URL & Credentials
+# For more info: https://access.redhat.com/terms-based-registry/
+oreg_url: 'registry.redhat.io/openshift3/ose-${component}:${version}'
+#oreg_auth_user: "{{ lookup('env', 'OREG_AUTH_USER' )}}"
+#oreg_auth_password: "{{ lookup('env', 'OREG_AUTH_PASSWORD' )}}"
+
 # Enable the OpenStack cloud provider for i.e.: dynamic storage with Cinder
 openshift_cloudprovider_kind: openstack
 openshift_cloudprovider_openstack_auth_url: "{{ lookup('env','OCP_OSP_AUTH_URL') }}"

@@ -40,6 +40,11 @@ openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_hostname: "console.internal.{{ env_id }}.{{ dns_domain }}"
 openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
+# Registry URL & Credentials
+# For more info: https://access.redhat.com/terms-based-registry/
+oreg_url: 'registry.redhat.io/openshift3/ose-${component}:${version}'
+#oreg_auth_user: "{{ lookup('env', 'OREG_AUTH_USER' )}}"
+#oreg_auth_password: "{{ lookup('env', 'OREG_AUTH_PASSWORD' )}}"
 
 # Deploy Logging with dynamic storage
 #openshift_logging_install_logging: false
