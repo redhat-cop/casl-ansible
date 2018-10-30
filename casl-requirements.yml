@@ -8,9 +8,9 @@
 
 # From 'openshift-applier'
 - src: https://github.com/redhat-cop/openshift-applier
-  version: v2.0.2
+  version: v2.0.4
 
 # From 'openshift-ansible'
 - src: https://github.com/openshift/openshift-ansible
-  version: release-3.10
+  version: release-3.11
 
