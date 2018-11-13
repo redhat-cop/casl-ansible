@@ -133,7 +133,7 @@ The format of the VM names will be `<prefix>-<ordinal>-<env_id>`.
 Notice that we bring the `openshift_master_cluster_public_hostname`, `openshift_master_cluster_hostname`, `openshift_master_default_subdomain` from the OSEv3 group (vars) to the all group (vars). You must not redefine those properties in the OSEv3 group. 
 Also you must not specify the `docker_storage_block_device`.
 
-Ad the other standard casl properties in the all.yaml group_vars, and anything OpenShift related properties to the OSEv3 group_vars definition.
+Add the other standard casl properties in the all.yaml group_vars, and anything OpenShift related properties to the OSEv3 group_vars definition.
 
 For the host layout see the example and replace the suffixes with your `env_id`.
 
