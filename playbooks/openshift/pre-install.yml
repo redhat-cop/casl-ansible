@@ -26,6 +26,13 @@
         ansible_become: True
       when:
         - rhsm_register
+    # NOTE: This shall be before the container storage, so the next step
+    #       can use all the remaining storage.
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/config-lvm
+      vars:
+        ansible_become: True
+      when: lvm_entries is defined
     # NOTE: this "openstack" role is generic and can be used across all cloud
     #       providers. We should work with the `openshift-ansible` team to get
     #       this corrected - i.e.: made generic.
