@@ -1,9 +1,5 @@
 ---
 
-# Post-Install tasks for specific providers
-- import_playbook: gcp/post-install.yml
-  when: hosting_infrastructure == "gcp"
-
 - hosts: cluster_hosts
   roles:
     - role: sync-keys

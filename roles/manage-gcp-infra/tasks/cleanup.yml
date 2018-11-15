@@ -63,13 +63,23 @@
     state: absent
   when: (infranode_external.stdout | from_json)       
 
-- name: check if google deployment exists
+- name: Verify google deployment exists
   shell: gcloud deployment-manager deployments list 2>&1 | grep openshift-{{ gcloud_env }}
   register: deployment
   failed_when: deployment.rc|int > 1
   changed_when: false
     
-- name: delete infrastructure
-  shell: gcloud deployment-manager deployments delete openshift-{{ gcloud_env }} --quiet
-  when: deployment.stdout       
-
+- name: Destroy GCP Infrastructure
+  block:
+    - name: Determine GCP bucket size
+      shell: gsutil ls -l gs://{{ google_registry_bucket_name }}
+      register: gs_file_count
+      failed_when: gs_file_count.rc|int > 1
+    - name: Empty GCP bucket if necessary
+      shell: gsutil rm gs://{{ google_registry_bucket_name }}/**
+      when:
+      - gs_file_count.stdout
+    - name: Delete GCP nodes and storage bucket
+      shell: gcloud deployment-manager deployments delete openshift-{{ gcloud_env }} --quiet
+  when:
+  - deployment.stdout
