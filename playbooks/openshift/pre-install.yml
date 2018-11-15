@@ -4,10 +4,12 @@
 # OpenShift Pre-Requisites
 
 # Ensure the 'docker_storage_block_device' is correctly populated for all nodes
+# if not yet defined
 - hosts: nodes
   tasks:
     - set_fact:
         docker_storage_block_device: "{{ hostvars['localhost'].docker_storage_block_device }}"
+      when: docker_storage_block_device is undefined
 
 #
 # - subscribe hosts
