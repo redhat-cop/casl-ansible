@@ -15,6 +15,10 @@ Before getting started following this guide, you'll need the following:
   ** **NOTE:** If you plan to run docker as yourself (non-root), your username must be added to the `docker` user group.
 * Ansible 2.5 or later installed
   ** link:https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html[See Installation Guide]
+* Although not strictly necessary, it is very handy to have the aws cli installed
+  ** `pip install awscli --upgrade --user`
+  ** link:https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html[See Documentation]
+
 [source,bash]
 ----
 cd ~/src/
@@ -59,6 +63,8 @@ The following is just an example on how the `sample.aws.example.com` inventory c
   ** Set the `env_id` variable in `group_vars/all.yml` to match.
 3. Edit `group_vars/all.yml` to match your AWS environment. See comments in the file for more detailed information on how to fill these in.
 4. Edit `group_vars/OSEv3.yml` for OpenShift related configuration. See comments in the file for more detailed information on how to fill these in.
+
+NOTE: To know the available AZs of the region you are deploying in, you can run this aws cli command: `aws ec2 describe-availability-zones --region <REPLACE WITH AWS REGION>`  
 
 Run the `end-to-end` provisioning playbook via our link:../images/installer-aws/[AWS installer container image].
 
@@ -105,10 +111,13 @@ A cluster can be decommissioned/deleted by re-using the same inventory with the 
 
 [source,bash]
 ----
-docker run -u `id -u` \
+docker run -it -u `id -u` \
       -v $HOME/.ssh/id_rsa:/opt/app-root/src/.ssh/id_rsa:Z \
       -v $HOME/src/:/tmp/src:Z \
+      -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+      -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.casl.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/delete-cluster.yml \
+      -e OPTS="-e aws_key_name=my-key-name" -t \
       redhatcop/installer-aws
 ----
