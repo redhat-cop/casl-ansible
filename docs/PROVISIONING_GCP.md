@@ -208,7 +208,7 @@ ansible-playbook -i <inventory_dir> --private-key=<private key for $gcp_user> <c
 
 
 # Cleaning up
-In order to clean up run this plyabook
+In order to clean up run this playbook
 ```
 ansible-playbook -i <inventory_dir> --private-key=<private key for $gcp_user> <casl_ansible_dir>/playbooks/openshift/delete-cluster.yaml
 ```
