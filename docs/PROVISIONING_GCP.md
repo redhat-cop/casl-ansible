@@ -46,7 +46,7 @@ You also have to define a user for this key. We will refer to this user hencefor
 
 Create a service account by going [here](https://console.cloud.google.com/iam-admin/serviceaccounts).
 Your service account should have the `editor` role.
-Download the json file to a secure location. We will refer to that loaction as `$gcp_sa_json`.
+Download the json file to a secure location. We will refer to that location as `$gcp_sa_json`.
 Take note of the service account id (it will look like an email address). We will refer to it as `$gcp_sa_id`.
 
 ## Ansible host preparation
