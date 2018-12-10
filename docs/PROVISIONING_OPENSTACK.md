@@ -59,7 +59,7 @@ openshift_hosted_registry_storage_kind: openstack
 
 4) Create public and private DNS Zones. (more instructions coming soon)
 
-5) Run the `end-to-end` provisioning playbook via our [OpenStack installer container image](../images/installer-openstack/).
+5) Run the `end-to-end` provisioning playbook via our [OpenStack installer container image](../images/casl-ansible/).
 
 ```
 docker run -u `id -u` \
@@ -69,7 +69,7 @@ docker run -u `id -u` \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.osp.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/end-to-end.yml \
       -e OPTS="-e openstack_ssh_public_key=my-key-name" -t \
-      redhatcop/installer-openstack
+      quay.io/redhat-cop/casl-ansible
 ```
 
 > **Note 1:** The `openstack_ssh_public_key` variable at the end should specify the name of your OpenStack keypair - as noted under OpenStack Specific Requirements above (Obtain name from the OpenStack web console or use the `openstack keypair list` CLI command).

@@ -66,7 +66,7 @@ The following is just an example on how the `sample.aws.example.com` inventory c
 
 NOTE: To know the available AZs of the region you are deploying in, you can run this aws cli command: `aws ec2 describe-availability-zones --region <REPLACE WITH AWS REGION>`  
 
-Run the `end-to-end` provisioning playbook via our link:../images/installer-aws/[AWS installer container image].
+Run the `end-to-end` provisioning playbook via our link:../images/casl-ansible/[AWS installer container image].
 
 [source,bash]
 ----
@@ -78,7 +78,7 @@ docker run -u `id -u` \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.aws.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/end-to-end.yml \
       -e OPTS="-e aws_key_name=my-key-name" -t \
-      redhatcop/installer-aws
+      quay.io/redhat-cop/casl-ansible
 ----
 
 NOTE: The `aws_key_name` variable at the end should specify the name of your AWS SSH keypair - as noted under AWS Specific Requirements above.
