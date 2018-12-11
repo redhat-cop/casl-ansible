@@ -102,5 +102,5 @@ docker run -u `id -u` \
       -v $HOME/.config/openstack/:/opt/app-root/src/.config/openstack/ \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.osp.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/delete-cluster.yml \
-      redhatcop/installer-openstack
+      quay.io/redhat-cop/casl-ansible
 ```

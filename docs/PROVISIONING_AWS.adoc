@@ -119,5 +119,5 @@ docker run -it -u `id -u` \
       -e INVENTORY_DIR=/tmp/src/casl-ansible/inventory/sample.casl.example.com.d/inventory \
       -e PLAYBOOK_FILE=/tmp/src/casl-ansible/playbooks/openshift/delete-cluster.yml \
       -e OPTS="-e aws_key_name=my-key-name" -t \
-      redhatcop/installer-aws
+      quay.io/redhat-cop/casl-ansible
 ----
