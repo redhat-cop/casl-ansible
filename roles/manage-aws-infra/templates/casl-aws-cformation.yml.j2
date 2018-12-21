@@ -28,9 +28,9 @@ Parameters:
     Description: "The instance type to be used"
     Type: "String"
   BastionInstanceType:
-	  Default: "t2.medium"
-		Description: "The instance type to be used"
-		Type: "String"
+    Default: "t2.medium"
+    Description: "The instance type to be used"
+    Type: "String"
   EtcdInstanceType:
     Default: "m4.xlarge"
     Description: "The instance type to be used"
@@ -57,7 +57,7 @@ Parameters:
     Type: "String"
 Resources:
 {# Figure out the node types with more zones to create all the required SubNets per AZ #}
-  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
+  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_bastion_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_masters_zones.__len__() -%}
     {% set zones = aws_masters_zones -%}
   {% elif (aws_etcd_zones.__len__() >= aws_masters_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
@@ -237,24 +237,24 @@ Resources:
       - Key: 'Name'
         Value: '{{ env_id }}'
   bastionsg:
-	  Type: AWS::EC2::SecurityGroup
-		Properties:
-		  GroupName: ocp-bastion-node
-			GroupDescription: Bastion Node Security Group
-			VpcId: !Ref VPC
-			SecurityGroupIngress:
-			- IpProtocol: tcp
-			  FromPort: '80'
-				ToPort: '80'
-				CidrIp: 0.0.0.0/0
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-bastion-node
+      GroupDescription: Bastion Node Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
       - IpProtocol: tcp
-			  FromPort: '443'
-				ToPort: '443'
-				CidrIp: 0.0.0.0/0
-		  SecurityGroupEgress:
-			- IpProtocol: tcp
-			  FromPort: '0'
-				ToPort: '65535'
+        FromPort: '80'
+        ToPort: '80'
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: '443'
+        ToPort: '443'
+        CidrIp: 0.0.0.0/0
+        SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
   nodesg:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -452,44 +452,39 @@ Resources:
             VolumeSize: "{{ etcd_docker_volume_size }}"
 {% endfor %}
 {% for idx in range(0, aws_num_bastion | int) %}
-{% set zone = aws_etcd_zones[ (idx % aws_etcd_zones.__len__())] %}
-{% set zoneidx = (idx % aws_etcd_zones.__len__()) + 1 %}
-  ETCD{{ '%02d' % idx }}:
+{% set zone = aws_bastion_zones[ (idx % aws_bastion_zones.__len__())] %}
+{% set zoneidx = (idx % aws_bastion_zones.__len__()) + 1 %}
+  Bastion{{ '%02d' % idx }}:
     Type: "AWS::EC2::Instance"
     Properties:
       ImageId: !Ref Image
       KeyName: !Ref KeyPairName
-      InstanceType: !Ref EtcdInstanceType
+      InstanceType: !Ref BastionInstanceType
       SubnetId: !Ref SubnetAZ{{ zoneidx }}
       SecurityGroupIds:
-        - !GetAtt etcdsg.GroupId
+        - !GetAtt bastionsg.GroupId
         - !GetAtt nodesg.GroupId
         - !GetAtt sshsg.GroupId
       Tags:
         - Key: 'Name'
-          Value: '{{ aws_etcd_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+          Value: '{{ aws_bastion_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
         - Key: 'ocp_role'
-          Value: 'etcd'
+          Value: 'bastion'
         - Key: 'env_id'
           Value: '{{ env_id }}'
         - Key: 'group'
-          Value: '{{ group_etcd_nodes_tag }}'
+          Value: '{{ group_bastion_nodes_tag }}'
         - Key: 'node_labels'
-          Value: '{{ labels_etcd_nodes_tag }}'
+          Value: '{{ labels_bastion_nodes_tag }}'
         - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
           Value: '{{ env_id }}'
       AvailabilityZone: {{ zone }}
       BlockDeviceMappings:
-        - DeviceName: "{{ etcd_root_volume }}"
+        - DeviceName: "{{ bastion_root_volume }}"
           Ebs:
             VolumeType: "gp2"
             DeleteOnTermination: "true"
-            VolumeSize: "{{ etcd_root_volume_size }}"
-        - DeviceName: "{{ docker_storage_block_device }}"
-          Ebs:
-            VolumeType: "gp2"
-            DeleteOnTermination: "true"
-            VolumeSize: "{{ etcd_docker_volume_size }}"
+            VolumeSize: "{{ bastion_root_volume_size }}"
 {% endfor %}
 {% for idx in range(0, aws_num_infra_nodes | int) %}
 {% set zone = aws_infranodes_zones[ (idx % aws_infranodes_zones.__len__())] %}
@@ -785,7 +780,7 @@ Resources:
         Type: CNAME
         TTL: 300
         ResourceRecords:
-         - !GetAtt Node{{ '%02d' % idx }}.PrivateDnsName
+         - !GetAtt Bastion{{ '%02d' % idx }}.PrivateDnsName
       {% endfor -%}
       - Name: "{{ openshift_master_cluster_public_hostname }}."
         Type: A

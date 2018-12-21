@@ -151,7 +151,6 @@ etcd_docker_volume_size: "{{ cloud_infrastructure.etcdnodes.docker_volume_size  
 infra_node_docker_volume_size: "{{ cloud_infrastructure.infranodes.docker_volume_size }}"
 app_node_docker_volume_size: "{{ cloud_infrastructure.appnodes.docker_volume_size }}"
 cns_node_docker_volume_size: "{{ cloud_infrastructure.cnsnodes.docker_volume_size }}"
-bastion_node_docker_volume_size: "{{ cloud_infrastructure.bastion.docker_volume_size }}"
 
 ## Feed gluster volume device sizes for CNS instances from `cloud_infrastructure` list on the inventory
 cns_node_glusterfs_volume_size: "{{ cloud_infrastructure.cnsnodes.gluster_volume_size }}"

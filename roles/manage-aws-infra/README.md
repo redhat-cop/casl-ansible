@@ -65,14 +65,14 @@ cloud_infrastructure: **mandatory**
      root_volume_size: **defaulted**
      docker_volume_size: **defaulted**
      gluster_volume_size: **defaulted**
-	 bastionnode:  **not mandatory**
-	   count: **0 by default**
-		 flavor: **defaulted**
-		 zones:
-		 - **at least 1 zone specification is mandatory**
-		 name_prefix: **defaulted**
+     bastionnode:  **not mandatory**
+     count: **0 by default**
+     flavor: **defaulted**
+     zones:
+     - **at least 1 zone specification is mandatory**
+     name_prefix: **defaulted**
      root_volume_size: **defaulted**
-		 docker_volume_size: **defaulted**
+     docker_volume_size: **defaulted**
 ```
 
 Other variables
