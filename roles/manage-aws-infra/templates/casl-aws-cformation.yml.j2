@@ -57,7 +57,7 @@ Parameters:
     Type: "String"
 Resources:
 {# Figure out the node types with more zones to create all the required SubNets per AZ #}
-  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_bastion_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
+  {% if (aws_masters_zones.__len__() >= aws_etcd_zones.__len__()) and (aws_masters_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
     {% set numzones = aws_masters_zones.__len__() -%}
     {% set zones = aws_masters_zones -%}
   {% elif (aws_etcd_zones.__len__() >= aws_masters_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_appnodes_zones.__len__()) and (aws_etcd_zones.__len__() >= aws_infranodes_zones.__len__()) and (aws_masters_zones.__len__() >= aws_cnsnodes_zones.__len__()) -%}
@@ -244,17 +244,17 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: '80'
-        ToPort: '80'
+        FromPort: '22'
+        ToPort: '22'
         CidrIp: 0.0.0.0/0
-      - IpProtocol: tcp
-        FromPort: '443'
-        ToPort: '443'
-        CidrIp: 0.0.0.0/0
-        SecurityGroupEgress:
+      SecurityGroupEgress:
       - IpProtocol: tcp
         FromPort: '0'
         ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
   nodesg:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -470,14 +470,8 @@ Resources:
           Value: '{{ aws_bastion_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
         - Key: 'ocp_role'
           Value: 'bastion'
-        - Key: 'env_id'
-          Value: '{{ env_id }}'
         - Key: 'group'
           Value: '{{ group_bastion_nodes_tag }}'
-        - Key: 'node_labels'
-          Value: '{{ labels_bastion_nodes_tag }}'
-        - Key: 'kubernetes.io/cluster/cluster-{{ env_id }}'
-          Value: '{{ env_id }}'
       AvailabilityZone: {{ zone }}
       BlockDeviceMappings:
         - DeviceName: "{{ bastion_root_volume }}"
@@ -735,7 +729,7 @@ Resources:
     - ETCD{{ '%02d' % idx }}
     {% endfor -%}
     {% for idx in range(0, aws_num_bastion | int) -%}
-    - BAST{{ '%02d' % idx }}
+    - Bastion{{ '%02d' % idx }}
     {% endfor -%}
     Properties:
       HostedZoneName: "{{ env_id }}.{{ dns_domain }}."
@@ -775,7 +769,7 @@ Resources:
         ResourceRecords:
          - !GetAtt ETCD{{ '%02d' % idx }}.PrivateDnsName
       {% endfor -%}
-      {% for idx in range(0, aws_num_bastion_nodes | int) -%}
+      {% for idx in range(0, aws_num_bastion | int) -%}
       - Name: "bastion-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
         Type: CNAME
         TTL: 300
@@ -816,7 +810,7 @@ Resources:
     - ETCD{{ '%02d' % idx }}
     {% endfor -%}
     {% for idx in range(0, aws_num_bastion | int) -%}
-    - BAST{{ '%02d' % idx }}
+    - Bastion{{ '%02d' % idx }}
     {% endfor -%}
     Properties:
       HostedZoneName: "{{ dns_domain }}."
@@ -861,5 +855,5 @@ Resources:
         Type: CNAME
         TTL: 300
         ResourceRecords:
-        - !GetAtt BAST{{ '%02d' % idx }}.PublicDnsName
+        - !GetAtt Bastion{{ '%02d' % idx }}.PublicDnsName
       {% endfor -%}

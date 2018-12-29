@@ -115,7 +115,7 @@ aws_num_etcd: "{{ cloud_infrastructure.etcdnodes.count }}"
 aws_num_app_nodes: "{{ cloud_infrastructure.appnodes.count }}"
 aws_num_infra_nodes: "{{ cloud_infrastructure.infranodes.count }}"
 aws_num_cns_nodes: "{{ cloud_infrastructure.cnsnodes.count }}"
-aws_num_bastion_nodes: "{{ cloud_infrastructure.bastion.count }}"
+aws_num_bastion: "{{ cloud_infrastructure.bastion.count }}"
 
 ## Feed instance flavors for each instance from `cloud_infrastructure` list on the inventory
 master_flavor: "{{ cloud_infrastructure.masters.flavor }}"
@@ -131,7 +131,7 @@ etcd_root_volume: "{{ default_root_volume }}"
 infra_node_root_volume: "{{ default_root_volume }}"
 app_node_root_volume: "{{ default_root_volume }}"
 cns_node_root_volume: "{{ default_root_volume }}"
-bastion_node_root_volume: "{{ default_root_volume }}"
+bastion_root_volume: "{{ default_root_volume }}"
 ## Temporary set for Docker and Gluster Storage block device names
 ## Leaving here as a reference. Will be handle on a handle on a different way in the future
 #cns_node_glusterfs_volume: "{{ default_cns_volume }}"
@@ -143,7 +143,7 @@ etcd_root_volume_size: "{{ cloud_infrastructure.etcdnodes.root_volume_size  }}"
 infra_node_root_volume_size: "{{ cloud_infrastructure.infranodes.root_volume_size }}"
 app_node_root_volume_size: "{{ cloud_infrastructure.appnodes.root_volume_size }}"
 cns_node_root_volume_size: "{{ cloud_infrastructure.cnsnodes.root_volume_size }}"
-bastion_node_root_volume_size: "{{ cloud_infrastructure.bastion.root_volume_size }}"
+bastion_root_volume_size: "{{ cloud_infrastructure.bastion.root_volume_size }}"
 
 ## Feed root volume device sizes for each instance from `cloud_infrastructure` list on the inventory
 master_docker_volume_size: "{{ cloud_infrastructure.masters.docker_volume_size }}"

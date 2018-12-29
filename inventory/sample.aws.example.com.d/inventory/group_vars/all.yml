@@ -131,6 +131,7 @@ aws_etcd_sgroups: ['ocp-ssh', 'ocp-etcd', 'ocp-app-node']
 aws_infra_node_sgroups: ['ocp-ssh', 'ocp-infra-node', 'ocp-app-node']
 aws_app_node_sgroups: ['ocp-ssh', 'ocp-app-node']
 aws_cns_node_sgroups: ['ocp-ssh', 'ocp-app-node', 'ocp-cns']
+aws_bastion_sgroups: ['ocp-bastion']
 
 ## These are the tag used to create different dynamic groups based on these names
 ## NOTE: modifying these default values will affect on how the different type of nodes are discovered and configured on the required groups. You will need to update `hosts` inventory file accordingly if these values are modified 
@@ -140,6 +141,7 @@ group_etcd_nodes_tag: etcd_nodes_aws
 group_infra_nodes_tag: infra_nodes_aws
 group_app_nodes_tag: app_nodes_aws
 group_cns_nodes_tag: cns_nodes_aws
+group_bastion_tag: bastion_aws
 
 ## These tags will define the labels your OCP Nodes will be assigned with as part of the OCP deployment process
 labels_masters_tag: '{"region": "default"}'
