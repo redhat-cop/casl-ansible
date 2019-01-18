@@ -19,6 +19,8 @@
       openshift_hosted_registry_storage_volume_size: "{{ disk.volume.size }}Gi"
       openshift_hosted_registry_storage_access_modes: "{{ openshift_hosted_registry_storage_access_modes | default(\"['ReadWriteOnce']\") }}"
       openshift_hosted_registry_storage_openstack_filesystem: "{{ openshift_hosted_registry_storage_openstack_filesystem | default('ext4')}}"
+      openshift_hosted_registry_storage_annotations:
+      - "volume.beta.kubernetes.io/storage-class: {{ openshift_hosted_registry_storage_class | default('standard') }}"
     with_items:
     -  "{{ hostvars['localhost'].os_volumes.results }}"
     when:

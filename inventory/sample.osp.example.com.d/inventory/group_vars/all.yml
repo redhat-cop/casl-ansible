@@ -103,6 +103,8 @@ openshift_hosted_registry_storage_kind: openstack
 #openshift_hosted_registry_storage_openstack_filesystem: ext4
 #openshift_hosted_registry_storage_openstack_volumeID: 3a650b4f-c8c5-4e0a-8ca5-eaee11f16c57
 #openshift_hosted_registry_storage_volume_size: 20Gi
+#openshift_hosted_registry_storage_annotations:
+#- 'volume.beta.kubernetes.io/storage-class: standard'
 
 
 # Subscription Management Details
