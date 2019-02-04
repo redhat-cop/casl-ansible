@@ -10,7 +10,6 @@
     set_fact:
       private_v4: "{{ openstack.private_v4 }}"
       public_v4: "{{ openstack.public_v4 }}"
-      openshift_hostname: "{{ inventory_hostname }}"
       openshift_public_hostname: "{{ inventory_hostname }}"
   roles:
   - role: ../../../galaxy/infra-ansible/roles/config-hostname
@@ -22,7 +21,7 @@
   - import_tasks: ../prep-inventory.yml
   - import_tasks: dns.yml
   roles:
-  - role: ../../../galaxy/infra-ansible/roles/dns
+  - role: ../../../galaxy/infra-ansible/roles/dns/manage-dns-records
 
 # provision cinder volume
 - import_playbook: cinder-registry.yml

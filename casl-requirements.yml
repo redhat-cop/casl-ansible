@@ -4,11 +4,11 @@
 
 # From 'infra-ansible'
 - src: https://github.com/redhat-cop/infra-ansible
-  version: v1.0.4
+  version: v1.0.8
 
 # From 'openshift-applier'
 - src: https://github.com/redhat-cop/openshift-applier
-  version: v2.0.4
+  version: v2.0.7
 
 # From 'openshift-ansible'
 - src: https://github.com/openshift/openshift-ansible

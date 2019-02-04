@@ -26,6 +26,8 @@
         ansible_become: True
       when:
         - rhsm_register
+    - import_role:
+        name: ../../galaxy/infra-ansible/roles/manage-server-ca-cert
     # NOTE: This shall be before the container storage, so the next step
     #       can use all the remaining storage.
     - import_role:

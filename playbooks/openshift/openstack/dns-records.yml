@@ -3,7 +3,7 @@
 - name: "Start with a clean list of records"
   set_fact:
     a_records: []
-    named_records: []
+    nsupdate_servers: []
 
 - name: "Set the DNS zone to use"
   set_fact:
@@ -11,11 +11,11 @@
 
 - name: "Generate list of A records"
   set_fact:
-    a_records: "{{ a_records | default([]) +
+    a_records: "{{ a_records +
                    [{
                       'type': 'A',
-                      'hostname': (hostvars[item]['ansible_fqdn'] | replace('.' + nsupdate_zone, '')),
-                      'ip': hostvars[item][nsupdate.view + '_v4']
+                      'record': (hostvars[item]['ansible_fqdn'] | replace('.' + nsupdate_zone, '')),
+                      'value': hostvars[item][nsupdate.view + '_v4']
                    }]
                  }}"
   with_items:
@@ -23,11 +23,11 @@
 
 - name: "Add wildcard records to the A records for infrahosts"
   set_fact:
-    a_records: "{{ a_records | default([]) +
+    a_records: "{{ a_records +
                    [{
                       'type': 'A',
-                      'hostname': '*.' + (openshift_master_default_subdomain | replace('.' + nsupdate_zone, '')),
-                      'ip': hostvars[item][nsupdate.view + '_v4']
+                      'record': '*.' + (openshift_master_default_subdomain | replace('.' + nsupdate_zone, '')),
+                      'value': hostvars[item][nsupdate.view + '_v4']
                    }]
                 }}"
   when:
@@ -54,32 +54,39 @@
 
 - name: "Add public master cluster hostname records to the A records"
   set_fact:
-    a_records: "{{ a_records | default([]) +
+    a_records: "{{ a_records +
                    [{
                       'type': 'A',
-                      'hostname': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(nsupdate_zone, ''))[:-1],
-                      'ip': master_ip
+                      'record': (hostvars[groups.masters[0]].openshift_master_cluster_public_hostname | replace(nsupdate_zone, ''))[:-1],
+                      'value': master_ip
                    }]
                 }}"
   when:
     - hostvars[groups.masters[0]].openshift_master_cluster_public_hostname is defined
 
-- name: "Generate the Add section for DNS for all nsupdate servers"
+- name: "Generate the nsupdate server list"
   set_fact:
-    named_records: "{{ named_records | default([]) +
-                       [{
-                          'view': nsupdate.view,
-                          'zone': nsupdate.zone,
-                          'server': item.server,
-                          'key_name': item.key_name,
-                          'key_secret': item.key_secret,
-                          'key_algorithm': (item.key_algorithm | lower),
-                          'entries': a_records
-                       }]
-                    }}"
+    nsupdate_servers: "{{ nsupdate_servers +
+                         [{
+                           'server': item.server,
+                           'key_name': item.key_name,
+                           'key_secret': item.key_secret,
+                           'key_algorithm': (item.key_algorithm|lower)
+                         }]
+                       }}"
   with_items:
     - "{{ nsupdate.server_list }}"
 
-- name: "Add to 'dns_records_add' list"
+- name: "Generate the Add section for DNS for all nsupdate servers"
   set_fact:
-    dns_records_add: "{{ dns_records_add | default([]) + named_records }}"
+    dns_view:
+      - name: "{{ nsupdate.view }}"
+        zones:
+          - dns_domain: "{{ nsupdate.zone }}"
+            nsupdate: "{{ nsupdate_servers }}"
+            entries: "{{ a_records }}"
+
+- name: "Add to 'dns_data' dictionary"
+  set_fact:
+    dns_data:
+      views: "{{ dns_data.views + dns_view }}"

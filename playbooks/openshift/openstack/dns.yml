@@ -1,5 +1,10 @@
 ---
 
+- name: "Prepare facts for DNS records"
+  set_fact:
+    dns_data:
+      views: []
+
 - name: "Set the private(internal) and public(external) DNS to use (if provided)"
   include_tasks: dns-records.yml
   with_items:
