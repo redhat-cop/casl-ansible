@@ -81,6 +81,9 @@ nsupdate_config:
 # Specify the version of docker to use
 #docker_version: "1.12.*"
 
+# Set this to false if you wish to use local storage, i.e.: not using an attached volume
+#openshift_configure_container_storage: false
+
 # Docker Storage configuration variables
 docker_volume_size: "5"
 docker_storage_block_device: "/dev/vdb"

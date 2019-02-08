@@ -39,8 +39,7 @@
     #       providers. We should work with the `openshift-ansible` team to get
     #       this corrected - i.e.: made generic.
     - import_role:
-        name: ../../galaxy/openshift-ansible/roles/openshift_openstack
-        tasks_from: container-storage-setup.yml
+        name: container-storage-setup
       vars:
         ansible_become: True
     - import_role:

@@ -1,0 +1,7 @@
+DEVS="{{ docker_storage_mountpoints | default(openshift_container_storage_setup.docker_dev) }}"
+VG="{{ openshift_container_storage_setup.docker_vg }}"
+DATA_SIZE="{{ openshift_container_storage_setup.docker_data_size }}"
+STORAGE_DRIVER=overlay2
+CONTAINER_ROOT_LV_NAME="{{ openshift_container_storage_setup.container_root_lv_name }}"
+CONTAINER_ROOT_LV_MOUNT_PATH="{{ openshift_container_storage_setup.container_root_lv_mount_path }}"
+CONTAINER_ROOT_LV_SIZE=100%FREE

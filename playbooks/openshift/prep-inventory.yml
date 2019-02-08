@@ -53,6 +53,13 @@
   when:
     - openshift_openstack_container_storage_setup is undefined
 
+- name: Set ephemeral volumes fact (OpenStack)
+  set_fact:
+    openshift_openstack_ephemeral_volumes: true
+  when:
+    - openshift_configure_container_storage == false
+    - hosting_infrastructure == "openstack"
+
 - name: Set the packages to install on the target systems
   set_fact:
     list_of_packages_to_install:
