@@ -16,7 +16,7 @@
   command: >
     oc get {{ type }}/{{ resource }} {{ target_namespace }} -o json
   register: query_result
-  delay: "{{ delay }}"
-  retries: "{{ retries }}"
+  delay: "{{ delay | int }}"
+  retries: "{{ retries | int }}"
   until: (query_result.stdout | from_json)['spec']['replicas'] | default("0") | int == (query_result.stdout | from_json)['status']['readyReplicas'] | default("0") | int
   failed_when: (query_result.stdout | from_json)['spec']['replicas'] is not defined
