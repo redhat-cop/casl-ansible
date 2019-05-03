@@ -34,11 +34,7 @@ osm_cockpit_plugins:
 # Enable the Multi-Tenant plugin
 os_sdn_network_plugin_name: 'redhat/openshift-ovs-multitenant'
 
-# OpenShift FQDNs, DNS, App domain specific configurations
 openshift_master_cluster_method: native
-openshift_master_default_subdomain: "apps.{{ env_id }}.{{ dns_domain }}"
-openshift_master_cluster_hostname: "console.internal.{{ env_id }}.{{ dns_domain }}"
-openshift_master_cluster_public_hostname: "console.{{ env_id }}.{{ dns_domain }}"
 
 # Registry URL & Credentials
 # For more info: https://access.redhat.com/terms-based-registry/
