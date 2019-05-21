@@ -4,9 +4,11 @@
   set_fact:
     processed_namespace: "{{ target_namespace | default('') }}"
 
-- name: Empty namespace param when not needed
+- name: "Prepend '-n' to the namespace, unless already set"
   set_fact:
-    namespace_param: "{{ (processed_namespace|length > 0) | ternary('-n ' + processed_namespace, '') }}"
+    namespace_param: "{% if ((processed_namespace|trim).find('-n') != 0) %}-n {% endif %}{{ processed_namespace }}"
+  when:
+    - processed_namespace|length > 0
 
 - name: "Apply label {{ label }} to object {{ target_object }}"
   command: >
