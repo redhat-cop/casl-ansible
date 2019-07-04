@@ -27,6 +27,10 @@ Parameters:
     Default: "m4.xlarge"
     Description: "The instance type to be used"
     Type: "String"
+  BastionInstanceType:
+    Default: "t2.medium"
+    Description: "The instance type to be used"
+    Type: "String"
   EtcdInstanceType:
     Default: "m4.xlarge"
     Description: "The instance type to be used"
@@ -236,6 +240,25 @@ Resources:
       Tags:
       - Key: 'Name'
         Value: '{{ env_id }}'
+  bastionsg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ocp-bastion-node
+      GroupDescription: Bastion Node Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: '0'
+        ToPort: '65535'
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: 'Name'
+        Value: '{{ env_id }}'
   nodesg:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -435,6 +458,35 @@ Resources:
             VolumeType: "gp2"
             DeleteOnTermination: "true"
             VolumeSize: "{{ etcd_docker_volume_size }}"
+{% endfor %}
+{% for idx in range(0, aws_num_bastion | int) %}
+{% set zone = aws_bastion_zones[ (idx % aws_bastion_zones.__len__())] %}
+{% set zoneidx = (idx % aws_bastion_zones.__len__()) + 1 %}
+  Bastion{{ '%02d' % idx }}:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !Ref Image
+      KeyName: !Ref KeyPairName
+      InstanceType: !Ref BastionInstanceType
+      SubnetId: !Ref SubnetAZ{{ zoneidx }}
+      SecurityGroupIds:
+        - !GetAtt bastionsg.GroupId
+        - !GetAtt nodesg.GroupId
+        - !GetAtt sshsg.GroupId
+      Tags:
+        - Key: 'Name'
+          Value: '{{ aws_bastion_name_prefix }}-{{ idx }}.{{ env_id }}.{{ dns_domain }}'
+        - Key: 'ocp_role'
+          Value: 'bastion'
+        - Key: 'group'
+          Value: '{{ group_bastion_nodes_tag }}'
+      AvailabilityZone: {{ zone }}
+      BlockDeviceMappings:
+        - DeviceName: "{{ bastion_root_volume }}"
+          Ebs:
+            VolumeType: "gp2"
+            DeleteOnTermination: "true"
+            VolumeSize: "{{ bastion_root_volume_size }}"
 {% endfor %}
 {% for idx in range(0, aws_num_infra_nodes | int) %}
 {% set zone = aws_infranodes_zones[ (idx % aws_infranodes_zones.__len__())] %}
@@ -684,6 +736,9 @@ Resources:
     {% for idx in range(0, aws_num_etcd | int) -%}
     - ETCD{{ '%02d' % idx }}
     {% endfor -%}
+    {% for idx in range(0, aws_num_bastion | int) -%}
+    - Bastion{{ '%02d' % idx }}
+    {% endfor -%}
     Properties:
       HostedZoneName: "{{ env_id }}.{{ dns_domain }}."
       RecordSets:
@@ -722,6 +777,13 @@ Resources:
         ResourceRecords:
          - !GetAtt ETCD{{ '%02d' % idx }}.PrivateDnsName
       {% endfor -%}
+      {% for idx in range(0, aws_num_bastion | int) -%}
+      - Name: "bastion-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+         - !GetAtt Bastion{{ '%02d' % idx }}.PrivateDnsName
+      {% endfor -%}
       - Name: "{{ openshift_master_cluster_public_hostname }}."
         Type: A
         AliasTarget:
@@ -754,6 +816,9 @@ Resources:
     {% endfor -%}
     {% for idx in range(0, aws_num_etcd | int) -%}
     - ETCD{{ '%02d' % idx }}
+    {% endfor -%}
+    {% for idx in range(0, aws_num_bastion | int) -%}
+    - Bastion{{ '%02d' % idx }}
     {% endfor -%}
     Properties:
       HostedZoneName: "{{ dns_domain }}."
@@ -792,4 +857,11 @@ Resources:
         TTL: 300
         ResourceRecords:
         - !GetAtt ETCD{{ '%02d' % idx }}.PublicDnsName
+      {% endfor -%}
+      {% for idx in range(0, aws_num_bastion| int) -%}
+      - Name: "bastion-{{ idx }}.{{ env_id }}.{{ dns_domain }}."
+        Type: CNAME
+        TTL: 300
+        ResourceRecords:
+        - !GetAtt Bastion{{ '%02d' % idx }}.PublicDnsName
       {% endfor -%}

@@ -16,6 +16,7 @@
       EtcdInstanceType: "{{ etcd_flavor }}"
       NodesInstanceType: "{{ app_node_flavor }}"
       InfraInstanceType: "{{ infra_node_flavor }}"
+      BastionInstanceType: " {{ bastion_node_flavor }}"
       CNSInstanceType: "{{ cns_node_flavor }}"
       MasterHealthTarget: "TCP:{{ openshift_master_api_port }}"
       MasterApiPort: "{{ openshift_master_api_port }}"
