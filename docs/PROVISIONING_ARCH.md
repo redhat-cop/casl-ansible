@@ -45,7 +45,7 @@ Some principles we try to adhere to with all of these phases include the followi
 
 ## OpenShift Ansible integration
 
-CASL-Ansible provisioning is intended to be a complement (and in some cases an upstream) to the [openshift-ansible](https://github.com/openshift/openshift-ansible.git) repo. As such, we intend for the CASL tools to support all of the features and capabilities of the openshift-ansible cluster deployment playbook. The aim is to use CASL to provision and prepare infrastructure and then hand off to the [deploy_cluster](https://github.com/openshift/openshift-ansible/blob/master/playbooks/deploy_cluster.yml) playbook for the installation of OpenShift.
+CASL-Ansible provisioning is intended to be a complement (and in some cases an upstream) to the [openshift-ansible](https://github.com/openshift/openshift-ansible.git) repo. As such, we intend for the CASL tools to support all of the features and capabilities of the openshift-ansible cluster deployment playbook. The aim is to use CASL to provision and prepare infrastructure and then hand off to the [deploy_cluster](https://github.com/openshift/openshift-ansible/blob/release-3.11/playbooks/deploy_cluster.yml) playbook for the installation of OpenShift.
 
 ## Ansible Inventory Structure
 

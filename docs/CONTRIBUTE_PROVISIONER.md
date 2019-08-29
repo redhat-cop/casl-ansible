@@ -1,6 +1,6 @@
 # Contributing a New Provisioner
 
-Building a provisioner for a new cloud provider is fairly straight forward, thanks to our pluggable [provisioning architecture](PROVSIONING_ARCH.md).
+Building a provisioner for a new cloud provider is fairly straight forward, thanks to our pluggable [provisioning architecture](PROVISIONING_ARCH.md).
 
 Here's what you need.
 
