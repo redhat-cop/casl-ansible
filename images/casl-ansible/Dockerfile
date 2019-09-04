@@ -4,10 +4,13 @@ USER root
 
 # Update System and install clients
 RUN \
-    yum install -y --setopt=tsflags=nodocs https://repos.fedorapeople.org/repos/openstack/openstack-queens/rdo-release-queens-1.noarch.rpm; \
+    yum install -y --setopt=tsflags=nodocs \
+      https://repos.fedorapeople.org/repos/openstack/openstack-queens/rdo-release-queens-1.noarch.rpm \
+      http://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm; \
     yum -y install python2-pip; \
     pip install --upgrade pip; \
     yum -y install \
+      python-ovirt-engine-sdk4 \
       python-ceilometerclient \
       python-cinderclient python-glanceclient \
       python-heatclient python-neutronclient \
