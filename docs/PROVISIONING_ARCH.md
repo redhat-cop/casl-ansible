@@ -4,7 +4,7 @@ The CASL automated provisioning framework provides an opinionated architecture f
 
 ## Four Phased Approach
 
-A provisioning run should be split into four (4) phases as represented in our [end-to-end.yml](/playbooks/openshift/end-to-end.yml) playbook:
+A provisioning run should be split into four (4) phases as represented in our [end-to-end.yml](../playbooks/openshift/end-to-end.yml) playbook:
 
 
 ```yaml
