@@ -1,0 +1,10 @@
+---
+# tasks file for openshift-patch-resource
+- name: Patch {{ api_version }} {{ kind }}/{{ name }}
+  k8s:
+    api_version: "{{ api_version }}"
+    kind: "{{ kind }}"
+    merge_type: "{{ merge_type| default(omit) }}"
+    name: "{{ name }}"
+    namespace: "{{ namespace | default(omit) }}"
+    definition: "{{ definition | default(omit) }}"
