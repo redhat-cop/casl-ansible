@@ -1,7 +1,13 @@
 ---
 
+- name: "Prepend '-n' to the namespace, unless already set"
+  set_fact:
+    namespace_param: "{% if ((target_namespace|trim).find('-n') != 0) %}-n {% endif %}{{ target_namespace }}"
+  when:
+    - target_namespace|length > 0
+
 - name: "Lookup route url for {{ route }}"
-  shell: "oc get route {{ route }} -o jsonpath='{ .spec.host }'"
+  shell: "oc get route {{ route }} -o jsonpath='{ .spec.host }' {{ namespace_param }}"
   register: url
   when:
   - route is defined
