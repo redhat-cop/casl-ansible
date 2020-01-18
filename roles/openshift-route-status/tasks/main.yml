@@ -1,31 +1,35 @@
 ---
 
+- name: Verify Required Parameters
+  fail:
+    msg: "'route', 'protocol' and 'status' Parameters Must be Provided!"
+  when: route is not defined or route|trim == '' or protocol is not defined or protocol|trim == '' or status is not defined or status|trim == ''
+  ignore_errors: yes
+
+- name: "Prepend '-n' to the namespace, unless already set"
+  set_fact:
+    namespace_param: "{% if ((target_namespace|trim).find('-n') != 0) %}-n {% endif %}{{ target_namespace }}"
+  when:
+  - target_namespace|length > 0
+
 - name: "Lookup route url for {{ route }}"
-  shell: "oc get route {{ route }} -o jsonpath='{ .spec.host }'"
+  command: >
+    oc get route {{ route }} {{ namespace_param }} -o jsonpath='{ .spec.host }'
   register: url
   when:
   - route is defined
   - route|trim != ''
 
-- name: "Set default delay time"
-  set_fact:
-    delay: "{{ delay | default(5) }}"
-
-- name: "Set default number of retries"
-  set_fact:
-    retries: "{{ retries | default(3) }}"
-
 - name: "Wait for {{ protocol }}://{{ url.stdout }} to respond with status: {{ status }}"
   uri:
     url: "{{ protocol }}://{{ url.stdout }}"
+    headers: "{{ headers }}"
+    validate_certs: "{{ validate_certificates }}"
   register: rc
   until: rc.status|trim|int == status|trim|int
   retries: "{{ retries|int }}"
   delay: "{{ delay|int }}"
   when:
+  - url is defined
   - url.stdout is defined
   - url.stdout|trim != ''
-  - protocol is defined
-  - protocol|trim != ''
-  - status is defined
-  - status|trim != ''

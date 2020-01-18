@@ -1,0 +1,7 @@
+---
+
+target_namespace: ''
+delay: 5
+retries: 3
+headers: {}
+validate_certificates: true
