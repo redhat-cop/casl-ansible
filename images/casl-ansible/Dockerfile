@@ -1,4 +1,4 @@
-FROM openshift/origin-ansible
+FROM openshift/origin-ansible:v3.11
 
 USER root
 
@@ -17,7 +17,7 @@ RUN \
       python-novaclient python-saharaclient \
       python-swiftclient python-troveclient \
       python-openstackclient python-dns \
-      python2-pyOpenSSL python-shade; \
+      python2-pyOpenSSL python-shade \
       python-boto3; \
       yum clean all; \
       rm -rf /var/cache/yum; \
